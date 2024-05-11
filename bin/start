@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# スクリプトの実行中にエラーが発生した場合、即座に停止する
+set -e 
+
+VENV_DIR="api/venv"
+CONTAINER_NAME="postgres_db"
+DATABASE_NAME="school_db"
+
+START_IOS_APP=false
+START_ANDROID=false
+API_PORT=8000
+APP_PORT=8081
+
+# オプションの確認
+
+while getopts "ia" opt; do
+    case ${opt} in
+    # オプションが i の場合
+        i )
+            START_IOS_APP=true
+            ;;
+    # オプションが a の場合
+        a )
+            START_ANDROID=true
+            ;;
+        \? )
+            echo "Usage: $(basename $0) [-i] [-a]"
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND -1))
+
+# 仮想環境が既に存在するかを確認
+if [ -d "$VENV_DIR" ]; then
+    echo "Virtual environment already exists. Activating it..."
+
+else
+    # 仮想環境が存在しない場合は新規作成
+    echo "Creating a new virtual environment..."
+    cd api/
+    python3 -m venv venv
+fi
+cd api/
+
+# 仮想環境を有効化
+source venv/bin/activate
+
+# Pythonの依存パッケージをインストール
+echo "Installing Python dependencies..."ls
+pip install -r requirements.txt
+
+# PostgreSQLデータベースコンテナを起動
+echo "Starting PostgreSQL database container..."
+docker-compose up -d
+
+# データベースが存在しない場合は作成
+echo "Creating the database '$DATABASE_NAME'..."
+docker exec $CONTAINER_NAME psql -U postgres -lqt | cut -d \| -f 1 | grep -qw $DATABASE_NAME
+if [ $? -eq 1 ]; then
+    docker exec $CONTAINER_NAME psql -U postgres -c "CREATE DATABASE $DATABASE_NAME;"
+    echo "Database '$DATABASE_NAME' created!"
+fi
+
+# 指定したポートを使用しているプロセスを停止する関数
+function kill_process_using_port {
+    local port=$1
+    local process_ids=$(lsof -ti :$port) 
+    if [ -n "$process_ids" ]; then
+        echo "Terminating processes using port $port..."
+        for pid in $process_ids; do
+            if [[ "$pid" =~ ^[0-9]+$ ]]; then  
+                kill -9 "$pid"  
+            else
+                echo "Invalid process ID: $pid"
+            fi
+        done
+    else
+        echo "No processes found using port $port."
+    fi
+}
+
+# APIポートとアプリケーションポートのプロセスを停止
+echo "Checking and terminating processes using ports: $API_PORT, $APP_PORT..."
+kill_process_using_port "$API_PORT"
+kill_process_using_port "$APP_PORT"
+
+# アプリケーションサーバーを起動
+echo "Starting the application server..."
+# uvicorn main:app --reload &
+# fastapi dev main.py &
+
+# モバイルアプリの起動
+# シミュレータが起動していること
+
+# client に移動する
+cd ..
+cd client || exit 1
+
+# パッケージをインストール
+npm install
+
+# シミュレータ　を動いている状態
+if [ "$START_IOS_APP" = true ]; then
+    echo "Starting the iOS simulator..."
+    npm run ios
+elif [ "$START_ANDROID" = true ]; then
+    echo "Starting the Android emulator..."
+    npm run android
+else
+    cd ../api
+    uvicorn main:app --reload &
+fi

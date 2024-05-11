@@ -26,18 +26,18 @@
 
 ### api だけ 起動する場合
 ```bash
-bin/start_api -d
+bin/start
 ```
 
 
 #### iOSアプリを起動する場合（データベースを含む）
 
 ```bash
-bin/start_api -d -i
+bin/start -i
 
 ```
 
 #### Androidアプリを起動する場合（データベースを含む）
 ```bash
-bin/start_api -d -a
+bin/start -a
 ```
