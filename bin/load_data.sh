@@ -55,7 +55,6 @@ if confirm "データベース '${DATABASE_NAME}' の既存データを削除し
     echo "データベース '${DATABASE_NAME}' の既存データを削除しました。"
 fi
 
-
 # データをデータベースに投入
 psql "${PSQL_CONNECTION}" -d "${DATABASE_NAME}" -f "${sql_file}"
 

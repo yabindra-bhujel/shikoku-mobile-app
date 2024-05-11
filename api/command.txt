@@ -1,3 +1,10 @@
  check docker datasbe
 
 $ psql postgresql://postgres:root@localhost:5433/school_db
+
+
+//generate migration file
+alembic revision --autogenerate -m
+
+//apply migration
+alembic upgrade head
