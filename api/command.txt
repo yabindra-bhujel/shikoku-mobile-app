@@ -8,3 +8,5 @@ alembic revision --autogenerate -m
 
 //apply migration
 alembic upgrade head
+
+alembic stamp head

@@ -1,6 +1,14 @@
 from sqlalchemy import Column, String, Integer, Boolean, DateTime
 from sqlalchemy.sql import func
 from ..database import Base
+import enum
+
+class UserRole(enum.Enum):
+    ADMIN = 'admin'
+    STAFF = 'staff'
+    STUDENT = 'student'
+    TEACHER = 'teacher'
+    USER = 'user'
 
 class User(Base):
     __tablename__ = 'users'
@@ -11,7 +19,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     joined_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
-    is_admin = Column(Boolean, default=False)
-    is_staff = Column(Boolean, default=False)
-    is_student = Column(Boolean, default=False)
-    is_teacher = Column(Boolean, default=False)
+    role = Column(String, default=UserRole.USER.value)
+
+    def __repr__(self):
+        return f'User: {self.username}'

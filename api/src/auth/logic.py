@@ -29,7 +29,7 @@ class AuthLogic:
         user = self.__authenticate_user(username, password, db)
         if user is None:
             return None
-        token = self.__create_access_token(user.username, user.id, user.email, timedelta(minutes=15))
+        token = self.__create_access_token(user.username, user.id, user.email, user.role, timedelta(minutes=15))
         return token
     
     def __authenticate_user(self, username: str, password: str, db)->users.User:
@@ -38,8 +38,8 @@ class AuthLogic:
             return None 
         return user
     
-    def __create_access_token(self, username: str, user_id: int, email: str, expires_delta: timedelta)->str:
-        encode = {'sub': username, 'id': user_id, 'email': email}
+    def __create_access_token(self, username: str, user_id: int, email: str, role: str, expires_delta: timedelta)->str:
+        encode = {'sub': username, 'id': user_id, 'email': email, 'role': role}
         expire = datetime.utcnow() + expires_delta
         encode.update({"exp": expire})
         token = jwt.encode(encode, self.secret_key, algorithm=self.algorithm)
@@ -50,11 +50,11 @@ class AuthLogic:
         username = payload.get("sub")
         user_id = payload.get("id")
         email = payload.get("email")
-        if username is None or user_id is None or email is None:
+        role = payload.get("role")
+        if username is None or user_id is None or email is None or role is None:
             return None
         
-        return {"username": username, "id": user_id, "email": email}
+        return {"username": username, "id": user_id, "email": email, "role": role}
     
     def logout(self, token: str):
         pass
-

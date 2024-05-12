@@ -4,15 +4,15 @@ from sqlalchemy.orm import Session
 from ..models.database import get_db
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError
-from .schema import *
 from .logic import AuthLogic
+from .schema import *
 
 router = APIRouter(prefix="/auth",tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 db_dependency = Annotated[Session, Depends(get_db)]
 auth_logic = AuthLogic()
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/create_user", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, credentials: Credentials):
 
     user = auth_logic.create_user(db, credentials.dict())
@@ -21,7 +21,7 @@ async def create_user(db: db_dependency, credentials: Credentials):
 
     return {"message": "User created successfully"}
 
-@router.post("/token", response_model=Token)
+@router.post("/access_token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
     user = auth_logic.login_token(db, form_data.username, form_data.password)
     if user is None:
@@ -37,9 +37,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         user = auth_logic.current_user(token)
-        if user is None:
+        if user is None or not all(key in user for key in ['username', 'email', 'role']):
             raise credentials_exception
-        return user
+        return User(**user)
     except JWTError:
         raise credentials_exception
 
@@ -47,3 +47,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def logout(token: str = Depends(oauth2_scheme)):
     auth_logic.logout(token)
     return None
+
+
+
+
