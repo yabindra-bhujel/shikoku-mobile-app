@@ -8,11 +8,12 @@ from .logic import AuthLogic
 from .schema import *
 
 router = APIRouter(prefix="/auth",tags=["auth"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 db_dependency = Annotated[Session, Depends(get_db)]
 auth_logic = AuthLogic()
 
-@router.post("/create_user", status_code=status.HTTP_201_CREATED)
+@router.post("/create_user", status_code=status.HTTP_201_CREATED,
+             description="Create a new user with the provided credentials. Returns HTTP 400 if user already exists.The role field should be one of 'admin', 'staff', 'student', 'teacher', or 'user'.")
 async def create_user(db: db_dependency, credentials: Credentials):
 
     user = auth_logic.create_user(db, credentials.dict())
@@ -47,6 +48,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def logout(token: str = Depends(oauth2_scheme)):
     auth_logic.logout(token)
     return None
+
+@router.post("/chnage_password", status_code=status.HTTP_200_OK)
+async def change_password(db: db_dependency, credentials: ChangePassword, user: User = Depends(get_current_user)):
+    password_changed = auth_logic.chnage_password(db, user.username, credentials.old_password, credentials.new_password)
+    if password_changed is  None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect old password")
+    
+    return {"message": "Password changed successfully"}
 
 
 

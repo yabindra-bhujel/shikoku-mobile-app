@@ -21,7 +21,7 @@ class AuthLogic:
             return None
         
         hashed_password = self.pwd_context.hash(data['password'])
-        user = users.User(username=data['username'], email=data['email'], hashed_password=hashed_password)
+        user = users.User(username=data['username'], email=data['email'], hashed_password=hashed_password, role=data['role'])
         try:
             db.add(user)
             db.commit()
@@ -63,3 +63,18 @@ class AuthLogic:
     
     def logout(self, token: str):
         pass
+
+    def chnage_password(self, db: Session, username: str, old_password: str, new_password: str):
+        user = db.query(users.User).filter(users.User.username == username).first()
+        if user is None:
+            return None
+        if not self.pwd_context.verify(old_password, user.hashed_password):
+            return None
+        user.hashed_password = self.pwd_context.hash(new_password)
+        try:
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        except IntegrityError:
+            return None
+        return user

@@ -14,7 +14,7 @@ class AuthorizationError(HTTPException):
     def __init__(self, detail: str):
         super().__init__(status_code=403, detail=detail)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 auth_settings = AuthSettings()
 secret_key = auth_settings.SECRET_KEY
 algorithm = auth_settings.ALGORITHM
