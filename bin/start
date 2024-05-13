@@ -94,6 +94,10 @@ echo "Starting the application server..."
 # モバイルアプリの起動
 # シミュレータが起動していること
 
+# migrate
+echo "Migrating the database..."
+alembic upgrade head
+
 # client に移動する
 cd ..
 cd client || exit 1

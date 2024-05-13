@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from jose import jwt
 from ..settings.auth import AuthSettings
 from ..models.entity import users
+from sqlalchemy.exc import IntegrityError
+
 
 class AuthLogic:
     def __init__(self):
@@ -20,9 +22,12 @@ class AuthLogic:
         
         hashed_password = self.pwd_context.hash(data['password'])
         user = users.User(username=data['username'], email=data['email'], hashed_password=hashed_password)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+        try:
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        except IntegrityError:
+            return None
         return user
 
     def login_token(self, db: Session, username: str, password: str)->str:
