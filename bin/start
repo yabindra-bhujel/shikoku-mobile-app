@@ -106,10 +106,17 @@ cd client || exit 1
 
 # シミュレータ　を動いている状態
 if [ "$START_IOS_APP" = true ]; then
+    cd ../api
+    uvicorn main:app --reload  &
+    cd ../client
     npm install
     echo "Starting the iOS simulator..."
-    npm run ios
+    npm run ios 
+   
 elif [ "$START_ANDROID" = true ]; then
+    cd ../api
+    uvicorn main:app --reload  &
+    cd ../client
     npm install
     echo "Starting the Android emulator..."
     npm run android
