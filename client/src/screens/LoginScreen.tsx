@@ -16,19 +16,20 @@ const Login = () => {
                     </View>
                 </View>
                 <Text style={styles.welback}>Welcome Back</Text>
-                <View style={styles.former}>
-                    <View style={styles.userField}>
-                        <FontAwesome5 name="user-alt" size={24} color="black" />
+                <View style={styles.inputFormer}>
+                    <View style={styles.inputContainer}>
+                        <FontAwesome5 name="user-alt" size={24} color="black"
+                        style={styles.inputIcon}/>
                         <TextInput
-                        style={styles.input}
+                        style={styles.textInput}
                         placeholder="username"
-                        inlineImageLeft={FontAwesome5}
                         textContentType="username"/>
                     </View>
-                    <View style={styles.userField}>
-                        <MaterialIcons name="lock" size={24} color="black" />
+                    <View style={styles.inputContainer}>
+                        <MaterialIcons name="lock" size={24} color="black"
+                        style={styles.inputIcon}/>
                         <TextInput
-                        style={styles.input}
+                        style={styles.textInput}
                         placeholder="password"
                         textContentType="password"/>
                     </View>
@@ -37,16 +38,14 @@ const Login = () => {
                         <View>
                             <Text>Remember me</Text>
                         </View>
-                        <Text>Forgot Password</Text>
+                        <Text style={styles.forgetText}>Forgot Password</Text>
                     </View>
                     <View style={styles.button}>
                         <Text style={styles.buttonText}>Login</Text>
                     </View>
                 </View>
             </View>
-            <View style={styles.privacyText}>
-                <Text>Terms of service and privacy policy</Text>
-            </View>
+            <Text style={styles.privacyText}>Terms of service and privacy policy</Text>
         </SafeAreaView>
     );
 }
@@ -89,38 +88,47 @@ const styles = StyleSheet.create({
         fontSize: 30,
         marginTop: 34,
         marginBottom: 20,
-        fontWeight: 'bold',
         color: '#000000',
         alignItems: 'center',
         justifyContent: "center",
         textAlign: 'center',
     },
-    former: {
-        padding: 35,
+    inputFormer: {
     },
     forgetfield: {
         flexDirection: "row",
         justifyContent: "space-around",
     },
-    userField: {
+    inputContainer: {
+        backgroundColor: "#FCF5F5",
+        alignItems: 'center',
         flexDirection: "row",
-    },
-    input: {
-        height: 53,
-        width: 321,
-        margin: 12,
+        borderRadius: 10,
         borderWidth: 1,
-        padding: 10,
-        borderRadius: 5,
-        fontSize: 15
+        marginHorizontal: 36,
+        marginVertical: 20,
+        height: 53,
+        gap: 7
+    },
+    inputIcon: {
+        marginLeft: 14
+    }
+    ,
+    textInput: {
+        textAlign: 'center',
+    },
+    forgetText: {
+        fontSize: 13,
+        color: "#F84A4A"
     },
     button: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10,
+        height: 53,
         margin: 10,
         borderRadius: 5,
         marginTop: 47,
+        marginHorizontal: 36,
         backgroundColor: '#4785FC',
     },
     buttonText: {
@@ -131,9 +139,7 @@ const styles = StyleSheet.create({
     privacyText: {
         color: '#3F44D1',
         fontSize: 13,
-        fontWeight: 'bold',
-        justifyContent: 'center',
-        alignItems: 'center',
+        textAlign: 'center',
     }
     
 })
