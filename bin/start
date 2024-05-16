@@ -41,6 +41,7 @@ else
     echo "Creating a new virtual environment..."
     cd api/
     python3 -m venv venv
+    cd ..
 fi
 cd api/
 
