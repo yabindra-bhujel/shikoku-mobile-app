@@ -1,10 +1,12 @@
 from src.chatbot_message.ConnectionManager import ConnectionManager
 from fastapi import FastAPI,Depends, WebSocket, WebSocketDisconnect
 from src.auth import router as auth_router
-from src.auth.permissions import authenticate_user
+from src.auth.permissions import authenticate_user, get_user
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 import logging
+from fastapi.responses import JSONResponse
+from typing import Dict
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,10 +35,17 @@ manager = ConnectionManager(logger=logger)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+    # how to check header
+    token= websocket.headers.get("Authorization")
+    # token = token.split(" ")[1]
+
+    user = get_user(token=token)
+    print(user)
+
+    await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"Message text was: {data}", websocket)
+            print(data)
     except WebSocketDisconnect:
         manager.disconnect(websocket)

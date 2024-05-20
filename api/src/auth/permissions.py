@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends
 from ..settings.auth import AuthSettings
 from .schema import *
+from typing import Optional
 
 class AuthenticationError(HTTPException):
     def __init__(self, detail: str):
@@ -88,3 +89,19 @@ def get_user_model(payload: dict):
         return None
     usermodel = User(id=id, username=username, email=email, role=role)
     return usermodel
+
+
+def get_user(token: str) -> Optional[dict]:
+    try:
+        if token.startswith("Bearer "):
+            token = token[len("Bearer "):]
+        
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        user = get_user_model(payload)
+        if user is not None:
+            return user.dict()
+    except (JWTError, IndexError):
+        return None
+
+
+    
