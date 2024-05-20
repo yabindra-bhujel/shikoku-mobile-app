@@ -1,8 +1,14 @@
-from fastapi import FastAPI,Depends
+from src.chatbot_message.ConnectionManager import ConnectionManager
+from fastapi import FastAPI,Depends, WebSocket, WebSocketDisconnect
 from src.auth import router as auth_router
 from src.auth.permissions import authenticate_user
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI()
 
@@ -23,3 +29,14 @@ app.include_router(auth_router.router)
 async def root(user = Depends(authenticate_user)):
     return {"message": "Hello World"}
 
+manager = ConnectionManager(logger=logger)
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(f"Message text was: {data}", websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
