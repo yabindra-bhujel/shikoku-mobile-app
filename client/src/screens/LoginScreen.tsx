@@ -1,15 +1,34 @@
-import React from "react";
-import { View, SafeAreaView, Text, StyleSheet, Image, TextInput } from "react-native";
-import { FontAwesome5 } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
+import React from 'react';
+import { View, SafeAreaView, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 
 
-const Login = () => {
+type RootStackParamList = {
+    Login: undefined;
+    ForgetPass: undefined;
+};
+
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+type LoginScreenRouteProp = RouteProp<RootStackParamList, 'Login'>;
+
+type Props = {
+    navigation: LoginScreenNavigationProp;
+    route: LoginScreenRouteProp;
+};
+
+
+const Login: React.FC<Props> = ({ navigation }) => {
+    const handleForgetPass = () => {
+        navigation.navigate('ForgetPass');
+    };
+
     return (
         <SafeAreaView style={styles.Wrapper}>
             <View style={styles.container}>
-                <View style={styles.logo}>
-                    <Image source={require('@/assets/images/64px-shikoku-logo.png')}/>
+                <View style={styles.headerLogo}>
+                    <Image source={require('@/assets/images/64px-shikoku-logo.png')} />
                     <View style={styles.title}>
                         <Text style={styles.text1}>SHIKOKU UNIVERSITY</Text>
                         <Text style={styles.text2}>四国大学</Text>
@@ -18,37 +37,42 @@ const Login = () => {
                 <Text style={styles.welback}>Welcome Back</Text>
                 <View style={styles.inputFormer}>
                     <View style={styles.inputContainer}>
-                        <FontAwesome5 name="user-alt" size={24} color="black"
-                        style={styles.inputIcon}/>
+                        <FontAwesome5 name="user-alt" size={24} color="black" style={styles.inputIcon} />
                         <TextInput
-                        style={styles.textInput}
-                        placeholder="username"
-                        textContentType="username"/>
+                            style={styles.textInput}
+                            placeholder="username"
+                            textContentType="username"
+                            autoCapitalize="none"
+                        />
                     </View>
                     <View style={styles.inputContainer}>
-                        <MaterialIcons name="lock" size={24} color="black"
-                        style={styles.inputIcon}/>
+                        <MaterialIcons name="lock" size={24} color="black" style={styles.inputIcon} />
                         <TextInput
-                        style={styles.textInput}
-                        placeholder="password"
-                        textContentType="password"/>
+                            style={styles.textInput}
+                            placeholder="password"
+                            textContentType="password"
+                            secureTextEntry
+                            autoCapitalize="none"
+                        />
                     </View>
-                    
+
                     <View style={styles.forgetfield}>
                         <View>
                             <Text>Remember me</Text>
                         </View>
-                        <Text style={styles.forgetText}>Forgot Password</Text>
+                        <TouchableOpacity onPress={handleForgetPass}>
+                            <Text style={styles.forgetText}>Forgot Password</Text>
+                        </TouchableOpacity>
                     </View>
-                    <View style={styles.button}>
+                    <TouchableOpacity style={styles.button}>
                         <Text style={styles.buttonText}>Login</Text>
-                    </View>
+                    </TouchableOpacity>
                 </View>
             </View>
             <Text style={styles.privacyText}>Terms of service and privacy policy</Text>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     Wrapper: {
@@ -57,91 +81,82 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    logo: {
+    headerLogo: {
         marginTop: 105,
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: "center",
-        textAlign: 'center',
+        justifyContent: 'center',
     },
     title: {
         alignItems: 'center',
-        justifyContent: "center",
-        textAlign: 'center',
-        },
+        justifyContent: 'center',
+    },
     text1: {
         fontSize: 13,
+        textDecorationLine: 'underline',
         fontWeight: 'bold',
         color: '#000000',
-        alignItems: 'center',
-        justifyContent: "center",
-        textAlign: 'center',
-        },
+    },
     text2: {
-        fontSize: 30,
+        fontSize: 40,
         fontWeight: 'bold',
         color: '#000000',
-        alignItems: 'center',
-        justifyContent: "center",
-        textAlign: 'center',
-        },
+    },
     welback: {
         fontSize: 30,
         marginTop: 34,
-        marginBottom: 20,
+        marginBottom: 57,
         color: '#000000',
-        alignItems: 'center',
-        justifyContent: "center",
         textAlign: 'center',
     },
-    inputFormer: {
-    },
+    inputFormer: {},
     forgetfield: {
-        flexDirection: "row",
-        justifyContent: "space-around",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginHorizontal: 36,
+        marginVertical: 10,
     },
     inputContainer: {
-        backgroundColor: "#FCF5F5",
-        alignItems: 'center',
-        flexDirection: "row",
+        backgroundColor: '#FCF5F5',
+        flexDirection: 'row',
         borderRadius: 10,
         borderWidth: 1,
         marginHorizontal: 36,
-        marginVertical: 20,
+        marginVertical: 10,
         height: 53,
-        gap: 7
+        alignItems: 'center',
+        paddingHorizontal: 10,
     },
     inputIcon: {
-        marginLeft: 14
-    }
-    ,
+        marginRight: 10,
+    },
     textInput: {
-        textAlign: 'center',
+        flex: 1,
     },
     forgetText: {
         fontSize: 13,
-        color: "#F84A4A"
+        color: '#F84A4A',
     },
     button: {
         alignItems: 'center',
         justifyContent: 'center',
         height: 53,
-        margin: 10,
-        borderRadius: 5,
-        marginTop: 47,
+        marginVertical: 20,
         marginHorizontal: 36,
+        borderRadius: 5,
         backgroundColor: '#4785FC',
     },
     buttonText: {
         color: '#fff',
         fontSize: 20,
         fontWeight: 'bold',
-        },
+    },
     privacyText: {
         color: '#3F44D1',
         fontSize: 13,
         textAlign: 'center',
-    }
-    
-})
+        marginBottom: 20,
+    },
+});
 
 export default Login;

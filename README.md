@@ -58,5 +58,10 @@ npm install react-native-reanimated@~3.10.1
 ### 
 sudo npm install -g expo-cli
 
+### react navigation
+npm install @react-navigation/native-stack
+
+
+
 
 
