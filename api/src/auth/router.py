@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from ..models.database import get_db
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -44,7 +44,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
 
-@router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(token: str = Depends(oauth2_scheme)):
     auth_logic.logout(token)
     return None
@@ -58,5 +58,16 @@ async def change_password(db: db_dependency, credentials: ChangePassword, user: 
     return {"message": "Password changed successfully"}
 
 
+@router.post("/password_reset_link", status_code=status.HTTP_200_OK)
+def password_reset(email: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    password_reset_link = auth_logic.password_reset_link(db=db, email=email, background_tasks=background_tasks)
+    if password_reset_link is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not found")
+    return {"message": "Password reset link sent to your email"}
 
 
+@router.get("/password_reset_confirm/{token}", status_code=status.HTTP_200_OK)
+def password_reset_confirm(token: str, db: Session = Depends(get_db)):
+    if not auth_logic.verify_password_reset_token(db, token):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
+    return {"message": "Password reset link verified"}
