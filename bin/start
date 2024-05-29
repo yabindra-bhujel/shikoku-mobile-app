@@ -6,6 +6,7 @@ set -e
 VENV_DIR="api/venv"
 CONTAINER_NAME="postgres_db"
 DATABASE_NAME="school_db"
+NETWORK_NAME="school_app"
 
 START_IOS_APP=false
 START_ANDROID=false
@@ -16,11 +17,11 @@ APP_PORT=8081
 
 while getopts "ia" opt; do
     case ${opt} in
-    # オプションが i の場合
+        # オプションが i の場合
         i )
             START_IOS_APP=true
             ;;
-    # オプションが a の場合
+        # オプションが a の場合
         a )
             START_ANDROID=true
             ;;
@@ -35,7 +36,6 @@ shift $((OPTIND -1))
 # 仮想環境が既に存在するかを確認
 if [ -d "$VENV_DIR" ]; then
     echo "Virtual environment already exists. Activating it..."
-
 else
     # 仮想環境が存在しない場合は新規作成
     echo "Creating a new virtual environment..."
@@ -49,8 +49,12 @@ cd api/
 source venv/bin/activate
 
 # Pythonの依存パッケージをインストール
-echo "Installing Python dependencies..."ls
+echo "Installing Python dependencies..."
 pip install -r requirements.txt
+
+# Dockerネットワークを作成
+echo "Creating Docker network '$NETWORK_NAME' if not exists..."
+docker network ls | grep -wq $NETWORK_NAME || docker network create $NETWORK_NAME
 
 # PostgreSQLデータベースコンテナを起動
 echo "Starting PostgreSQL database container..."

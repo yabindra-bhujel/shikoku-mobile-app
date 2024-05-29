@@ -12,6 +12,11 @@ services:
       - "5433:5432"  
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - school_app
 
 volumes:
   db_data:
+
+networks:
+  school_app:
