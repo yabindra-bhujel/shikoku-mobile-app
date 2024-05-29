@@ -61,7 +61,7 @@ sudo npm install -g expo-cli
 ### react navigation
 npm install @react-navigation/native-stack
 
-
-
+#### create style ####
+npm i @shopify/restyle
 
 

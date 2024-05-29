@@ -1,27 +1,29 @@
 import React from "react";
-import { View, SafeAreaView, Text, StyleSheet, Image, TextInput } from "react-native";
+import { View, SafeAreaView, Text, StyleSheet, Image,TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from "@react-navigation/native";
+import StyledTextInput from "@/src/components/StyledTextInput";
+import { router } from "expo-router";
 
 
-const ForgetPass = () => {
-    const navigation = useNavigation();
+const ForgetPass = ({navigation}: {navigation: any}) => {
 
-    const loginHandle = () => {
-        navigation.navigate("Login");
+    const onPressButton = () => {
+        Alert.alert("Reset link sent to your email !");
     }
 
     return (
         <SafeAreaView style={styles.Wrapper}>
             <View style={styles.container}>
+                <TouchableOpacity>
                 <View style={styles.backBtnContainer}>
                     <Ionicons name="chevron-back" size={24} color="black" />
-                    <Text style={styles.backBtnText} onPress={loginHandle}>Back</Text>
+                    <Text style={styles.backBtnText} onPress={()=> {router.back()}}>Back</Text>
                 </View>
+                </TouchableOpacity>
                 <View style={styles.headerLogo}>
                     <Image source={require('@/assets/images/64px-shikoku-logo.png')}/>
-                    <View style={styles.title}>
+                    <View style={styles.headtitle}>
                         <Text style={styles.text1}>SHIKOKU UNIVERSITY</Text>
                         <Text style={styles.text2}>四国大学</Text>
                     </View>
@@ -31,15 +33,15 @@ const ForgetPass = () => {
                     <View style={styles.inputContainer}>
                         <MaterialCommunityIcons name="email" size={24} color="black" 
                         style={styles.inputIcon}/>
-                        <TextInput
-                        style={styles.textInput}
+                        <StyledTextInput
                         placeholder="s20*******@shikoku-u.ac.jp"
+                        keyboardType="email-address"
                         textContentType="emailAddress"/>
                     </View>
                     
-                    <View style={styles.button}>
-                        <Text style={styles.buttonText}>Send Me Link</Text>
-                    </View>
+                    <TouchableOpacity style={styles.button}>
+                        <Text style={styles.buttonText} onPress={onPressButton}>Send Me Link</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
             <Text style={styles.privacyText}>Terms of service and privacy policy</Text>
@@ -65,16 +67,13 @@ const styles = StyleSheet.create({
     },
     headerLogo: {
         marginTop: 105,
-        gap: 7,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: "center",
         textAlign: 'center',
     },
-    title: {
-        alignItems: 'center',
-        justifyContent: "center",
-        textAlign: 'center',
+    headtitle: {
+        marginLeft: 7,
         },
     text1: {
         fontSize: 13,
@@ -103,6 +102,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     inputFormer: {
+        height: 55,
     },
     forgetfield: {
         flexDirection: "row",
@@ -123,8 +123,9 @@ const styles = StyleSheet.create({
         marginLeft: 14
     }
     ,
-    textInput: {
-        textAlign: 'center',
+    textInputField: {
+        height: 53,
+        width: "100%"
     },
     forgetText: {
         fontSize: 13,

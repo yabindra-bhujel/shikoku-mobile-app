@@ -5,8 +5,10 @@
     "baseUrl": "./",
     "paths": {
       "@/*": [
-        "./*"
-      ]
+        "./*",
+      ],
+      "*.ts": ["*"],
+      "*.tsx": ["*"],
     },
     "jsx": "react",
     "allowSyntheticDefaultImports": true,
