@@ -18,5 +18,3 @@ class ConnectionManager:
         """disconnect event"""
         self.active_connections.remove(websocket)
         self.logger.info(f"WebSocket disconnected: {websocket.client}")
-
-    

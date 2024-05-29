@@ -80,7 +80,7 @@ def authenticate_student(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise http_exception
 
-def get_user_model(payload: dict):
+def get_user_model(payload: dict) -> Optional[User]:
     username = payload.get("sub")
     id = payload.get("id")
     email = payload.get("email")
@@ -91,15 +91,13 @@ def get_user_model(payload: dict):
     return usermodel
 
 
-def get_user(token: str) -> Optional[dict]:
+def get_user(token: str) -> Optional[User]:
     try:
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):]
-        
+      
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         user = get_user_model(payload)
         if user is not None:
-            return user.dict()
+            return user
     except (JWTError, IndexError):
         return None
 
