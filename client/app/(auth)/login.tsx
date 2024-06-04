@@ -10,13 +10,48 @@ import {
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import StyledTextInput from "@/src/components/StyledTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, router } from "expo-router";
+import { Link, Redirect, router } from "expo-router";
+import axios  from "axios";
+import { user_login } from "@/src/api/user_api";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 const Login = ({ navigation }: { navigation: any }) => {
-  const onPressButton = () => {
-    Alert.alert("Login with no account!");
-    navigation.navigate("Main");
-  };
+  
+  const [username, setUserName] = useState("");
+  const [password, setPassWord] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [form, setForm] = useState({
+    username: "",
+    password: "",
+  })
+
+
+  const submit = async () => {
+    if (form.username === "" || form.password === "") {
+      Alert.alert("Please fill all the fields");
+    }
+    
+    {
+      setIsLoading(true);
+      const res = await user_login(form); 
+      console.log(res);
+      if (res.status === 200) {
+        setIsLoading(false);
+        Alert.alert("Login Successful");
+        await AsyncStorage.setItem('token', res.data.token);
+        await AsyncStorage.setItem('user', JSON.stringify(res.data.user));
+        router.push("/home");
+  }}}
+
+
+
+
 
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false);
 
@@ -42,6 +77,11 @@ const Login = ({ navigation }: { navigation: any }) => {
             placeholder="username"
             textContentType="username"
             autoCapitalize="none"
+            value={form.username}
+            autoCorrect={false} 
+            onChangeText={(e) => setForm({...form, 
+              username: e
+            })}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -56,6 +96,12 @@ const Login = ({ navigation }: { navigation: any }) => {
             textContentType="password"
             secureTextEntry
             autoCapitalize="none"
+            autoCorrect={false}
+            value={form.password}
+            onChangeText={(e) => setForm({...form, 
+              password: e
+            })}
+
           />
         </View>
 
@@ -68,9 +114,10 @@ const Login = ({ navigation }: { navigation: any }) => {
             '/forgetpass'>Forgot Password</Link>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={()=> 
-          router.push('/login')}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity style={styles.button}
+        onPress={submit}>
+          <Text style={styles.buttonText}
+          >Login</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.privacyText}>
@@ -158,7 +205,7 @@ const styles = StyleSheet.create({
     color: "#3F44D1",
     fontSize: 13,
     textAlign: "center",
-    marginBottom: 20,
+    marginTop: 50,
   },
 });
 

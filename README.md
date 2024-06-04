@@ -64,4 +64,8 @@ npm install @react-navigation/native-stack
 #### create style ####
 npm i @shopify/restyle
 
+### to save data in local user logged
+npm install @react-native-async-storage/async-storage
+
+
 

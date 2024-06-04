@@ -23,7 +23,8 @@ async def create_user(db: db_dependency, credentials: Credentials):
     return {"message": "User created successfully"}
 
 @router.post("/access_token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
+async def login_for_access_token(form_data: Annotated[Login, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
+    print(form_data.username, form_data.password)
     user = auth_logic.login_token(db, form_data.username, form_data.password)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")

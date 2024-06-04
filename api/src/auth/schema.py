@@ -31,3 +31,7 @@ class ChangePassword(BaseModel):
     username: str
     old_password: str
     new_password: str
+
+class Login(BaseModel):
+    username: str
+    password: str

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState} from "react";
 import { View, SafeAreaView, Text, StyleSheet, Image,TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,8 +9,16 @@ import { router } from "expo-router";
 const ForgetPass = ({navigation}: {navigation: any}) => {
 
     const onPressButton = () => {
-        Alert.alert("Reset link sent to your email !");
+        if (form.email === "") {
+            Alert.alert("Please fill the email adress !")
+        } else {
+            Alert.alert("Reset link sent to your email !");
+        }
     }
+
+    const [form, setForm] = useState({
+        email: "",
+      })
 
     return (
         <SafeAreaView style={styles.Wrapper}>

@@ -8,10 +8,11 @@ import {
 } from "react-native";
 import React from "react";
 
-const StyledButton: React.FC<any> = ({ handlePress, title }) => {
+const StyledButton: React.FC<any> = ({ handlePress, title, icon, otherstyle }) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={handlePress}>
+    <TouchableOpacity style={styles.button} onPress={handlePress} >
       <Text style={styles.buttonText}>{title}</Text>
+      {icon}
     </TouchableOpacity>
   );
 };
@@ -25,7 +26,8 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
     height: 53,
     marginVertical: 20,
     marginHorizontal: 36,

@@ -3,6 +3,7 @@ import React from "react";
 import { Link, router } from "expo-router";
 import StyledButton from "@/src/components/StyledButton";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function StartScreen() {
   const handlePress = () => {
@@ -10,7 +11,7 @@ export default function StartScreen() {
   };
   return (
     <SafeAreaView>
-      <ScrollView contentContainerStyle={{ height: "100%" }}>
+      <ScrollView contentContainerStyle={{ height: "100%", minHeight: "83%" }}>
         <View style={styles.headerImage}>
           <Image source={require("@/assets/images/128px-shikoku-logo.png")} />
           <View>
@@ -24,11 +25,19 @@ export default function StartScreen() {
             </Text>
           </View>
         </View>
-        <StyledButton handlePress={()=> 
-          router.push('/login')
-        }
-        title="Go to Login"
-        />
+          <StyledButton
+            handlePress={() => router.push("/login")}
+            title={<Text>Go to Login</Text>}
+            icon={
+              <AntDesign
+                name="right"
+                size={24}
+                color="black"
+                style={styles.rightIcon}
+              />
+            }
+          />
+       
       </ScrollView>
     </SafeAreaView>
   );
@@ -63,9 +72,15 @@ const styles = StyleSheet.create({
   redirect: {
     color: "blue",
   },
+
+  rightIcon: {
+    marginRight: -20,
+    color: "#fff",
+  },
   exitAlert: {
     color: "red",
     fontSize: 20,
-    padding: 15,
+    marginHorizontal: 36,
+
   },
 });
