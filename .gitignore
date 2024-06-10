@@ -310,3 +310,9 @@ dist/**/*
 # ignore .lock
 yarn.lock
 package.lock
+
+# Ignore .env
+.env
+
+# pdf
+*.pdf
