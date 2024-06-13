@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import {Notices} from "../../components/notice-data";
 import { Link } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const HomeScreen = () => {
 
@@ -14,7 +15,7 @@ const HomeScreen = () => {
 </View>
   ))
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.headerView}>
         <View>
           <Text style={styles.headerText}>Welcome back</Text>
@@ -31,7 +32,7 @@ const HomeScreen = () => {
           {ListNotice}
         </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

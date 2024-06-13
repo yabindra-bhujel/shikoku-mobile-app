@@ -19,42 +19,46 @@ const Login = ({ navigation }: { navigation: any }) => {
   const [username, setUserName] = useState("");
   const [password, setPassWord] = useState("");
 
-  const submit = async () => {
-    if (!username) {
-      Alert.alert("Please fill user name !");
-      return;
-    }
-    if (!password) {
-      Alert.alert("Please fill password");
-      return;
-    }
-    try{
-    const baseUrl = "http://192.168.1.81:8000"
-    const response = await axios.post(`${baseUrl}/auth/access_token/`, {
-      username: username,
-      password: password
-    });
-
-    if (response.status === 200) {
-      // Assuming the token is in response.data.token
-      router.push("/home");
-    } else {
-      Alert.alert("Login failed", "Invalid credentials or server error.");
-    }
-  } catch (error: any) {
-    if (error.response) {
-      console.log("Server responded with a status:", error.response.status);
-      console.log(error.response.data);
-      Alert.alert("Login failed", "Invalid credentials or server error.");
-    } else if (error.request) {
-      console.log("No response was received:", error.request);
-      Alert.alert("Login failed", "No response from server.");
-    } else {
-      console.log("Error setting up the request:", error.message);
-      Alert.alert("Login failed", "An error occurred.");
-    }
+  const submit = () => {
+    router.push("/home");
   }
-  };
+
+  // const submit = async () => {
+  //   if (!username) {
+  //     Alert.alert("Please fill user name !");
+  //     return;
+  //   }
+  //   if (!password) {
+  //     Alert.alert("Please fill password");
+  //     return;
+  //   }
+  //   try{
+  //   const baseUrl = "http://192.168.1.81:8000"
+  //   const response = await axios.post(`${baseUrl}/auth/access_token/`, {
+  //     username: username,
+  //     password: password
+  //   });
+
+  //   if (response.status === 200) {
+  //     // Assuming the token is in response.data.token
+  //     router.push("/home");
+  //   } else {
+  //     Alert.alert("Login failed", "Invalid credentials or server error.");
+  //   }
+  // } catch (error: any) {
+  //   if (error.response) {
+  //     console.log("Server responded with a status:", error.response.status);
+  //     console.log(error.response.data);
+  //     Alert.alert("Login failed", "Invalid credentials or server error.");
+  //   } else if (error.request) {
+  //     console.log("No response was received:", error.request);
+  //     Alert.alert("Login failed", "No response from server.");
+  //   } else {
+  //     console.log("Error setting up the request:", error.message);
+  //     Alert.alert("Login failed", "An error occurred.");
+  //   }
+  // }
+  // };
 
   const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false);
 
@@ -125,11 +129,9 @@ const Login = ({ navigation }: { navigation: any }) => {
 };
 
 const styles = StyleSheet.create({
-  Wrapper: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
+    container: {
+      flex: 1,
+      height: "100%"
   },
   headerLogo: {
     marginTop: 105,
@@ -202,7 +204,7 @@ const styles = StyleSheet.create({
     color: "#3F44D1",
     textAlign: "center",
     fontSize: 13,
-    marginTop: "50%",
+    marginTop: 50
   },
 });
 
