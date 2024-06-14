@@ -1,18 +1,21 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import {Calendar, LocaleConfig} from 'react-native-calendars';
-import { FontAwesome } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+import { FontAwesome } from "@expo/vector-icons";
+import SysModal from "@/src/constants/sys_modal";
 
 const CalendarScreen = () => {
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        backgroundColor: "#72AAFF",
-        padding: 13,
-      }}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          backgroundColor: "#72AAFF",
+          padding: 13,
+        }}
+      >
         <View style={styles.headerBtn}>
           <Text style={styles.headerBtnText}>Month</Text>
         </View>
@@ -23,13 +26,18 @@ const CalendarScreen = () => {
           <Text style={styles.headerBtnText}>Day</Text>
         </View>
       </View>
-      <Calendar/>
-      <FontAwesome name="plus-circle" size={70} color="#72AAFF" style={styles.addBtn}/>
+      <Calendar />
+      <FontAwesome
+        name="plus-circle"
+        size={70}
+        color="#40AAFF"
+        style={styles.addBtn}
+      />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default CalendarScreen
+export default CalendarScreen;
 
 const styles = StyleSheet.create({
   headerBtn: {
@@ -37,7 +45,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     width: 70,
-    borderColor: 'transparent',
+    borderColor: "transparent",
     alignItems: "center",
     backgroundColor: "#E8E8E8",
   },
@@ -49,5 +57,5 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     right: 10,
-  }
-})
+  },
+});

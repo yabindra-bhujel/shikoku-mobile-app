@@ -6,6 +6,10 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import StyledTextInput from "@/src/components/StyledTextInput";
@@ -64,6 +68,11 @@ const Login = ({ navigation }: { navigation: any }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View>
       <View style={styles.headerLogo}>
         <Image source={require("@/assets/images/64px-shikoku-logo.png")} />
         <View style={styles.headertitle}>
@@ -113,7 +122,7 @@ const Login = ({ navigation }: { navigation: any }) => {
           </View>
           <TouchableOpacity>
             <Link style={styles.forgetText} href="/forgetpass">
-              Forgot Password
+              Forgot Password?
             </Link>
           </TouchableOpacity>
         </View>
@@ -121,6 +130,9 @@ const Login = ({ navigation }: { navigation: any }) => {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       </View>
+      </View>
+       </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
       <Text style={styles.privacyText}>
         Terms of service and privacy policy
       </Text>
@@ -204,7 +216,7 @@ const styles = StyleSheet.create({
     color: "#3F44D1",
     textAlign: "center",
     fontSize: 13,
-    marginTop: 50
+    marginTop: 50,
   },
 });
 

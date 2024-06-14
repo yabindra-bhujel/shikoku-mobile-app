@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import {Notices} from "../../components/notice-data";
 import { Link } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native";
+
 
 const HomeScreen = () => {
 
   const ListNotice = Notices.map(notice => (
-    <View style={styles.noticeLine}>
-    <Link href={`/&{notice.title}`} style={styles.noticeText} key={notice.id}>
+    <View style={styles.noticeLine} key={notice.id}>
+    <Link href={`/&{notice.title}`} style={styles.noticeText}>
     {notice.title}
     </Link>
 </View>
