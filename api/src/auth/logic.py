@@ -78,3 +78,6 @@ class AuthLogic:
         except IntegrityError:
             return None
         return user
+    
+    def get_user_by_id(self, db: Session, user_id: int) -> users.User:
+        return db.query(users.User).filter(users.User.id == user_id).first()
