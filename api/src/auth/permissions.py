@@ -1,8 +1,7 @@
 from jose import jwt
 from jose.exceptions import JWTError
 from fastapi.exceptions import HTTPException
-from fastapi.security import OAuth2PasswordBearer
-from fastapi import Depends
+from fastapi import Depends, Request
 from ..settings.auth import AuthSettings
 from .schema import *
 
@@ -14,14 +13,16 @@ class AuthorizationError(HTTPException):
     def __init__(self, detail: str):
         super().__init__(status_code=403, detail=detail)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 auth_settings = AuthSettings()
 secret_key = auth_settings.SECRET_KEY
 algorithm = auth_settings.ALGORITHM
 http_exception = AuthenticationError("Invalid credentials")
 role_exception = AuthorizationError("Invalid role")
 
-def authenticate_user(token: str = Depends(oauth2_scheme))->User:
+def authenticate_user(request: Request) -> User:
+    token = request.cookies.get("access_token")
+    if not token:
+        raise http_exception
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         user = get_user_model(payload)
@@ -31,7 +32,10 @@ def authenticate_user(token: str = Depends(oauth2_scheme))->User:
     except JWTError:
         raise http_exception
 
-def authenticate_admin(token: str = Depends(oauth2_scheme)):
+def authenticate_admin(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise http_exception
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         if payload['role'] != 'admin':
@@ -43,7 +47,10 @@ def authenticate_admin(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise http_exception
 
-def authenticate_staff(token: str = Depends(oauth2_scheme)):
+def authenticate_staff(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise http_exception
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         if payload['role'] != 'staff':
@@ -55,7 +62,10 @@ def authenticate_staff(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise http_exception
 
-def authenticate_teacher(token: str = Depends(oauth2_scheme)):
+def authenticate_teacher(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise http_exception
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         if payload['role'] != 'teacher':
@@ -67,7 +77,10 @@ def authenticate_teacher(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise http_exception
 
-def authenticate_student(token: str = Depends(oauth2_scheme)):
+def authenticate_student(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise http_exception
     try:
         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         if payload['role'] != 'student':

@@ -1,36 +1,68 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
 from ..models.database import get_db
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 from .logic import AuthLogic
 from .schema import *
+from datetime import timedelta
 
-router = APIRouter(prefix="/auth",tags=["auth"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
+
+router = APIRouter(prefix="/auth", tags=["auth"])
 db_dependency = Annotated[Session, Depends(get_db)]
 auth_logic = AuthLogic()
 
 @router.post("/create_user", status_code=status.HTTP_201_CREATED,
              description="Create a new user with the provided credentials. Returns HTTP 400 if user already exists.The role field should be one of 'admin', 'staff', 'student', 'teacher', or 'user'.")
 async def create_user(db: db_dependency, credentials: Credentials):
-
     user = auth_logic.create_user(db, credentials.dict())
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
 
     return {"message": "User created successfully"}
 
-@router.post("/access_token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
-    user = auth_logic.login_token(db, form_data.username, form_data.password)
-    if user is None:
+@router.post("/access_token", status_code=status.HTTP_200_OK)
+async def login_for_access_token(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
+    access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
+    if access_token and refresh_token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
     
-    return {"access_token": user, "token_type": "bearer"}
+    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    return {"message": "Login successful"}
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+@router.post("/refresh_token", status_code=status.HTTP_200_OK)
+async def refresh_access_token(request: Request, response: Response, db: db_dependency):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token not found")
+
+    payload = auth_logic.verify_token(refresh_token)
+    if payload is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    
+    user_id = int(payload["sub"])
+    user = auth_logic.get_user_by_user_id(db, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
+    new_access_token = auth_logic.create_access_token(
+        username=user.username,
+        user_id=int(payload["sub"]),
+        email=user.email,
+        role=user.role,
+        expires_delta=timedelta(minutes=15)
+    )
+    response.set_cookie(key="access_token", value=new_access_token, httponly=True)
+    return {"message": "Access token refreshed"}
+
+
+async def get_current_user(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -45,18 +77,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(token: str = Depends(oauth2_scheme)):
-    auth_logic.logout(token)
+async def logout(response: Response, request: Request):
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
     return None
 
-@router.post("/chnage_password", status_code=status.HTTP_200_OK)
+@router.post("/change_password", status_code=status.HTTP_200_OK)
 async def change_password(db: db_dependency, credentials: ChangePassword, user: User = Depends(get_current_user)):
-    password_changed = auth_logic.chnage_password(db, user.username, credentials.old_password, credentials.new_password)
-    if password_changed is  None:
+    password_changed = auth_logic.change_password(db, user.username, credentials.old_password, credentials.new_password)
+    if password_changed is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect old password")
     
     return {"message": "Password changed successfully"}
-
-
-
-
