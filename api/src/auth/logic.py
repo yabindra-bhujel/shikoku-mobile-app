@@ -4,15 +4,27 @@ from jose import jwt
 from ..settings.auth import AuthSettings
 from ..models.entity import users
 from sqlalchemy.exc import IntegrityError
-from .permissions import get_user_model
+from fastapi import BackgroundTasks
+from ..settings.email import EmailSettings
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
+import secrets
 
 
 class AuthLogic:
-    def __init__(self):
+    def __init__(self, logger=None):
         auth_settings = AuthSettings()
+        email_settings = EmailSettings()
         self.pwd_context = auth_settings.passlib_context
         self.secret_key = auth_settings.SECRET_KEY
         self.algorithm = auth_settings.ALGORITHM
+        self.sender_email = email_settings.EMAIL_IMAP_USERNAME
+        self.sender_password = email_settings.EMAIL_IMAP_PASSWORD
+        self.smtp_host = email_settings.EMAIL_IMAP_HOST
+        self.smtp_port = email_settings.EMAIL_IMAP_PORT
+        self.smtp_ssl = email_settings.EMAIL_IMAP_SSL
 
     def create_user(self, db: Session, data: dict) -> users.User:
         username = data['username']
@@ -107,3 +119,47 @@ class AuthLogic:
         usermodel = users.User(id=id, username=username, email=email, role=role)
         return usermodel
     
+    def password_reset_link(self, db: Session, email: str, background_tasks: BackgroundTasks):
+        user = db.query(users.User).filter(users.User.email == email).first()
+        if user is None:
+            return None
+        
+        email = user.email
+        subject = "Password Reset Link"
+        message = "Click on the link to reset your password"
+        token = self.__generate_token()
+        password_reset_link = f"http://localhost:8000/auth/password_reset_confirm/{token}/"
+        message = f"{message}: {password_reset_link}"
+        background_tasks.add_task(self.__send_email, email, subject, message)
+        return email
+
+    def __send_email(self, receiver: str, subject: str, message: str):
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = self.sender_email
+            msg['To'] = receiver
+            msg['Subject'] = subject
+            msg.attach(MIMEText(message, 'plain'))
+            server = smtplib.SMTP(self.smtp_host, self.smtp_port)
+            server.starttls()
+            server.login(self.sender_email, self.sender_password)
+            text = msg.as_string()
+            server.sendmail(self.sender_email, receiver, text)
+            server.quit()
+        except Exception:
+            return None
+        
+    def __generate_token(self) -> str:
+        # TODO: add expiration time in token
+        #TODO: save token to database or session
+        return secrets.token_hex(32)
+
+
+    def __store_token(self):
+        # TODO: store token to database or session
+        pass
+
+    def verify_password_reset_token(self, db: Session, token: str):
+        # TODO: verify token from database or session
+        # TODO: if token is valid then change password
+        pass
