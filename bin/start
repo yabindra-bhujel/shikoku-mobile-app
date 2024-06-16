@@ -130,3 +130,4 @@ elif [ "$START_ANDROID" = true ]; then
 else
     cd ../api
     uvicorn main:app --reload &
+fi
