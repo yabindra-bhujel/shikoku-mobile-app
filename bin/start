@@ -3,7 +3,7 @@
 # スクリプトの実行中にエラーが発生した場合、即座に停止する
 set -e 
 
-VENV_DIR="api/venv"
+VENV_DIR="services/api/venv"
 CONTAINER_NAME="postgres_db"
 DATABASE_NAME="school_db"
 NETWORK_NAME="school_app"
@@ -39,11 +39,13 @@ if [ -d "$VENV_DIR" ]; then
 else
     # 仮想環境が存在しない場合は新規作成
     echo "Creating a new virtual environment..."
-    cd api/
+    cd services/api/
     python3 -m venv venv
-    cd ..
+    echo "Virtual environment created!"
+    cd ../../
 fi
-cd api/
+
+cd services/api || exit 1
 
 # 仮想環境を有効化
 source venv/bin/activate
@@ -107,13 +109,14 @@ alembic upgrade head
 cd ..
 cd client || exit 1
 
+
 # パッケージをインストール
 
 # シミュレータ　を動いている状態
 if [ "$START_IOS_APP" = true ]; then
     cd ../api
     # uvicorn main:app --reload  &
-    uvicorn main:app --host 172.30.58.212 --port 8000 &
+    uvicorn main:app --reload &
     cd ../client
     npm install
     echo "Starting the iOS simulator..."
@@ -121,7 +124,6 @@ if [ "$START_IOS_APP" = true ]; then
    
 elif [ "$START_ANDROID" = true ]; then
     # cd ../api
-    uvicorn main:app --host 172.30.58.212 --port 8000 &
     uvicorn main:app --reload  &
     cd ../client
     npm install
