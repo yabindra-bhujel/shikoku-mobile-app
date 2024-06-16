@@ -27,7 +27,7 @@ async def login_for_access_token(response: Response, form_data: Annotated[OAuth2
     access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
     if access_token and refresh_token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
-    
+
     response.set_cookie(key="access_token", value=access_token, httponly=True)
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
     return {"message": "Login successful"}

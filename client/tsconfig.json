@@ -5,8 +5,10 @@
     "baseUrl": "./",
     "paths": {
       "@/*": [
-        "./*"
-      ]
+        "./*",
+      ],
+      "*.ts": ["*"],
+      "*.tsx": ["*"],
     },
     "jsx": "react",
     "allowSyntheticDefaultImports": true,
@@ -14,7 +16,9 @@
     "moduleResolution": "node",
     "target": "esnext",
     "lib": ["dom", "esnext"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false
+
   },
   "include": [
     "**/*.ts",
