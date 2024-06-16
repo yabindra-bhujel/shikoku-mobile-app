@@ -4,6 +4,7 @@ from fastapi.exceptions import HTTPException
 from fastapi import Depends, Request
 from ..settings.auth import AuthSettings
 from .schema import *
+from typing import Optional
 
 class AuthenticationError(HTTPException):
     def __init__(self, detail: str):
@@ -92,7 +93,7 @@ def authenticate_student(request: Request):
     except JWTError:
         raise http_exception
 
-def get_user_model(payload: dict):
+def get_user_model(payload: dict) -> Optional[User]:
     username = payload.get("sub")
     id = payload.get("id")
     email = payload.get("email")
@@ -101,3 +102,14 @@ def get_user_model(payload: dict):
         return None
     usermodel = User(id=id, username=username, email=email, role=role)
     return usermodel
+
+def get_user(token: str) -> Optional[User]:
+    try:
+      
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        user = get_user_model(payload)
+        if user is not None:
+            return user
+    except (JWTError, IndexError):
+        return None
+

@@ -35,3 +35,6 @@ class ChangePassword(BaseModel):
 class Login(BaseModel):
     username: str
     password: str
+class UserSocket(BaseModel):
+    username: str
+    websocket: str

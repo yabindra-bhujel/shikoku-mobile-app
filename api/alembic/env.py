@@ -6,6 +6,7 @@ from alembic import context
 from src.models.database import Base , DATABASE_URL
 from src.models.entity.users import User
 from src.models.entity.calender import Calendar
+from src.models.entity.messages import Message
 
 
 # this is the Alembic Config object, which provides
