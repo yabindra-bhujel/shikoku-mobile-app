@@ -1,13 +1,14 @@
-# プロジェクト: LLM 開発 プロジェクト
+# プロジェクト: 大学の LLM 開発 プロジェクト
 
 このリポジトリは、四国大学メディア情報学科の開発プロジェクトです。
 
 ## プロジェクトディレクトリ構造
 
-- **api**: APIモジュールに関する詳細。
 - **bin**:  bash scprit など  便利な コマンド とかが入っています。
-- **chatbot**: チャットボットモジュールに関する詳細。
-- **client**: クライアント側アプリケーションに関する詳細。
+- **services** 
+    - **chatbot**: チャットボットモジュールに関する詳細。
+    - **client**: クライアント側アプリケーションに関する詳細。
+    - **api**: APIモジュールに関する詳細。
 
 ## プロジェクトの立ち上げ方
 
@@ -43,29 +44,31 @@ bin/start -i
 bin/start -a
 ```
 
-#### update expo
-npm install expo@~51.0.5
 
-#### update 
-npm install expo-font@~12.0.5
+# git / github 運用ルール
 
-### expo-router
-npm install expo-router@~3.5.12
+### ブランチ命名規則 (Branch naming conventions):
+#### ブランチ名は 機能と わかるようにする
 
-#### 
-npm install react-native-reanimated@~3.10.1
+- 機能ブランチ (Feature branches):
+    - 形式: f/branch-name 
+    - 例: f/login-client
 
-### 
-sudo npm install -g expo-cli
-
-### react navigation
-npm install @react-navigation/native-stack
-
-#### create style ####
-npm i @shopify/restyle
-
-### to save data in local user logged
-npm install @react-native-async-storage/async-storage
+- 修正ブランチ (Bugfix branches):
+    - 形式: b/branch-name
+   - 例: bugfix/456-fix-api-response-error
 
 
+# commit
+ - できるだけ 詳細内容を書く commit メセッジは 長くしない
+ - 作業が完了したら、変更をローカルに留め置かずにプッシュする（コードの喪失を防ぐため）。
+ 
 
+ # pull request
+ - プルリクエストを作成し、コードの変更を他のチームメンバーにレビューしてもらう
+ -  プル リクエストを 作成時に内容をきちんと書く, 見てもらいたい内容、特にレビューをお願いしたい箇所, 今回保留した項目・次の課題 などとかわかりやすくかく 
+ - もし  コードの内容が そのままで マージされない前提であればタイトルの 先頭に [wip]  
+
+ # merge
+ - pull request ぜずに merge しない
+ - マジしたら ブランチも消す ロカルも リモートブランチも

@@ -15,9 +15,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import StyledTextInput from "@/src/components/StyledTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, Redirect, router } from "expo-router";
-import axios from "axios";
-import { user_login } from "@/src/api/user_api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AuthServices from "@/src/api/AuthServices";
 
 const Login = ({ navigation }: { navigation: any }) => {
   const [username, setUserName] = useState("");
