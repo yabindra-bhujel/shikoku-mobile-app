@@ -3,6 +3,7 @@ from src.auth import router as auth_router
 from src.auth.permissions import authenticate_user
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from src.router.calender import router as calender_router
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 
 
 app.include_router(auth_router.router)
+app.include_router(calender_router)
 
 @app.get("/")
 async def root(user = Depends(authenticate_user)):
