@@ -19,7 +19,7 @@ const TabNavigator = () => {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
-            let iconName;
+            let iconName: any;
             if (route.name === "Home") {
               iconName = "home";
             } else if (route.name === "Chat") {
@@ -38,11 +38,9 @@ const TabNavigator = () => {
           name="Home"
           component={HomeScreen}
           options={{ 
-            headerShown: false,
             tabBarLabel: "Home",
-            // backgroundColor
-            headerTintColor: "#D9D9D9"
-          
+            headerTintColor: "#D9D9D9",
+      
           }}
         />
         <Tab.Screen

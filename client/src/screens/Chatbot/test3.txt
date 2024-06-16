@@ -4,21 +4,21 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  Platform,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { Component, useState } from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
 import { chatTestData } from "@/src/components/chatTestData";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
+import moment from "moment";
 
 interface dtypes {
   id: number;
   type: string;
   content: string;
-  date: string;
+  date: string; // Keep date as string if you're using a string format
 }
 
 const ChatbotScreen = () => {
@@ -28,85 +28,68 @@ const ChatbotScreen = () => {
 
   const submitMessage = () => {
     setDataChat([
-      ...dataChat,
+      ...dataChat, 
       {
         id: Math.random(),
         type: "USER",
         content: message,
-        date: new Date().toISOString(),
+        date: new Date().toISOString(), // Convert Date to string
       },
     ]);
-    setMessage("");
-  };
+    setMessage(''); // Clear the input field after sending
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.chatBodyContainer}>
-          <FlatList
-            contentContainerStyle={{
-              paddingHorizontal: 15,
-              gap: 10,
-            }}
-            
-            inverted={true}
-            data={[...dataChat].reverse()}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item, index }) => {
-              return (
-                <View style={styles.chatTextContainer}>
-                  {item.type === "chatBot" ? (
-                    <View style={styles.chatUserIcon}>
-                      <FontAwesome6 name="robot" size={24} color="black" />
-                    </View>
-                  ) : (
-                    <></>
-                  )}
-                  <View style={styles.chatBody}>
-                    <Text>{item.content}</Text>
+      <View style={styles.chatBodyContainer}>
+        <FlatList
+          contentContainerStyle={{
+            paddingHorizontal: 15,
+            gap: 10,
+            paddingBottom: 60,
+          }}
+          automaticallyAdjustKeyboardInsets={true}
+          data={dataChat} // Change from chatTestData to dataChat to see new messages
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => {
+            return (
+              <View style={styles.chatTextContainer}>
+                {item.type === "chatBot" ? (
+                  <View style={styles.chatUserIcon}>
+                    <FontAwesome6 name="robot" size={24} color="black" />
                   </View>
-                  <View>
-                    {item.type === "USER" ? (
-                      <View style={styles.chatUserIcon}>
-                        <FontAwesome5
-                          name="user-circle"
-                          size={30}
-                          color="black"
-                        />
-                      </View>
-                    ) : (
-                      <></>
-                    )}
-                  </View>
+                ) : null}
+                <View style={styles.chatBody}>
+                  <Text>{item.content}</Text>
                 </View>
-              );
-            }}
-          />
-        </View>
-
+                {item.type === "USER" ? (
+                  <View style={styles.chatUserIcon}>
+                    <FontAwesome5 name="user-circle" size={30} color="black" />
+                  </View>
+                ) : null}
+              </View>
+            );
+          }}
+        />
+      </View>
+      <KeyboardAvoidingView behavior={"position"}>
         <View style={styles.chatInputContainer}>
           <View style={styles.inputForm}>
             <TextInput
               style={styles.inputField}
               value={message}
-              onChangeText={(e) => {
-                setMessage(e);
-              }}
+              onChangeText={(e) => setMessage(e)}
             />
           </View>
-
-          <View>
-            <TouchableOpacity style={styles.sendBtn} onPress={submitMessage}>
-              <Text style={styles.sendBtnTitle}>Send</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.sendBtn} onPress={submitMessage}>
+            <Text style={styles.sendBtnTitle}>Send</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   chatBodyContainer: {
     flex: 1,
@@ -130,7 +113,7 @@ const styles = StyleSheet.create({
     flex: 0,
     padding: 10,
     borderTopWidth: 2,
-    borderTopColor: "#fff",
+    borderTopColor: "#f0f0f0",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
