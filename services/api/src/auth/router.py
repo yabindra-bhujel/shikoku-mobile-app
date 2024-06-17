@@ -9,31 +9,43 @@ from .schema import *
 from datetime import timedelta
 
 
+# 各api endpointは auth から prefix される
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# 依存関係を定義 (db: Session) は get_db から取得される
+# dependency injection により、各エンドポイントで db が利用可能
 db_dependency = Annotated[Session, Depends(get_db)]
+
+# AuthLogic クラスのインスタンスを作成
 auth_logic = AuthLogic()
 
+# ユーザー作成エンドポイント (POST /auth/create_user)
 @router.post("/create_user", status_code=status.HTTP_201_CREATED,
              description="Create a new user with the provided credentials. Returns HTTP 400 if user already exists.The role field should be one of 'admin', 'staff', 'student', 'teacher', or 'user'.")
 async def create_user(db: db_dependency, credentials: Credentials):
+    # create_user メソッドを呼び出し、ユーザーを作成
     user = auth_logic.create_user(db, credentials.dict())
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
 
     return {"message": "User created successfully"}
 
+# ログインエンドポイント (POST /auth/access_token) 
 @router.post("/access_token", status_code=status.HTTP_200_OK)
 async def login_for_access_token(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
     access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
     if access_token and refresh_token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
-
+    
+    # レスポンスにアクセストークンとリフレッシュトークンを設定
     response.set_cookie(key="access_token", value=access_token, httponly=True)
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+
     return {"message": "Login successful"}
 
 @router.post("/refresh_token", status_code=status.HTTP_200_OK)
 async def refresh_access_token(request: Request, response: Response, db: db_dependency):
+    # TODO: 自動リフレッシュトークンの実装 (https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#automatic-refresh-token)
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token not found")
@@ -58,7 +70,9 @@ async def refresh_access_token(request: Request, response: Response, db: db_depe
     return {"message": "Access token refreshed"}
 
 
+# ユーザー情報取得エンドポイント (GET /auth/get_current_user)
 async def get_current_user(request: Request):
+    # リクエストからアクセストークンを取得
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
@@ -66,7 +80,6 @@ async def get_current_user(request: Request):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         user = auth_logic.current_user(token)
@@ -78,11 +91,13 @@ async def get_current_user(request: Request):
 
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(response: Response, request: Request):
+    # レスポンスからクッキーを削除
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 
 @router.post("/change_password", status_code=status.HTTP_200_OK)
 async def change_password(db: db_dependency, credentials: ChangePassword, user: User = Depends(get_current_user)):
+    # パスワード変更
     password_changed = auth_logic.change_password(db, user.username, credentials.old_password, credentials.new_password)
     if password_changed is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect old password")
@@ -103,3 +118,8 @@ def password_reset_confirm(token: str, db: Session = Depends(get_db)):
     if not auth_logic.verify_password_reset_token(db, token):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
     return {"message": "Password reset link verified"}
+
+
+@router.get("/get_current_user", response_model=User, status_code=status.HTTP_200_OK)
+async def get_current_user(user: User = Depends(get_current_user)):
+    return user
