@@ -15,8 +15,10 @@ import secrets
 
 class AuthLogic:
     def __init__(self, logger=None):
+        # ユーザーの認証と メール送信設定情報を取得
         auth_settings = AuthSettings()
         email_settings = EmailSettings()
+
         self.pwd_context = auth_settings.passlib_context
         self.secret_key = auth_settings.SECRET_KEY
         self.algorithm = auth_settings.ALGORITHM
@@ -26,101 +28,152 @@ class AuthLogic:
         self.smtp_port = email_settings.EMAIL_IMAP_PORT
         self.smtp_ssl = email_settings.EMAIL_IMAP_SSL
 
+
     def create_user(self, db: Session, data: dict) -> users.User:
         username = data['username']
         email = data['email']
+        # ユーザーが存在するかどうかを確認 同じ username と email が存在する場合は、ユーザーを作成しない
         user = db.query(users.User).filter(users.User.username == username, users.User.email == email).first()
+
+        # ユーザーが存在する場合は、None を返す
         if user:
             return None
         
+        # パスワードをハッシュ化して、ユーザーを作成
         hashed_password = self.pwd_context.hash(data['password'])
+        # ユーザーを作成
         user = users.User(username=data['username'], email=data['email'], hashed_password=hashed_password, role=data['role'])
+
         try:
+            # ユーザーをデータベースに追加
             db.add(user)
             db.commit()
             db.refresh(user)
+
         except IntegrityError:
             return None
         return user
 
+
     def login_token(self, db: Session, username: str, password: str)->str:
+        # ユーザーの認証　ユーザが 存在するかないか を確認
         user = self.__authenticate_user(username, password, db)
         if user is None:
             return None
+        
+        # アクセストークンとリフレッシュトークンを作成
         access_token = self.create_access_token(user.username, user.id, user.email, user.role, timedelta(minutes=15))
         refresh_token = self.create_refresh_token(user.id, timedelta(days=7))
 
         return access_token, refresh_token
     
+
     def __authenticate_user(self, username: str, password: str, db)->users.User:
+        # ユーザーが存在するかどうかを確認
         user = db.query(users.User).filter(users.User.username == username).first()
+        
+        # ユーザが 存在する場合は、パスワードを確認
         if not user or not self.pwd_context.verify(password, user.hashed_password):
             return None 
+        
         return user
     
     def create_access_token(self, username: str, user_id: int, email: str, role: str, expires_delta: timedelta)->str:
+        # ユーザー情報をエンコード
         encode = {'sub': username, 'id': user_id, 'email': email, 'role': role}
+
+        # トークンの有効期限を設定
         expire = datetime.utcnow() + expires_delta
+
+        # エンコードに有効期限を追加
         encode.update({"exp": expire})
+
+        # トークンを作成
         token = jwt.encode(encode, self.secret_key, algorithm=self.algorithm)
+
         return token
     
     def create_refresh_token(self, user_id: int, expires_delta: timedelta) -> str:
+        
         encode = {'sub': str(user_id)}
+
         expire = datetime.utcnow() + expires_delta
         encode.update({"exp": expire})
+
+        # トークンを作成
         token = jwt.encode(encode, self.secret_key, algorithm=self.algorithm)
+
         return token
     
     def verify_token(self, token: str):
         try:
+            # トークンをデコード
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+
             return payload
+        
         except jwt.JWTError:
             return None
     
+    # token からユーザー情報を取得
     def current_user(self, token: str)->dict:
+        # トークンをデコード
         payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+
+        # ユーザー情報を取得
         username = payload.get("sub")
         user_id = payload.get("id")
         email = payload.get("email")
         role = payload.get("role")
+
+        # ユーザー情報が存在しない場合は、None を返す
         if username is None or user_id is None or email is None or role is None:
             return None
         
         return {"username": username, "id": user_id, "email": email, "role": role}
     
-    def logout(self, token: str):
-        pass
 
     def chnage_password(self, db: Session, username: str, old_password: str, new_password: str):
+        # ユーザーが存在するかどうかを確認
         user = db.query(users.User).filter(users.User.username == username).first()
+
+        # ユーザーが存在しない場合は、None を返す
         if user is None:
             return None
+        
+        # ユーザのパスワードと 入力されたパスワードを比較 
         if not self.pwd_context.verify(old_password, user.hashed_password):
             return None
+        
+        # パスワードをハッシュ化して、ユーザーのパスワードを変更
         user.hashed_password = self.pwd_context.hash(new_password)
         try:
+            # ユーザーをデータベースに追加
             db.add(user)
             db.commit()
             db.refresh(user)
+
         except IntegrityError:
             return None
         return user
     
+    # ユーザー id からユーザーを取得
     def get_user_by_user_id(self, db: Session, user_id: int)->users.User:
+        # ユーザーを取得
         user = db.query(users.User).filter(users.User.id == user_id).first()
+
         if user is None:
             return None
-        id = user.id
-        username = user.username
-        email = user.email
-        role = user.role
-        usermodel = users.User(id=id, username=username, email=email, role=role)
-        return usermodel
+  
+        user_model = users.User(id=user.id, username=user.username, email=user.email, role=user.role)
+
+        return user_model
     
+    # パスワードリセットリンクを送信
     def password_reset_link(self, db: Session, email: str, background_tasks: BackgroundTasks):
+
         user = db.query(users.User).filter(users.User.email == email).first()
+
         if user is None:
             return None
         
@@ -133,12 +186,17 @@ class AuthLogic:
         background_tasks.add_task(self.__send_email, email, subject, message)
         return email
 
+    # メールを送信
     def __send_email(self, receiver: str, subject: str, message: str):
         try:
+
             msg = MIMEMultipart()
+            # メールの送信元と送信先を設定
             msg['From'] = self.sender_email
             msg['To'] = receiver
             msg['Subject'] = subject
+
+            # メールの本文を設定
             msg.attach(MIMEText(message, 'plain'))
             server = smtplib.SMTP(self.smtp_host, self.smtp_port)
             server.starttls()
@@ -146,6 +204,7 @@ class AuthLogic:
             text = msg.as_string()
             server.sendmail(self.sender_email, receiver, text)
             server.quit()
+
         except Exception:
             return None
         

@@ -8,8 +8,6 @@ class UserRole(str, Enum):
     TEACHER = 'teacher'
     USER = 'user'
     
-
-
 class Credentials(BaseModel):
     username: str
     email: EmailStr
@@ -38,3 +36,6 @@ class Login(BaseModel):
 class UserSocket(BaseModel):
     username: str
     websocket: str
+
+class RefreshTokenRequest(BaseModel):
+    token: str = None

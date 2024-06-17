@@ -16,14 +16,13 @@ import StyledTextInput from "@/src/components/StyledTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import AuthServices from "@/src/api/AuthServices";
+import * as SecureStore from 'expo-secure-store';
 
 const Login = () => {
-  const [username, setUserName] = useState("");
-  const [password, setPassWord] = useState("");
+  const [username, setUserName] = useState<string>("");
+  const [password, setPassWord] = useState<string>("");
 
   const submit = async () => {
-
-    // もし、ユーザー名とパースワードを入力してなかったら、
     if (!username || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -33,7 +32,15 @@ const Login = () => {
       const response = await AuthServices.login(username, password);
 
       if (response.status === 200) {
+        const refreshToken = response.data.refresh_token;
+        if (!refreshToken) {
+          throw new Error("No refresh token received");
+        }
+
+        await SecureStore.setItemAsync('refreshToken', refreshToken);
+
         router.push("/home");
+
       } else {
         Alert.alert("Error", response.data.message);
       }
