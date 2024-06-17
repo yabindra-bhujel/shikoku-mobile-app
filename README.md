@@ -12,13 +12,17 @@
 
 ## プロジェクトの立ち上げ方
 
-### 前提条件
+### 前提条件v
 
 - [Dockerのインストール](https://www.docker.com/get-started/)
 - Xcodeのインストール（iOSアプリを起動する場合）
 - iOSシミュレータのインストール（iOSアプリを起動する場合）
 - Expo Goアプリのインストール（Expoで開発されたアプリを起動する場合）
 - Node.Js のインストール
+
+- api dir の中で env.template ファイルをコーピをして .env ファイルを 作成し 貼り付ける
+
+
 
 ### 立ち上げ手順
 
