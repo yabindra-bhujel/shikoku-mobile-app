@@ -1,20 +1,20 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import {Notices} from "../../components/notice-data";
+import { Notices } from "../../components/notice-data";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native";
 
-
 const HomeScreen = () => {
 
-  const ListNotice = Notices.map(notice => (
+  const ListNotice = Notices.map((notice) => (
     <View style={styles.noticeLine} key={notice.id}>
-    <Link href={`/&{notice.title}`} style={styles.noticeText}>
-    {notice.title}
-    </Link>
-</View>
-  ))
+      <Link href={`/&{notice.title}`} style={styles.noticeText}>
+        {notice.title}
+      </Link>
+    </View>
+  ));
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.headerView}>
@@ -26,12 +26,12 @@ const HomeScreen = () => {
           <FontAwesome name="user-circle" size={24} color="black" />
         </View>
       </View>
-      <Link href="/profile" style={{color: "blue"}}>Profile</Link>
+      <Link href="/profile" style={{ color: "blue" }}>
+        Profile
+      </Link>
       <View style={styles.noticement}>
         <Text style={styles.noticeTitle}>新着のお知らせ</Text>
-        <ScrollView style={styles.noticeBox}>
-          {ListNotice}
-        </ScrollView>
+        <ScrollView style={styles.noticeBox}>{ListNotice}</ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   noticeBox: {
     borderStyle: "solid",
     borderWidth: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
   noticeLine: {
     padding: 5,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   noticeText: {
     fontSize: 20,
     lineHeight: 30,
-    color: '#0000aa'
+    color: "#0000aa",
   },
 });
 

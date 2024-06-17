@@ -11,8 +11,9 @@ const axiosInstance = axios.create({
 
     // リクエストのヘッダーに json を指定
     headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
     },
+    data: FormData.toString(),
 });
 
 export default axiosInstance;
