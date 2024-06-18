@@ -5,7 +5,6 @@ import ChatScreen from "../screens/Chat/ChatScreen";
 import { useColorScheme } from "../hooks/useColorScheme";
 import { Colors } from "../constants/Colors";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CalendarScreen from "../screens/Calendar/CalendarScreen";
 import ChatbotScreen from "../screens/Chatbot/ChatbotScreen";
 
