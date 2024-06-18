@@ -40,19 +40,23 @@ async def create_user(db: db_dependency, credentials: Credentials):
 # ログイン
 @router.post("/access_token", status_code=status.HTTP_200_OK)
 async def login_for_access_token(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
+    try:
+        access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
 
-    access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
+        # アクセストークンとリフレッシュトークンがない場合
+        if access_token and refresh_token is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    # アクセストークンとリフレッシュトークンがない場合
-    if access_token and refresh_token is None:
+        # アクセストークンをクッキーにセット
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="refresh_token", value=refresh_token)
+
+        # リフレッシュトークンをresponse で返す
+        return {"message": "Login successful", "refresh_token": refresh_token}
+    
+    except Exception as e:
+        logger.error(e)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
-
-    # アクセストークンをクッキーにセット
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    response.set_cookie(key="refresh_token", value=refresh_token)
-
-    # リフレッシュトークンをresponse で返す
-    return {"message": "Login successful", "refresh_token": refresh_token}
 
 
 @router.post("/refresh_token", status_code=status.HTTP_200_OK)
