@@ -9,7 +9,8 @@ const AuthServices = {
     formData.append("password", password);
 
     try {
-      const result = await axiosInstance.post("/auth/access_token", formData.toString, {
+
+      const result = await axiosInstance.post("/auth/access_token", formData, {
 
         // リクエストヘッダーの設定
         headers: {

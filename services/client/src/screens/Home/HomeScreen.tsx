@@ -1,11 +1,19 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Button } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Notices } from "../../components/notice-data";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native";
+import * as SecureStore from 'expo-secure-store'; 
+import { router } from 'expo-router';
+
 
 const HomeScreen = () => {
+  const handleLogout = () => {
+    SecureStore.deleteItemAsync('refreshToken');
+    router.push("/login");
+
+  };
 
   const ListNotice = Notices.map((notice) => (
     <View style={styles.noticeLine} key={notice.id}>
@@ -22,8 +30,9 @@ const HomeScreen = () => {
           <Text style={styles.headerText}>Welcome back</Text>
           <Text style={styles.username}>Bob Jhonn</Text>
         </View>
-        <View>
+        <View style={styles.headerActions}>
           <FontAwesome name="user-circle" size={24} color="black" />
+          <Button title="Logout" onPress={handleLogout} />
         </View>
       </View>
       <Link href="/profile" style={{ color: "blue" }}>
@@ -53,6 +62,10 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   noticement: {
     padding: 10,
