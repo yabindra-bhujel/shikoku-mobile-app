@@ -14,122 +14,108 @@ import {
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import StyledTextInput from "@/src/components/StyledTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, Redirect, router } from "expo-router";
+import { Link, router } from "expo-router";
 import AuthServices from "@/src/api/AuthServices";
+import * as SecureStore from 'expo-secure-store';
 
-const Login = ({ navigation }: { navigation: any }) => {
-  const [username, setUserName] = useState("");
-  const [password, setPassWord] = useState("");
+const Login = () => {
+  const [username, setUserName] = useState<string>("");
+  const [password, setPassWord] = useState<string>("");
 
-  const submit = () => {
-    router.push("/home");
-  }
+  const submit = async () => {
+    if (!username || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
 
-  // const submit = async () => {
-  //   if (!username) {
-  //     Alert.alert("Please fill user name !");
-  //     return;
-  //   }
-  //   if (!password) {
-  //     Alert.alert("Please fill password");
-  //     return;
-  //   }
-  //   try{
-  //   const baseUrl = "http://192.168.1.81:8000"
-  //   const response = await axios.post(`${baseUrl}/auth/access_token/`, {
-  //     username: username,
-  //     password: password
-  //   });
+    try {
+      const response = await AuthServices.login(username, password);
 
-  //   if (response.status === 200) {
-  //     // Assuming the token is in response.data.token
-  //     router.push("/home");
-  //   } else {
-  //     Alert.alert("Login failed", "Invalid credentials or server error.");
-  //   }
-  // } catch (error: any) {
-  //   if (error.response) {
-  //     console.log("Server responded with a status:", error.response.status);
-  //     console.log(error.response.data);
-  //     Alert.alert("Login failed", "Invalid credentials or server error.");
-  //   } else if (error.request) {
-  //     console.log("No response was received:", error.request);
-  //     Alert.alert("Login failed", "No response from server.");
-  //   } else {
-  //     console.log("Error setting up the request:", error.message);
-  //     Alert.alert("Login failed", "An error occurred.");
-  //   }
-  // }
-  // };
+      if (response.status === 200) {
+        const refreshToken = response.data.refresh_token;
+        if (!refreshToken) {
+          throw new Error("No refresh token received");
+        }
 
-  const [toggleCheckBox, setToggleCheckBox] = useState<boolean>(false);
+        await SecureStore.setItemAsync('refreshToken', refreshToken);
+
+        router.push("/home");
+
+      } else {
+        Alert.alert("Error", response.data.message);
+      }
+
+    } catch (error) {
+      Alert.alert("Error", "Invalid username or password");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View>
-      <View style={styles.headerLogo}>
-        <Image source={require("@/assets/images/64px-shikoku-logo.png")} />
-        <View style={styles.headertitle}>
-          <Text style={styles.text1}>SHIKOKU UNIVERSITY</Text>
-          <Text style={styles.text2}>四国大学</Text>
-        </View>
-      </View>
-      <Text style={styles.welback}>Welcome Back</Text>
-      <View>
-        <View style={styles.inputContainer}>
-          <FontAwesome5
-            name="user-alt"
-            size={24}
-            color="black"
-            style={styles.inputIcon}
-          />
-          <StyledTextInput
-            placeholder="username"
-            textContentType="username"
-            autoCapitalize="none"
-            value={username}
-            autoCorrect={false}
-            onChangeText={setUserName}
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <MaterialIcons
-            name="lock"
-            size={24}
-            color="black"
-            style={styles.inputIcon}
-          />
-          <StyledTextInput
-            placeholder="password"
-            textContentType="password"
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={password}
-            onChangeText={setPassWord}
-          />
-        </View>
-
-        <View style={styles.forgetfield}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View>
-            <Text>Remember me</Text>
+            <View style={styles.headerLogo}>
+              <Image
+                source={require("@/assets/images/64px-shikoku-logo.png")}
+              />
+              <View style={styles.headertitle}>
+                <Text style={styles.text1}>SHIKOKU UNIVERSITY</Text>
+                <Text style={styles.text2}>四国大学</Text>
+              </View>
+            </View>
+            <Text style={styles.welback}>Welcome Back</Text>
+            <View>
+              <View style={styles.inputContainer}>
+                <FontAwesome5
+                  name="user-alt"
+                  size={24}
+                  color="black"
+                  style={styles.inputIcon}
+                />
+                <StyledTextInput
+                  placeholder="username"
+                  textContentType="username"
+                  autoCapitalize="none"
+                  value={username}
+                  autoCorrect={false}
+                  onChangeText={setUserName}
+                />
+              </View>
+              <View style={styles.inputContainer}>
+                <MaterialIcons
+                  name="lock"
+                  size={24}
+                  color="black"
+                  style={styles.inputIcon}
+                />
+                <StyledTextInput
+                  placeholder="password"
+                  textContentType="password"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={password}
+                  onChangeText={setPassWord}
+                />
+              </View>
+
+              <View style={styles.forgetfield}>
+                <TouchableOpacity>
+                  <Link style={styles.forgetText} href="/forgetpass">
+                    Forgot Password?
+                  </Link>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style={styles.button} onPress={submit}>
+                <Text style={styles.buttonText}>Login</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <TouchableOpacity>
-            <Link style={styles.forgetText} href="/forgetpass">
-              Forgot Password?
-            </Link>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.button} onPress={submit}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      </View>
-      </View>
-       </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
       <Text style={styles.privacyText}>
         Terms of service and privacy policy
@@ -139,9 +125,9 @@ const Login = ({ navigation }: { navigation: any }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      height: "100%"
+  container: {
+    flex: 1,
+    height: "100%",
   },
   headerLogo: {
     marginTop: 105,
@@ -174,7 +160,7 @@ const styles = StyleSheet.create({
   },
   forgetfield: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     marginHorizontal: 36,
     marginVertical: 10,
   },

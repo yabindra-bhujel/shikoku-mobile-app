@@ -1,20 +1,28 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Button } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import {Notices} from "../../components/notice-data";
+import { Notices } from "../../components/notice-data";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native";
+import * as SecureStore from 'expo-secure-store'; 
+import { router } from 'expo-router';
 
 
 const HomeScreen = () => {
+  const handleLogout = () => {
+    SecureStore.deleteItemAsync('refreshToken');
+    router.push("/login");
 
-  const ListNotice = Notices.map(notice => (
+  };
+
+  const ListNotice = Notices.map((notice) => (
     <View style={styles.noticeLine} key={notice.id}>
-    <Link href={`/&{notice.title}`} style={styles.noticeText}>
-    {notice.title}
-    </Link>
-</View>
-  ))
+      <Link href={`/&{notice.title}`} style={styles.noticeText}>
+        {notice.title}
+      </Link>
+    </View>
+  ));
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.headerView}>
@@ -22,16 +30,17 @@ const HomeScreen = () => {
           <Text style={styles.headerText}>Welcome back</Text>
           <Text style={styles.username}>Bob Jhonn</Text>
         </View>
-        <View>
+        <View style={styles.headerActions}>
           <FontAwesome name="user-circle" size={24} color="black" />
+          <Button title="Logout" onPress={handleLogout} />
         </View>
       </View>
-      <Link href="/profile" style={{color: "blue"}}>Profile</Link>
+      <Link href="/profile" style={{ color: "blue" }}>
+        Profile
+      </Link>
       <View style={styles.noticement}>
         <Text style={styles.noticeTitle}>新着のお知らせ</Text>
-        <ScrollView style={styles.noticeBox}>
-          {ListNotice}
-        </ScrollView>
+        <ScrollView style={styles.noticeBox}>{ListNotice}</ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -54,6 +63,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   noticement: {
     padding: 10,
   },
@@ -68,7 +81,7 @@ const styles = StyleSheet.create({
   noticeBox: {
     borderStyle: "solid",
     borderWidth: 1,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
   noticeLine: {
     padding: 5,
@@ -78,7 +91,7 @@ const styles = StyleSheet.create({
   noticeText: {
     fontSize: 20,
     lineHeight: 30,
-    color: '#0000aa'
+    color: "#0000aa",
   },
 });
 
