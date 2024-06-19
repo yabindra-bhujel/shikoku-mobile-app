@@ -24,7 +24,9 @@ class User(Base):
     role = Column(String, default=UserRole.USER.value)
 
     calendars = relationship("Calendar", back_populates="user")
-    user_profile = relationship("UserProfile", back_populates="user")
+    user_profile = relationship("UserProfile", uselist=False, back_populates="user", cascade="all, delete-orphan")
+
+
 
     def __repr__(self):
         return f'User: {self.username}'

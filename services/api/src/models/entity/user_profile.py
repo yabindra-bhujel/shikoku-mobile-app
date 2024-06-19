@@ -16,8 +16,8 @@ class UserProfile(Base):
     created_at = Column(DateTime(timezone=True), default=func.now())
     
     # usersテーブルのidを外部キーとして設定
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), unique=True)
     user = relationship('User', back_populates='user_profile')
 
     def __repr__(self):
-        return f'UserProfile(id={self.id}, first_name={self.first_name}, last_name={self.last_name})'
+        return f'UserProfile(id={self.id}, first_name={self.first_name}, last_name={self.last_name})' 

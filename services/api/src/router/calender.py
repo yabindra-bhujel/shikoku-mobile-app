@@ -17,10 +17,9 @@ from ..models.entity.users import User
 router = APIRouter(prefix="/calenders",tags=["calender"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 db_dependency = Annotated[Session, Depends(get_db)]
-auth_logic = AuthLogic()
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-async def change_password(db: db_dependency, calendar: CalendarInput, user: User = Depends(get_current_user)):
+async def create_calender(db: db_dependency, calendar: CalendarInput, user: User = Depends(get_current_user)):
     try:
         new_calendar = Calendar(
             title=calendar.title,
