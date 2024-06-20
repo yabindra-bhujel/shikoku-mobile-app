@@ -23,7 +23,13 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     role = Column(String, default=UserRole.USER.value)
 
+    # Relationships
     calendars = relationship("Calendar", back_populates="user")
+    posts = relationship('Post', back_populates='user', cascade='all, delete-orphan')
+    comments = relationship('Comment', back_populates='user', cascade='all, delete-orphan')
+    comment_replies = relationship('CommentReply', back_populates='user', cascade='all, delete-orphan')
+    likes = relationship('Likes', back_populates='user', cascade='all, delete-orphan')
+
 
 
 
