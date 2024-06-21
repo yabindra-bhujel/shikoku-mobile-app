@@ -9,9 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { Notices } from "@/src/components/notice-data";
 import { Link } from "expo-router";
-import { SafeAreaView } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { router, useRouter } from "expo-router";
 import AuthServices from "@/src/api/AuthServices";
