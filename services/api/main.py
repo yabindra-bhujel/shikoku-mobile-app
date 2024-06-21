@@ -1,16 +1,18 @@
 from fastapi import FastAPI,Depends, WebSocket, WebSocketDisconnect, HTTPException
 from src.settings.auth import AuthSettings
 from src.auth import router as auth_router
-from src.auth.permissions import authenticate_user, get_user
+from src.auth.permissions import authenticate_user
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from src.router.calender import router as calender_router
+from src.router.posts import router as post_router
+from src.router.comments import router as comment_router
+from src.router.likes import router as like_router
 import logging
-from fastapi.responses import JSONResponse
-from typing import Dict
 from src.message.ConnectionManager import ConnectionManager
 from src.message.PersonalMessage import PersonalMessage
-from jose import JWTError, jwt
+from debug_toolbar.middleware import DebugToolbarMiddleware
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,7 +24,8 @@ secret_key = auth_settings.SECRET_KEY
 algorithm = auth_settings.ALGORITHM
 
 
-app = FastAPI()
+app = FastAPI(debug=True)
+app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,6 +40,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 
 app.include_router(auth_router.router)
 app.include_router(calender_router)
+app.include_router(post_router)
+app.include_router(comment_router)
+app.include_router(like_router)
 
 @app.get("/")
 async def root(user = Depends(authenticate_user)):

@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
+from .users import User
+from .post import Post
 
 class Comment(Base):
     __tablename__ = 'comments'
@@ -37,6 +39,4 @@ class CommentReply(Base):
     parent_comment = relationship('Comment', back_populates='replies')
 
     def __repr__(self):
-        return f'CommentReply(id={self.id}, content={self.content})'
-
- 
+        return f'CommentReply(id={self.id}, content={self.content})' 

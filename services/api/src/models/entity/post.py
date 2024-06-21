@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Boolean, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, Text, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
@@ -13,13 +13,15 @@ class Post(Base):
     
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='posts')
+    comments = relationship('Comment', back_populates='post', cascade='all, delete-orphan', passive_deletes=True)
+    comment_replies = relationship('CommentReply', back_populates='post', cascade='all, delete-orphan')
     images = relationship('PostImage', back_populates='post', cascade='all, delete-orphan', passive_deletes=True)
+    likes = relationship('Likes', back_populates='post', cascade='all, delete-orphan', passive_deletes=True)
     videos = relationship('PostVideo', back_populates='post', cascade='all, delete-orphan', passive_deletes=True)
     files = relationship('PostFile', back_populates='post', cascade='all, delete-orphan', passive_deletes=True)
 
     def __repr__(self):
         return f'Post(id={self.id}, content={self.content})'
-    
 
 class PostImage(Base):
     __tablename__ = 'post_images'

@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from ..database import Base
 from sqlalchemy.sql import func
+from .users import User
 
 class Calendar(Base):
     __tablename__ = 'calendar'

@@ -4,7 +4,6 @@ from ..database import Base
 import enum
 from sqlalchemy.orm import relationship
 
-
 class UserRole(enum.Enum):
     ADMIN = 'admin'
     STAFF = 'staff'
@@ -29,9 +28,6 @@ class User(Base):
     comments = relationship('Comment', back_populates='user', cascade='all, delete-orphan')
     comment_replies = relationship('CommentReply', back_populates='user', cascade='all, delete-orphan')
     likes = relationship('Likes', back_populates='user', cascade='all, delete-orphan')
-
-
-
 
 
     def __repr__(self):
