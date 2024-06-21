@@ -8,6 +8,9 @@ from src.models.entity.users import User
 from src.models.entity.calender import Calendar
 from src.models.entity.messages import Message
 from src.models.entity.user_profile import UserProfile
+from src.models.entity.post import Post, PostFile, PostImage, PostVideo
+from src.models.entity.comments import Comment, CommentReply
+from src.models.entity.likes import Likes
 
 
 # this is the Alembic Config object, which provides

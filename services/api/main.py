@@ -11,6 +11,13 @@ from src.message.ConnectionManager import ConnectionManager
 from src.message.PersonalMessage import PersonalMessage
 import os
 from fastapi.staticfiles import StaticFiles
+from src.router.posts import router as post_router
+from src.router.comments import router as comment_router
+from src.router.likes import router as like_router
+import logging
+from src.message.ConnectionManager import ConnectionManager
+from src.message.PersonalMessage import PersonalMessage
+from debug_toolbar.middleware import DebugToolbarMiddleware
 
 
 logging.basicConfig(level=logging.INFO)
@@ -23,7 +30,8 @@ secret_key = auth_settings.SECRET_KEY
 algorithm = auth_settings.ALGORITHM
 
 
-app = FastAPI()
+app = FastAPI(debug=True)
+app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,6 +50,9 @@ app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__
 app.include_router(auth_router.router)
 app.include_router(calender_router)
 app.include_router(user_profile_router)
+app.include_router(post_router)
+app.include_router(comment_router)
+app.include_router(like_router)
 
 @app.get("/")
 async def root(user = Depends(authenticate_user)):
