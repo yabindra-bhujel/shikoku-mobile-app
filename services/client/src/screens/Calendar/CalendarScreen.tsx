@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { FontAwesome } from "@expo/vector-icons";
 import SysModal from "@/src/constants/sys_modal";
