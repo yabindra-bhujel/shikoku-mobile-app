@@ -1,96 +1,96 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-const HomeScreenIcon = () => {
+const SimpleScreen = () => {
   return (
-    <View>
+    <View style={{
+      flex: 1,
+      marginTop: 15,
+    }}>
       <View style={styles.iconLineContainer}>
-        <TouchableOpacity style={[styles.iconContainer, styles.redBackground]}>
+        <TouchableOpacity style={styles.iconContainer}>
           <View style={styles.iconItSelt}>
-            <FontAwesome5 name="home" size={40} color="white" />
+            <MaterialIcons name="feed" size={40} color="#ff6666" />
+            <Text style={styles.iconTitle}>Tweet</Text>
           </View>
-          <Text style={styles.iconTitle}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.iconContainer, styles.blueBackground]}
+          style={styles.iconContainer}
           onPress={() => router.push("/calendar")}
         >
           <View style={styles.iconItSelt}>
-            <FontAwesome5 name="home" size={40} color="white" />
+            <FontAwesome5 name="home" size={40} color="blue" />
+            <Text style={styles.iconTitle}>Calendar</Text>
           </View>
-          <Text style={styles.iconTitle}>Calendar</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.iconLineContainer}>
         <TouchableOpacity
-          style={[styles.iconContainer, styles.greenBackground]}
+          style={styles.iconContainer}
           onPress={() => router.push("/chatbot")}
         >
           <View style={styles.iconItSelt}>
-            <FontAwesome5 name="robot" size={40} color="white" />
+            <FontAwesome5 name="robot" size={40} color="green" />
+            <Text style={styles.iconTitle}>ChatBot</Text>
           </View>
-          <Text style={styles.iconTitle}>ChatBot</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.iconContainer, styles.orangeBackground]}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => router.push("/chat")}>
           <View style={styles.iconItSelt}>
-            <FontAwesome5 name="home" size={40} color="white" />
+            <FontAwesome name="wechat" size={40} color="#00A5CF" />
+            <Text style={styles.iconTitle}>Chat</Text>
           </View>
-          <Text style={styles.iconTitle}>Home</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.iconLineContainer}>
-        <TouchableOpacity style={[styles.iconContainer, styles.purpleBackground]}>
+        <TouchableOpacity style={styles.iconContainer} onPress={()=>router.push("/frequen")}>
           <View style={styles.iconItSelt}>
-            <FontAwesome5 name="home" size={40} color="white" />
+            <FontAwesome5 name="question" size={40} color="red" />
+            <Text style={styles.iconTitle}>A&Q</Text>
           </View>
-          <Text style={styles.iconTitle}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.iconContainer, styles.yellowBackground]}
+          style={styles.iconContainer}
           onPress={() => router.push("/setting")}
         >
           <View style={styles.iconItSelt}>
-            <AntDesign name="setting" size={40} color="white" />
+            <AntDesign name="setting" size={40} color="#CA3C25" />
+            <Text style={styles.iconTitle}>Settings</Text>
           </View>
-          <Text style={styles.iconTitle}>Settings</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-export default HomeScreenIcon;
+export default SimpleScreen;
 
 const styles = StyleSheet.create({
   iconLineContainer: {
-    marginHorizontal: 50,
-    marginBottom: 50,
-    marginTop: 50,
-    gap: 50,
     flexDirection: "row",
     justifyContent: "space-between",
   },
   iconContainer: {
+    marginHorizontal: 10,
+    marginBottom: 25,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
   iconItSelt: {
-    height: 100,
-    width: 100,
     borderRadius: 20,
-    marginBottom: 5,
+    marginBottom: 15,
     borderWidth: 1,
+    width: 180,
+    height: 200,
     borderColor: "white",
     alignItems: "center",
+    backgroundColor: "#fff",
     justifyContent: "center",
-    backgroundColor: "#CA3C25 ",
-    // 00A5CF
-    // 251605
-    // ff6666
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -104,24 +104,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
-    color: "white"
-  },
-  redBackground: {
-    backgroundColor: "red",
-  },
-  blueBackground: {
-    backgroundColor: "blue",
-  },
-  greenBackground: {
-    backgroundColor: "green",
-  },
-  orangeBackground: {
-    backgroundColor: "orange",
-  },
-  purpleBackground: {
-    backgroundColor: "purple",
-  },
-  yellowBackground: {
-    backgroundColor: "#724cf9",
+    marginTop: 25,
   },
 });
