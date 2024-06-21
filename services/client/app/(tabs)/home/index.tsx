@@ -6,6 +6,7 @@ import {
   ScrollView,
   Button,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Notices } from "@/src/components/notice-data";
@@ -15,6 +16,7 @@ import * as SecureStore from "expo-secure-store";
 import { router, useRouter } from "expo-router";
 import AuthServices from "@/src/api/AuthServices";
 import { User } from "@/assets/interfaces/userInterface";
+import HomeScreenIcon from "@/src/screens/Home/HomeScreenIcon";
 const HomeScreen = () => {
   const [user, setUser] = useState<User | null>(null);
 
@@ -37,26 +39,13 @@ const HomeScreen = () => {
     router.push("user/index");
   };
 
-  const ListNotice = Notices.map((notice) => (
-    <View style={styles.noticeLine} key={notice.id}>
-      <Link href={{
-        pathname: 'home/[noticeId]',
-        params: { noticeId: notice.id ,
-          body : notice.body,
-          title: notice.title,
-        },
-      }} style={styles.noticeText}>
-        {notice.id}{"--"}
-        {notice.title}
-      </Link>
-    </View>
-  ));
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1, 
+      marginTop: Platform.OS === "ios" ? 45 : 0,
+    }}>
       <View style={styles.headerView}>
         <View>
-          <Text style={styles.headerText}>Welcome back</Text>
+          <Text style={styles.headerText}>四国大学</Text>
           <Text style={styles.username}>{user?.username}</Text>
         </View>
         <TouchableOpacity style={styles.headerActions}>
@@ -71,18 +60,10 @@ const HomeScreen = () => {
           <Button title="Logout" onPress={handleLogout} />
         </TouchableOpacity>
       </View>
-      <View style={styles.bodyContainer}>
-        <TouchableOpacity onPress={() => routers.navigate("modal")}>
-          <Text>
-          Profile
-          </Text>
-        </TouchableOpacity>
-        <View style={styles.noticement}>
-          <Text style={styles.noticeTitle}>新着のお知らせ</Text>
-          <ScrollView style={styles.noticeBox}>{ListNotice}</ScrollView>
-        </View>
-      </View>
-    </SafeAreaView>
+      <ScrollView style={styles.bodyContainer}>
+        <HomeScreenIcon/>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -96,13 +77,15 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   headerText: {
-    fontSize: 16,
+    fontSize: 24,
+    fontWeight: "bold",
   },
   bodyContainer: {
     flex: 1,
     borderRadius: 5,
     borderTopWidth: 1,
     padding: 10,
+    backgroundColor: "#FFFAF0",
   },
   username: {
     fontSize: 16,
@@ -111,30 +94,6 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  noticement: {},
-  noticeTitle: {
-    fontSize: 20,
-    padding: 5,
-    fontWeight: "bold",
-  },
-  Link: {
-    color: "#0000aa",
-  },
-  noticeBox: {
-    borderStyle: "solid",
-    borderWidth: 1,
-    backgroundColor: "#fff",
-  },
-  noticeLine: {
-    padding: 5,
-    borderStyle: "solid",
-    borderBottomWidth: 1,
-  },
-  noticeText: {
-    fontSize: 20,
-    lineHeight: 30,
-    color: "#0000aa",
   },
 });
 

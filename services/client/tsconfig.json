@@ -10,7 +10,7 @@
       "*.ts": ["*"],
       "*.tsx": ["*"],
     },
-    "jsx": "react",
+    "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "moduleResolution": "node",

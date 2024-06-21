@@ -2,16 +2,13 @@ import axiosInstance from "../config/Api";
 
 const AuthServices = {
   async login(username: string, password: string): Promise<any> {
-
     // 新規でURLSearchParamsオブジェクトを作成
     const formData = new URLSearchParams();
     formData.append("username", username);
     formData.append("password", password);
 
     try {
-
       const result = await axiosInstance.post("/auth/access_token", formData, {
-
         // リクエストヘッダーの設定
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -23,12 +20,10 @@ const AuthServices = {
       throw error;
     }
   },
-  
+
   async getCurrentUser() {
     try {
-      const result = await axiosInstance.get("", {
-        withCredentials: true,
-      });
+      const result = await axiosInstance.get("/auth/get_current_user");
       return result;
     } catch (error) {
       throw error;
@@ -49,7 +44,6 @@ const AuthServices = {
       throw error;
     }
   },
-
 
   async logout() {},
 
