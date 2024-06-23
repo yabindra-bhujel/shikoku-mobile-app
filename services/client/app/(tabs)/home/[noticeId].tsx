@@ -1,7 +1,6 @@
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
-import NoticeDisplayer from '@/src/components/noticeDisplayer';
 
 const Notice = () => {
 
@@ -12,7 +11,6 @@ const Notice = () => {
     <SafeAreaView style={styles.container}>
       <View>
       <Text>Hello to notice details -- {noticeId}`</Text>
-      <NoticeDisplayer></NoticeDisplayer>
       </View>
     </SafeAreaView>
   )
