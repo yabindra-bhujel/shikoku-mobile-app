@@ -7,27 +7,24 @@ import {
   Button,
   TouchableOpacity,
   Platform,
-  Appearance,
-  useColorScheme,
+  StatusBar,
+  Pressable,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { Link } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import AuthServices from "@/src/api/AuthServices";
 import { User } from "@/assets/interfaces/userInterface";
 import SimpleScreen from "@/src/screens/Home/SimpleScreen";
-import { useThemeColor } from "@/src/hooks/useThemeColor";
-import { MyColor1 } from "@/src/constants/mycolor";
+import { ThemeContext } from "@/src/hooks/ThemeContext";
+import useTheme from "@/src/hooks/CustomTheme";
 
 
 const HomeScreen = () => {
-  const colorScheme = useColorScheme();
+
+  const { theme } = useTheme();
 
   const [user, setUser] = useState<User | null>(null);
-
-  const backgroundColorStyle = colorScheme === "dark" ? styles.darBgColor : "black";
-
 
   useEffect(() => {
     const getUser = async () => {
@@ -42,28 +39,39 @@ const HomeScreen = () => {
     router.push("/login");
   };
 
-  const handleProfile = () => {
-    router.push("/modal");
-  };
-
   return (
-    <View style={{ flex: 1, marginTop: Platform.OS === "ios" ? 45 : 0, }}>
-      <View style={styles.headerView}>
+    <View style={{ flex: 1 }}>
+      <View style={{flex: 0,
+        height: Platform.OS === "ios" ? 45 : 0 ,
+        backgroundColor: theme === "dark" ? "#333" : "#fff"
+      }}/>
+      <StatusBar 
+      barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+      backgroundColor={theme === 'dark' ? '#333' : '#fff'}/>
+      <View style={[styles.headerView, { backgroundColor: theme === 'dark' ? '#333' : '#fff' }]}>
         <View>
-          <Text style={styles.headerText}>四国大学</Text>
-          <Text style={styles.username}>{user?.username}</Text>
+          <Text style={[
+            styles.headerText,
+            { color: theme === 'dark' ? '#fff' : '#000' }
+          ]}>四国大学</Text>
+          <Text style={[
+            styles.username,
+            { color: theme === 'dark' ? '#aaa' : '#333' }
+          ]}>{user?.username}</Text>
         </View>
-        <TouchableOpacity style={styles.headerActions}>
+        <Pressable style={styles.headerActions}>
             <FontAwesome
               name="user-circle"
               size={24}
-              color="black"
+              color={theme === 'dark' ? '#fff' : '#000'}
               onPress={()=>router.push("/profile")}
             />
           <Button title="Logout" onPress={handleLogout} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
-      <ScrollView style={styles.bodyContainer}>
+      <ScrollView style={[styles.bodyContainer, {
+        backgroundColor: theme === "dark" ? "#333" : "white",
+      }]}>
         <SimpleScreen />
       </ScrollView>
     </View>
@@ -78,7 +86,6 @@ const styles = StyleSheet.create({
     height: 55,
     paddingLeft: 28,
     paddingRight: 20,
-    marginBottom: 10,
   },
   headerText: {
     fontSize: 24,
@@ -86,7 +93,6 @@ const styles = StyleSheet.create({
   },
   bodyContainer: {
     flex: 1,
-    borderRadius: 5,
     borderTopWidth: 1,
     padding: 10,
   },

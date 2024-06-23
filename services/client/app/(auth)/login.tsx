@@ -10,6 +10,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
+  Pressable,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import StyledTextInput from "@/src/components/StyledTextInput";
@@ -56,7 +57,7 @@ const Login = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View>
           <View>
             <View style={styles.headerLogo}>
               <Image
@@ -104,18 +105,18 @@ const Login = () => {
               </View>
 
               <View style={styles.forgetfield}>
-                <TouchableOpacity>
+                <Pressable>
                   <Link style={styles.forgetText} href="/forgetpass">
                     Forgot Password?
                   </Link>
-                </TouchableOpacity>
+                </Pressable>
               </View>
-              <TouchableOpacity style={styles.button} onPress={submit}>
+              <Pressable style={styles.button} onPress={submit}>
                 <Text style={styles.buttonText}>Login</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </KeyboardAvoidingView>
       <Text style={styles.privacyText}>
         Terms of service and privacy policy

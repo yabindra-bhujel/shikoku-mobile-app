@@ -5,10 +5,9 @@ import { useColorScheme } from "@/src/hooks/useColorScheme";
 import { Colors } from "@/src/constants/Colors";
 
 import { FontAwesome5 } from "@expo/vector-icons";
+import useTheme from "@/src/hooks/CustomTheme";
 
 const TabLayout = () => {
-  const colorScheme = useColorScheme();
-  const themeColors = colorScheme ? Colors[colorScheme] : Colors.light; 
 
   return (
     <Stack>
