@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from jose import jwt
 from ..settings.auth import AuthSettings
 from ..models.entity import users
+from ..models.entity.user_profile import UserProfile
 from sqlalchemy.exc import IntegrityError
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException
 from ..settings.email import EmailSettings
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -32,27 +33,41 @@ class AuthLogic:
     def create_user(self, db: Session, data: dict) -> users.User:
         username = data['username']
         email = data['email']
-        # ユーザーが存在するかどうかを確認 同じ username と email が存在する場合は、ユーザーを作成しない
-        user = db.query(users.User).filter(users.User.username == username, users.User.email == email).first()
-
-        # ユーザーが存在する場合は、None を返す
-        if user:
-            return None
-        
-        # パスワードをハッシュ化して、ユーザーを作成
-        hashed_password = self.pwd_context.hash(data['password'])
-        # ユーザーを作成
-        user = users.User(username=data['username'], email=data['email'], hashed_password=hashed_password, role=data['role'])
 
         try:
-            # ユーザーをデータベースに追加
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+        
+            # ユーザーが存在するかどうかを確認 同じ username と email が存在する場合は、ユーザーを作成しない
+            user = db.query(users.User).filter(users.User.username == username, users.User.email == email).first()
 
-        except IntegrityError:
-            return None
-        return user
+            # ユーザーが存在する場合は、None を返す
+            if user:
+                return None
+            
+            # パスワードをハッシュ化して、ユーザーを作成
+            hashed_password = self.pwd_context.hash(data['password'])
+            # ユーザーを作成
+            user = users.User(username=data['username'], email=data['email'], hashed_password=hashed_password, role=data['role'])
+
+            try:
+                # ユーザーをデータベースに追加
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+
+
+            except IntegrityError as e:
+                print("IntegrityError", e)
+                return None
+            
+            user_profile = UserProfile(user_id=user.id)
+            db.add(user_profile)
+            db.commit()
+            db.refresh(user_profile)
+        
+            return user
+        except Exception as e:
+            db.rollback()
+            return HTTPException(status_code=500, detail="Internal Server Error")
 
 
     def login_token(self, db: Session, username: str, password: str)->str:

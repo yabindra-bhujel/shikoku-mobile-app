@@ -18,6 +18,10 @@ db_dependency = Depends(get_db)
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=UserProfileOutput)
 async def create_user(user_profile: UserProfileInput, request: Request, db: Session = db_dependency, user: User = Depends(get_current_user)):
     try:
+        user_profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+        if user_profile:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User profile already exists")
+        
         new_user_profile = UserProfile(
             first_name=user_profile.first_name,
             last_name=user_profile.last_name,
@@ -91,21 +95,21 @@ async def get_profile(request: Request, db: Session = db_dependency, user: User 
         if not user_profile:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found")
         
-        if user_profile.profile_picture:
-            profile_picture_url = str(request.url_for('static', path=user_profile.profile_picture))
+        profile_output = {
+            "first_name": user_profile.first_name,
+            "last_name": user_profile.last_name,
+            "bio": user_profile.bio,
+            "update_profile": None 
+        }
 
-            profile_output = {
-                "first_name": user_profile.first_name,
-                "last_name": user_profile.last_name,
-                "bio":user_profile.bio,
-                "update_profile": profile_picture_url
-            }
+        if user_profile.profile_picture:
+            profile_output["update_profile"] = str(request.url_for('static', path=user_profile.profile_picture))
         
         return profile_output
     
     except Exception as e:
-
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 
 
 # ユーザ プロファイルの更新
