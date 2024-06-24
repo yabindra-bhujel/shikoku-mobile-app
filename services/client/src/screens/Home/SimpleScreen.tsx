@@ -3,6 +3,7 @@ import React from "react";
 import { FontAwesome5, FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import useTheme from "@/src/hooks/CustomTheme";
+import { ScaledSheet } from "react-native-size-matters";
 
 interface ButtonData {
   route: string;
@@ -33,11 +34,16 @@ const SimpleScreen = () => {
 
   const groupedButtonData = groupButtons(buttonData, 2);
 
-  const styles = StyleSheet.create({
+  const styles = ScaledSheet.create({
+    homeContainer: {
+      flex: 1,
+      marginTop: "20@s"
+
+    },
     iconLineContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: 25,
+      marginBottom: "25@s",
     },
     iconContainer: {
       flex: 1,
@@ -46,10 +52,9 @@ const SimpleScreen = () => {
     },
     iconItSelt: {
       borderRadius: 20,
-      marginBottom: 15,
       borderWidth: 1,
-      width: 180,
-      height: 200,
+      width: "150@s",
+      height: "180@s",
       borderColor: "white",
       alignItems: "center",
       backgroundColor: theme === "dark" ? "#111" : "#fff",
@@ -64,16 +69,16 @@ const SimpleScreen = () => {
       elevation: 8,
     },
     iconTitle: {
-      fontSize: 18,
+      fontSize: "18@s",
       fontWeight: "bold",
       textAlign: "center",
-      marginTop: 20,
+      marginTop: "20@s",
       color: theme === "dark" ? "#fff" : "#00f",
     },
   });
 
   return (
-    <View style={{ flex: 1, marginTop: 15 }}>
+    <View style={styles.homeContainer}>
       {groupedButtonData.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.iconLineContainer}>
           {row.map((button, index) => (
