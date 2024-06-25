@@ -1,14 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
 import { Stack } from "expo-router";
-import { useColorScheme } from "@/src/hooks/useColorScheme";
-import { Colors } from "@/src/constants/Colors";
-
-import { FontAwesome5 } from "@expo/vector-icons";
-import useTheme from "@/src/hooks/CustomTheme";
 
 const TabLayout = () => {
-
   return (
     <Stack>
       <Stack.Screen
@@ -21,14 +13,14 @@ const TabLayout = () => {
         name="chatbot"
         options={{
           headerTitle: "ChatBot",
-          headerBackTitle: "Back"
+          headerBackTitle: "Back",
         }}
       />
       <Stack.Screen
         name="calendar"
         options={{
           headerTitle: "ChatBot",
-          headerBackTitle: "Back"
+          headerBackTitle: "Back",
         }}
       />
       <Stack.Screen
@@ -38,15 +30,22 @@ const TabLayout = () => {
           headerBackTitle: "Back",
         }}
       />
-       <Stack.Screen name='profile'
-      options={{
-        title: "Profile",
-        headerBackTitle: "Back",
-      }}/>
+      <Stack.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="community"
+        options={{
+          title: "Profile",
+          headerBackTitle: "Back",
+        }}
+      />
     </Stack>
   );
 };
 
 export default TabLayout;
-
-const styles = StyleSheet.create({});

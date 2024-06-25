@@ -1,9 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import React from "react";
-import { FontAwesome5, FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { Text, View, TouchableOpacity, useColorScheme } from "react-native";
+import { FontAwesome5, FontAwesome, AntDesign, FontAwesome6 } from "@expo/vector-icons";
 import { router } from "expo-router";
-import useTheme from "@/src/hooks/CustomTheme";
 import { ScaledSheet } from "react-native-size-matters";
+import * as SecureStore from "expo-secure-store";
 
 interface ButtonData {
   route: string;
@@ -12,15 +11,22 @@ interface ButtonData {
 }
 
 const SimpleScreen = () => {
-  const { theme } = useTheme();
+  const theme = useColorScheme();
+
+  const handleLogout = () => {
+    SecureStore.deleteItemAsync("refreshToken");
+    router.push("/login");
+  };
 
   const buttonData: ButtonData[] = [
-    { route: "/tweet", icon: <MaterialIcons name="feed" size={50} color="#ff6666" />, title: "Tweet" },
-    { route: "/calendar", icon: <FontAwesome5 name="home" size={50} color="blue" />, title: "Calendar" },
-    { route: "/chatbot", icon: <FontAwesome5 name="robot" size={50} color="green" />, title: "ChatBot" },
-    { route: "/chat", icon: <FontAwesome name="wechat" size={50} color="#00A5CF" />, title: "Chat" },
-    { route: "/frequen", icon: <FontAwesome5 name="question" size={50} color="red" />, title: "A&Q" },
-    { route: "/setting", icon: <AntDesign name="setting" size={50} color="#CA3C25" />, title: "Settings" },
+    { route: "/community", icon: <FontAwesome6 name="people-roof" size={45} color="#ff6666" />, title: "Community" },
+    { route: "/calendar", icon: <FontAwesome5 name="calendar" size={45} color="blue" />, title: "Calendar" },
+    { route: "/chatbot", icon: <FontAwesome5 name="robot" size={45} color="green" />, title: "ChatBot" },
+    { route: "/chat", icon: <FontAwesome name="wechat" size={45} color="#00A5CF" />, title: "Chat" },
+    { route: "/frequen", icon: <FontAwesome5 name="question" size={45} color="red" />, title: "A&Q" },
+    { route: "/setting", icon: <AntDesign name="setting" size={45} color="#CA3C25" />, title: "Settings" },
+    { route: "/login", icon: <AntDesign name="logout" size={45} color="#CA3C25"  onPress={handleLogout}/>, title: "Logout" },
+    { route: "/profile", icon: <AntDesign name="user" size={45} color="#CA3C25"/>, title: "Profile" },
   ];
 
   // Function to group buttons into pairs
@@ -43,7 +49,7 @@ const SimpleScreen = () => {
     iconLineContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: "25@s",
+      marginBottom: "20@s",
     },
     iconContainer: {
       flex: 1,
@@ -53,8 +59,8 @@ const SimpleScreen = () => {
     iconItSelt: {
       borderRadius: 20,
       borderWidth: 1,
-      width: "150@s",
-      height: "180@s",
+      width: "145@s",
+      height: "110@s",
       borderColor: "white",
       alignItems: "center",
       backgroundColor: theme === "dark" ? "#111" : "#fff",
@@ -69,7 +75,7 @@ const SimpleScreen = () => {
       elevation: 8,
     },
     iconTitle: {
-      fontSize: "18@s",
+      fontSize: "14@s",
       fontWeight: "bold",
       textAlign: "center",
       marginTop: "20@s",
