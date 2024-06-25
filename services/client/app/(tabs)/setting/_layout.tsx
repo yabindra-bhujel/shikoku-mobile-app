@@ -9,7 +9,6 @@ const RootLayout = () => {
         options={{ headerShown: false,
         }}
       />
-      {/* <Stack.Screen name="[noticeId]"/> */}
     </Stack>
   );
 };

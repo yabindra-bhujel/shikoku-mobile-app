@@ -1,9 +1,7 @@
-import { Text, View, Switch, StyleSheet } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
 import { styled, useColorScheme } from "nativewind";
-import { EventRegister } from "react-native-event-listeners";
 
 export const StyledText = styled(Text);
 
@@ -32,13 +30,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  but: {
-    fontSize: 20,
-    fontWeight: "bold",
-    margin: 10,
-    padding: 20,
-    color: "white",
-    backgroundColor: "blue",
   },
 });

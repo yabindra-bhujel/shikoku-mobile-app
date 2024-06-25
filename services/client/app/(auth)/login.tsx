@@ -10,7 +10,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
-  Pressable,
+  useColorScheme,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import StyledTextInput from "@/src/components/StyledTextInput";
@@ -20,6 +20,9 @@ import AuthServices from "@/src/api/AuthServices";
 import * as SecureStore from 'expo-secure-store';
 
 const Login = () => {
+
+  const theme = useColorScheme();
+
   const [username, setUserName] = useState<string>("");
   const [password, setPassWord] = useState<string>("");
 
@@ -51,13 +54,95 @@ const Login = () => {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      height: "100%",
+      backgroundColor: theme === "dark" ? "#333": "white",
+    },
+    headerLogo: {
+      marginTop: 105,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headertitle: {
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 7,
+    },
+    text1: {
+      fontSize: 13,
+      textDecorationLine: "underline",
+      fontWeight: "bold",
+      color: theme === "dark" ? "white": "black",
+    },
+    text2: {
+      fontSize: 40,
+      fontWeight: "bold",
+      color: theme === "dark" ? "white": "black",
+    },
+    welback: {
+      fontSize: 30,
+      marginTop: 34,
+      marginBottom: 57,
+      color: theme === "dark" ? "white": "black",
+      textAlign: "center",
+    },
+    forgetfield: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginHorizontal: 36,
+      marginVertical: 10,
+    },
+    inputContainer: {
+      backgroundColor: theme === "dark" ? "black": "#FCF5F5",
+      flexDirection: "row",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme === "dark" ? "white" : "black",
+      marginHorizontal: 36,
+      marginVertical: 10,
+      height: 53,
+      alignItems: "center",
+      paddingHorizontal: 10,
+    },
+    inputIcon: {
+      marginRight: 10,
+    },
+    forgetText: {
+      fontSize: 13,
+      color: theme === "dark" ? "white": "#F84A4A",
+    },
+    button: {
+      alignItems: "center",
+      justifyContent: "center",
+      height: 53,
+      marginVertical: 20,
+      marginHorizontal: 36,
+      borderRadius: 5,
+      backgroundColor: theme === "dark" ? "purple": "#4785FC",
+    },
+    buttonText: {
+      color: theme === "dark" ? "white": "#FCF5F5",
+      fontSize: 20,
+      fontWeight: "bold",
+    },
+    privacyText: {
+      color: theme === "dark" ? "white": "#4785FC",
+      textAlign: "center",
+      fontSize: 13,
+      marginTop: 50,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View>
             <View style={styles.headerLogo}>
               <Image
@@ -74,11 +159,12 @@ const Login = () => {
                 <FontAwesome5
                   name="user-alt"
                   size={24}
-                  color="black"
+                  color={theme === "dark" ? "white" : "black"}
                   style={styles.inputIcon}
                 />
                 <StyledTextInput
                   placeholder="username"
+                  placeholderTextColor={theme === "dark" ? "lightblue" : "black"}
                   textContentType="username"
                   autoCapitalize="none"
                   value={username}
@@ -90,11 +176,12 @@ const Login = () => {
                 <MaterialIcons
                   name="lock"
                   size={24}
-                  color="black"
+                  color={theme === "dark" ? "white" : "black"}
                   style={styles.inputIcon}
                 />
                 <StyledTextInput
                   placeholder="password"
+                  placeholderTextColor={theme === "dark" ? "lightblue" : "black"}
                   textContentType="password"
                   secureTextEntry
                   autoCapitalize="none"
@@ -105,18 +192,18 @@ const Login = () => {
               </View>
 
               <View style={styles.forgetfield}>
-                <Pressable>
+                <TouchableOpacity>
                   <Link style={styles.forgetText} href="/forgetpass">
                     Forgot Password?
                   </Link>
-                </Pressable>
+                </TouchableOpacity>
               </View>
-              <Pressable style={styles.button} onPress={submit}>
+              <TouchableOpacity style={styles.button} onPress={submit}>
                 <Text style={styles.buttonText}>Login</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
       <Text style={styles.privacyText}>
         Terms of service and privacy policy
@@ -124,85 +211,5 @@ const Login = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    height: "100%",
-  },
-  headerLogo: {
-    marginTop: 105,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headertitle: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 7,
-  },
-  text1: {
-    fontSize: 13,
-    textDecorationLine: "underline",
-    fontWeight: "bold",
-    color: "#000000",
-  },
-  text2: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: "#000000",
-  },
-  welback: {
-    fontSize: 30,
-    marginTop: 34,
-    marginBottom: 57,
-    color: "#000000",
-    textAlign: "center",
-  },
-  forgetfield: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginHorizontal: 36,
-    marginVertical: 10,
-  },
-  inputContainer: {
-    backgroundColor: "#FCF5F5",
-    flexDirection: "row",
-    borderRadius: 10,
-    borderWidth: 1,
-    marginHorizontal: 36,
-    marginVertical: 10,
-    height: 53,
-    alignItems: "center",
-    paddingHorizontal: 10,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  forgetText: {
-    fontSize: 13,
-    color: "#F84A4A",
-  },
-  button: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 53,
-    marginVertical: 20,
-    marginHorizontal: 36,
-    borderRadius: 5,
-    backgroundColor: "#4785FC",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  privacyText: {
-    color: "#3F44D1",
-    textAlign: "center",
-    fontSize: 13,
-    marginTop: 50,
-  },
-});
 
 export default Login;

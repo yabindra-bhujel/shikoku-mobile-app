@@ -1,22 +1,21 @@
-import useTheme from "@/src/hooks/CustomTheme";
 import { Stack } from "expo-router";
 import React from "react";
+import { useColorScheme } from "react-native";
 
-const RootLayout = () => { 
-   const { theme } = useTheme();
+const RootLayout = () => {
+  const theme = useColorScheme();
   return (
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ title: "Home" ,
+        options={{
+          title: "Home",
           headerShown: false,
           headerStyle: {
-            backgroundColor: theme === "dark" ? "#f3f3f3" : "#000", 
-          }
-          
+            backgroundColor: theme === "dark" ? "red" : "#000",
+          },
         }}
       />
-      {/* <Stack.Screen name="[noticeId]"/> */}
     </Stack>
   );
 };

@@ -1,11 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 import React from "react";
-import { Stack } from "expo-router";
-import useTheme from "@/src/hooks/CustomTheme";
 
 const Profile = () => {
 
-  const { theme } = useTheme();
+  const theme = useColorScheme();
 
   return (
         <View style={{

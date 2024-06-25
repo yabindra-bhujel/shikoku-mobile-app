@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import React, { Component, useState } from "react";
 import { SafeAreaView } from "react-native";
-import { chatTestData } from "@/src/components/chatTestData";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 

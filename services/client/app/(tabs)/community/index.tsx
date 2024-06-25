@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const Frequest = () => {
+const Community = () => {
   return (
     <View>
-      <Text>Frequest sreen</Text>
+      <Text>Community</Text>
     </View>
   )
 }
 
-export default Frequest
+export default Community
 
 const styles = StyleSheet.create({})

@@ -6,7 +6,7 @@ import StyledTextInput from "@/src/components/StyledTextInput";
 import { router } from "expo-router";
 
 
-const ForgetPass = ({navigation}: {navigation: any}) => {
+const ForgetPass = () => {
 
     const onPressButton = () => {
         if (form.email === "") {
