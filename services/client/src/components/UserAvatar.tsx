@@ -21,7 +21,7 @@ const UserAvatar = (
     <View>
       <Image
         source={{
-          uri: props.url = 'https://randomuser.me/api/portraits/men/75.jpg'
+          uri: props.url,
         }}
         style={styles.avatar}
       />

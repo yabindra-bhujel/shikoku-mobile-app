@@ -7,7 +7,6 @@ export const StyledText = styled(Text);
 
 export default function Modal() {
   const { colorScheme, toggleColorScheme } = useColorScheme();
-  console.log(colorScheme);
 
   // If the page was reloaded or navigated to directly, then the modal should be presented as
   // a full screen page. You may need to change the UI to account for this.

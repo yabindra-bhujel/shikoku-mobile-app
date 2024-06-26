@@ -1,5 +1,4 @@
 import { Stack } from "expo-router";
-
 const TabLayout = () => {
   return (
     <Stack>
@@ -40,10 +39,17 @@ const TabLayout = () => {
       <Stack.Screen
         name="community"
         options={{
-          title: "Profile",
-          headerBackTitle: "Back",
+          headerShown: false,
         }}
+        
       />
+      <Stack.Screen
+        name="create-post"
+        options={{
+          headerShown: false,
+        }}
+        />
+
     </Stack>
   );
 };

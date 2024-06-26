@@ -1,10 +1,14 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
-from typing import List
+from typing import List, Optional
 from ..models.entity.post import Post, PostImage, PostVideo, PostFile
 from ..models.entity.comments import Comment
 from ..models.entity.likes import Likes
 from ..utils.post_utils import PostUtils
+from ..models.entity.user_profile import UserProfile
+from ..models.entity.users import User
+from fastapi import Request
+
 
 class PostService:
 
@@ -46,14 +50,14 @@ class PostService:
             db.close()
 
     @staticmethod
-    def get_post(db: Session) -> List[dict]:
+    def get_post(db: Session, request: Request) -> List[dict]:
         posts = db.query(Post).options(
             joinedload(Post.images),
             joinedload(Post.videos),
             joinedload(Post.files)
         ).all()
 
-        return [PostService._format_post_data(db, post) for post in posts]
+        return [PostService._format_post_data(db, post, request) for post in posts]
 
     @staticmethod
     def get_post_by_id(db: Session, post_id: int) -> dict:
@@ -70,9 +74,29 @@ class PostService:
         post_data["comments"] = PostService._get_comment(db, post_id)
         return post_data
 
+    @staticmethod
+    def get_user_profile_by_user_id(db: Session, user_id: int, request: Request) -> Optional[dict]:
+        user_profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+        if user_profile:
+            user = db.query(User).filter(User.id == user_id).first()
+            poster_profile_data = {
+                "id": user.id,
+                "first_name": user_profile.first_name,
+                "last_name": user_profile.last_name,
+            }
+
+            if user_profile.profile_picture:
+                poster_profile_data["profile_picture"] = str(request.url_for('static', path=user_profile.profile_picture))
+            
+            return poster_profile_data
+        
+        return None
 
     @staticmethod
-    def _format_post_data(db: Session, post: Post) -> dict:
+    def _format_post_data(db: Session, post: Post, request: Request) -> dict:
+
+        user = PostService.get_user_profile_by_user_id(db, post.user_id, request)
+
         return {
             "id": post.id,
             "content": post.content,
@@ -80,7 +104,7 @@ class PostService:
             "videos": [video.url for video in post.videos],
             "files": [file.url for file in post.files],
             "created_at": post.created_at,
-            "user_id": post.user_id,
+            "user": user,
             "is_active": post.is_active,
             "total_comments": PostService._get_total_comments(db, post.id),
             "total_likes": PostService._get_total_likes(db, post.id),

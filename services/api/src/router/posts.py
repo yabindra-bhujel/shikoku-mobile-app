@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..models.database import get_db
@@ -36,9 +36,10 @@ async def create_post(db: Session = db_dependency,user: User = Depends(get_curre
           
 
 @router.get("", status_code=status.HTTP_200_OK)
-async def get_posts(db: Session = db_dependency, user: User = Depends(authenticate_user)):
+async def get_posts(request: Request, db: Session = Depends(get_db), user: User = Depends(authenticate_user)):
+
     try:
-        posts = PostService.get_post(db)
+        posts = PostService.get_post(db, request)
         return posts
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

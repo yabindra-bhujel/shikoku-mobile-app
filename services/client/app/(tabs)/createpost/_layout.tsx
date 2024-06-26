@@ -5,11 +5,11 @@ const RootLayout = () => {
   return (
     <Stack>
       <Stack.Screen
-        name="index"
-        options={{ headerShown: false,
+        name="create-post"
+        options={{ 
+          headerShown: false,
         }}
       />
-
     </Stack>
   );
 };
