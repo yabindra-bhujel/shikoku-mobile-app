@@ -3,14 +3,9 @@ import React from "react";
 
 const RootLayout = () => { 
   return (
-    <Stack>
-      <Stack.Screen
-        name="create-post"
-        options={{ 
-          headerShown: false,
-        }}
-      />
-    </Stack>
+    <Stack screenOptions={{
+      headerShown: false,
+    }}/>
   );
 };
 

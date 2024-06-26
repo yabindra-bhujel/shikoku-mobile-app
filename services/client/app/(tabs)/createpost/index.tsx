@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import React from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -8,7 +8,7 @@ import IPost from "@/src/components/community/IPost";
 
 const Community = () => {
   return (
-    <SafeAreaView>
+    <View>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
@@ -18,7 +18,7 @@ const Community = () => {
       >
 
 
-      <CommunityPageHeader />
+      <CommunityPageHeader  headerTitle="Create Post"/>
 
       {/* post */}
 
@@ -27,7 +27,7 @@ const Community = () => {
       {/*  */}
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

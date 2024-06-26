@@ -44,7 +44,7 @@ const TabLayout = () => {
         
       />
       <Stack.Screen
-        name="create-post"
+        name="createpost"
         options={{
           headerShown: false,
         }}
