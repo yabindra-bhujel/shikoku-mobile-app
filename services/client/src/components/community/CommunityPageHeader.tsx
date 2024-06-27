@@ -10,7 +10,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
 
-const CommunityPageHeader = ({ headerTitle }: { headerTitle: string }) => {
+const CommunityPageHeader = () => {
   const theme = useColorScheme();
   const router = useRouter();
 
@@ -54,16 +54,6 @@ const CommunityPageHeader = ({ headerTitle }: { headerTitle: string }) => {
               size={24}
               color={theme === "dark" ? "#fff" : "#000"}
             />
-
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-                color: theme === "dark" ? "#fff" : "#000",
-              }}
-            >
-              Back
-            </Text>
           </TouchableOpacity>
         </View>
         <View>
@@ -74,7 +64,7 @@ const CommunityPageHeader = ({ headerTitle }: { headerTitle: string }) => {
               color: theme === "dark" ? "#fff" : "#000",
             }}
           >
-            {headerTitle}
+            Community
           </Text>
         </View>
 
