@@ -151,66 +151,67 @@ const CalendarScreen = () => {
   };
 
   const styles = StyleSheet.create({
-  headerBtn: {
-    padding: 6,
-    borderWidth: 1,
-    borderRadius: 10,
-    width: 70,
-    borderColor: 'transparent',
-    alignItems: 'center',
-    backgroundColor: '#E8E8E8',
-  },
-  headerBtnText: {
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  addBtn: {
-    position: 'absolute',
-    bottom: 20,
-    right: 10,
-  },
-  dateContainer: {
-    padding: 20,
-  },
-  dateText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  eventList: {
-    padding: 20,
-  },
-  eventGroup: {
-    marginVertical: 10,
-  },
-  eventDate: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  eventItem: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    borderLeftColor: 'red',
-    borderTopWidth: 1,
-    borderTopColor: '#111',
-    borderLeftWidth: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  eventTitle: {
-    fontSize: 16,
-  },
-  noEventsText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});
+    headerBtn: {
+      padding: 6,
+      borderWidth: 1,
+      borderRadius: 10,
+      width: 70,
+      borderColor: 'transparent',
+      alignItems: 'center',
+      // backgroundColor: '#E8E8E8',
+      backgroundColor: '#F5F5F5',
+    },
+    headerBtnText: {
+      fontWeight: 'bold',
+      fontSize: 15,
+    },
+    addBtn: {
+      position: 'absolute',
+      bottom: 20,
+      right: 10,
+    },
+    dateContainer: {
+      padding: 20,
+    },
+    dateText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginVertical: 10,
+    },
+    eventList: {
+      padding: 20,
+    },
+    eventGroup: {
+      marginVertical: 10,
+    },
+    eventDate: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 5,
+    },
+    eventItem: {
+      backgroundColor: '#fff',
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 10,
+      borderLeftColor: 'red',
+      borderTopWidth: 1,
+      borderTopColor: '#111',
+      borderLeftWidth: 5,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    eventTitle: {
+      fontSize: 16,
+    },
+    noEventsText: {
+      fontSize: 16,
+      color: '#666',
+      textAlign: 'center',
+      marginTop: 20,
+    },
+  });
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

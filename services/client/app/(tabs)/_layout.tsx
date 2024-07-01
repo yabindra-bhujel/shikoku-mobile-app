@@ -1,5 +1,11 @@
 import { Stack } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
+import { View, useColorScheme } from "react-native";
+import { useState } from "react";
+
 const TabLayout = () => {
+  const isDark = useColorScheme() === "dark";
+
   return (
     <Stack>
       <Stack.Screen
@@ -18,8 +24,22 @@ const TabLayout = () => {
       <Stack.Screen
         name="calendar"
         options={{
-          headerTitle: "ChatBot",
+          headerTitle: "",
           headerBackTitle: "Back",
+          headerRight: () => {
+            return (
+              <View>
+                <AntDesign
+                  name="plus"
+                  size={24}
+                  color={isDark ? "white" : "black"}
+                />
+              </View>
+            );
+          },
+          headerStyle: {
+            backgroundColor: isDark ? "#333" : "white",
+          },
         }}
       />
       <Stack.Screen
@@ -41,15 +61,13 @@ const TabLayout = () => {
         options={{
           headerShown: false,
         }}
-        
       />
       <Stack.Screen
         name="createpost"
         options={{
           headerShown: false,
         }}
-        />
-
+      />
     </Stack>
   );
 };

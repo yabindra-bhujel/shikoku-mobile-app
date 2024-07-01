@@ -4,10 +4,8 @@ const StackLayout =() => {
     return (
         <Stack>
             <Stack.Screen name="index" options={{
-                headerTitle: "Calendar",
                 headerShown: false
             }}/>
-
         </Stack>
     )
 }

@@ -24,6 +24,6 @@ class CalendarInput(BaseModel):
 class CalendarUpdate(BaseModel):
     title: str = None
     description: str = None
-    start: datetime = None
-    end: datetime = None
+    start: str = None
+    end: str = None
     color: str = None
