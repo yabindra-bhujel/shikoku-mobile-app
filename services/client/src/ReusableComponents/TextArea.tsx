@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { TextInput, StyleSheet, View } from "react-native";
 
-const TextArea = () => {
-    const [text, setText] = useState('');
+const TextArea = ({text, setText}) => {
 
     return (
         <View style={styles.container}>
             <TextInput
                 style={styles.textArea}
-                placeholder="Some regular text"
+                placeholder="共有する内容を入力してください！"
                 placeholderTextColor="gray"
                 value={text}
                 onChangeText={setText}

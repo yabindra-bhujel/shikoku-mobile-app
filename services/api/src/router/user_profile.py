@@ -33,11 +33,11 @@ async def create_user(user_profile: UserProfileInput, request: Request, db: Sess
         db.add(new_user_profile)
         db.commit()
         db.refresh(new_user_profile)
-        
 
         return new_user_profile  
         
     except Exception as e:
+        
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 

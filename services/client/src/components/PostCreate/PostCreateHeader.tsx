@@ -6,12 +6,10 @@ import {
     useColorScheme,
   } from "react-native";
   import Ionicons from "@expo/vector-icons/Ionicons";
-  import AntDesign from "@expo/vector-icons/AntDesign";
-  import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
   import { useRouter } from "expo-router";
   import Button from "@/src/ReusableComponents/Button";
   
-  const PostCreateHeader = () => {
+  const PostCreateHeader = ({post}) => {
     const theme = useColorScheme();
     const router = useRouter();
   
@@ -72,7 +70,10 @@ import {
               gap: 10,
             }}
           >
-            <Button title="投稿" />
+            <Button
+             title="投稿"
+             onPress={post}
+              />
           </View>
         </View>
       </View>

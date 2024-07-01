@@ -1,4 +1,6 @@
 import { Stack } from "expo-router";
+import React from "react";
+
 const TabLayout = () => {
   return (
     <Stack>
@@ -18,7 +20,7 @@ const TabLayout = () => {
       <Stack.Screen
         name="calendar"
         options={{
-          headerTitle: "ChatBot",
+          headerTitle: "Calendar",
           headerBackTitle: "Back",
         }}
       />
@@ -41,15 +43,7 @@ const TabLayout = () => {
         options={{
           headerShown: false,
         }}
-        
       />
-      <Stack.Screen
-        name="createpost"
-        options={{
-          headerShown: false,
-        }}
-        />
-
     </Stack>
   );
 };

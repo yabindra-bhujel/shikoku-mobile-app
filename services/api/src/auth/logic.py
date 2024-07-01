@@ -77,7 +77,7 @@ class AuthLogic:
             return None
         
         # アクセストークンとリフレッシュトークンを作成
-        access_token = self.create_access_token(user.username, user.id, user.email, user.role, timedelta(minutes=15))
+        access_token = self.create_access_token(user.username, user.id, user.email, user.role, timedelta(hours=10))
         refresh_token = self.create_refresh_token(user.id, timedelta(days=7))
 
         return access_token, refresh_token

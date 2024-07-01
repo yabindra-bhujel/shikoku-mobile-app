@@ -16,6 +16,4 @@ class PostOutput(BaseModel):
 
 class PostInput(BaseModel):
     content: Optional[str] = None
-    image_urls: Optional[List[str]] = None
-    video_urls: Optional[List[str]] = None
-    file_urls: Optional[List[str]] = None
+    image_files: Optional[List[str]] = None

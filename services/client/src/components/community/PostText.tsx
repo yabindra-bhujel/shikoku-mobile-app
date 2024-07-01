@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 
 interface TextPostProps {
-  content: string;
+  content: string | null | undefined;
 }
 
 const TextPost: React.FC<TextPostProps> = ({ content }) => {
@@ -12,12 +12,13 @@ const TextPost: React.FC<TextPostProps> = ({ content }) => {
     setShowFullText(!showFullText);
   };
 
-  const textToShow = showFullText ? content : content.slice(0, 200);
+  // Check if content exists before slicing
+  const textToShow = content ? (showFullText ? content : content.slice(0, 200)) : '';
 
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{textToShow}</Text>
-      {content.length > 200 && (
+      {content && content.length > 200 && (
         <TouchableOpacity onPress={toggleText} style={styles.readMoreButton}>
           <Text style={styles.readMoreText}>{showFullText ? "Read less" : "Read more"}</Text>
         </TouchableOpacity>

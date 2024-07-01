@@ -1,17 +1,38 @@
 import { Stack } from "expo-router";
-import React from "react";
 
-const RootLayout = () => { 
+const Layout = () => {
   return (
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ headerShown: false,
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="[postId]"
+        options={{
+          headerShown: false,
         }}
       />
 
+      <Stack.Screen
+        name="createpost"
+        options={{
+          headerShown: false,
+        }}
+        />
+
+      <Stack.Screen
+        name="notification"
+        options={{
+          headerShown: false,
+        }}
+
+        />
+        
     </Stack>
   );
 };
 
-export default RootLayout;
+export default Layout;

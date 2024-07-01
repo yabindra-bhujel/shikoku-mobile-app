@@ -19,8 +19,12 @@ const CommunityPageHeader = () => {
   };
 
   const navigateToCreatePost = () => {
-    router.push("/createpost");
+    router.push("/community/createpost");
   };
+
+  const navigateToNotification = () => {
+    router.push("/community/notification");
+  }
 
   const styles = StyleSheet.create({
     container: {},
@@ -81,12 +85,15 @@ const CommunityPageHeader = () => {
             color={theme === "dark" ? "#fff" : "#000"}
             style={{ marginRight: 10, fontWeight: "bold" }}
           />
+          <TouchableOpacity onPress={navigateToNotification}>
           <Ionicons
             name="notifications"
             size={24}
             color={theme === "dark" ? "#fff" : "#000"}
             style={{ marginRight: 10, fontWeight: "bold" }}
           />
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={navigateToCreatePost}>
             <FontAwesome6
               name="add"
