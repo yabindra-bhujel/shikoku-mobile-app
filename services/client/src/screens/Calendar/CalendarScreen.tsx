@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+
 import {
   StyleSheet,
   Text,
@@ -12,7 +14,7 @@ import { Calendar } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
 import SysModal from '@/src/constants/sys_modal';
 import EventModal from './EventModal';
-import GetServices from '@/src/api/GetServices';
+import CalenderService from '@/src/api/CalenderService';
 
 const CalendarScreen = () => {
   const isDark = useColorScheme() === 'dark';
@@ -48,32 +50,34 @@ const CalendarScreen = () => {
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await GetServices.fetchCalendarData();
-        // Map data to the required structure
-        const mappedData = data.map(event => {
-          const startDate = event.start_time.split('T')[0];
-          const startTime = event.start_time.split('T')[1].split('.')[0];
-          const endDate = event.end_time.split('T')[0];
-          const endTime = event.end_time.split('T')[1].split('.')[0];
-          return {
-            ...event,
-            startDate,
-            startTime,
-            endDate,
-            endTime,
-          };
-        });
-        setEvents(mappedData);
-      } catch (err) {
-        setError('Error fetching data');
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const res = await CalenderService.getPosts();
+      const mappedData = res.data.map(event => {
+        const startDate = event.start_time.split('T')[0];
+        const startTime = event.start_time.split('T')[1].split('.')[0];
+        const endDate = event.end_time.split('T')[0];
+        const endTime = event.end_time.split('T')[1].split('.')[0];
+        return {
+          ...event,
+          startDate,
+          startTime,
+          endDate,
+          endTime,
+        };
+      });
+      setEvents(mappedData);
+    } catch (err) {
+      setError('Error fetching data');
+    }
+  };
 
-    fetchData();
-  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   useEffect(() => {
     const updatedMarkedDates = {};
@@ -298,7 +302,7 @@ const CalendarScreen = () => {
           visible={showEventModal}
           event={selectedEvent}
           onClose={() => setShowEventModal(false)}
-          onSave={handleSaveEvent}
+          // onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
         />
       )}

@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Alert,
 } from 'react-native';
-import { updateEvent } from '@/src/api/PutServices';
+import CalenderService from '@/src/api/CalenderService';
 
 const EventModal = ({ visible, event, onClose, onDelete }) => {
   const [title, setTitle] = useState('');
@@ -29,23 +30,27 @@ const EventModal = ({ visible, event, onClose, onDelete }) => {
   }, [event]);
 
   const handleSave = async () => {
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('start', start);
-    formData.append('end', end);
+    const eventData = {
+      title,
+      description,
+      start,
+      end,
+    };
 
-    try{
-      const res = await updateEvent(event.id, formData)
-    }catch(error){
-      console.log('error')
+    try {
+      const res = await CalenderService.updateEvent(event.id, eventData);
+      if (res) {
+        onClose();
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update event');
     }
-    
   };
 
   if (!event) {
     return null;
   }
+
 
   return (
     <Modal visible={visible} animationType="fade" onRequestClose={onClose}>
