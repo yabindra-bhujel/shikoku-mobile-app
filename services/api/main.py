@@ -18,6 +18,7 @@ import logging
 from src.message.ConnectionManager import ConnectionManager
 from src.message.PersonalMessage import PersonalMessage
 from debug_toolbar.middleware import DebugToolbarMiddleware
+from src.router.group import router as group_router
 
 
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +54,7 @@ app.include_router(user_profile_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(like_router)
+app.include_router(group_router)
 
 @app.get("/")
 async def root(user = Depends(authenticate_user)):
