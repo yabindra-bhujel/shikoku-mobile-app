@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from ..database import Base
 import enum
 from sqlalchemy.orm import relationship
+from .group import group_members_association
 
 class UserRole(enum.Enum):
     ADMIN = 'admin'
@@ -30,6 +31,10 @@ class User(Base):
     comments = relationship('Comment', back_populates='user', cascade='all, delete-orphan')
     comment_replies = relationship('CommentReply', back_populates='user', cascade='all, delete-orphan')
     likes = relationship('Likes', back_populates='user', cascade='all, delete-orphan')
+
+    # Relationships for groups
+    admin_group = relationship("Group", uselist=False, back_populates="admin")
+    member_groups = relationship("Group", secondary=group_members_association, back_populates="group_members")
 
 
     def __repr__(self):

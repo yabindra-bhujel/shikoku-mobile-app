@@ -11,6 +11,7 @@ from src.models.entity.user_profile import UserProfile
 from src.models.entity.post import Post, PostFile, PostImage, PostVideo
 from src.models.entity.comments import Comment, CommentReply
 from src.models.entity.likes import Likes
+from src.models.entity.group import Group, group_members_association
 
 
 # this is the Alembic Config object, which provides
