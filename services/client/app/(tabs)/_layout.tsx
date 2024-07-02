@@ -26,8 +26,7 @@ const TabLayout = () => {
       <Stack.Screen
         name="chat"
         options={{
-          title: "Chat",
-          headerBackTitle: "Back",
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -44,6 +43,7 @@ const TabLayout = () => {
           headerBackTitle: "Back",
         }}
       />
+    
     </Stack>
   );
 };
