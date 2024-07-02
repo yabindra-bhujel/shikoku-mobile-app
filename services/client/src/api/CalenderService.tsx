@@ -28,7 +28,7 @@ async updateEvent(id, event) {
 
 async submitCalendarData(data: any) {
   try {
-    const result = await axiosInstance.post("/calendars", data);
+    const result = await axiosInstance.post("/calenders", data);
     return result.data;
   } catch (error:any) {
     throw error;

@@ -12,15 +12,18 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import StyledButton2 from "../components/StyledButton2";
 import { AntDesign } from "@expo/vector-icons";
+import CalenderService from "../api/CalenderService";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
+import AuthServices from "../api/AuthServices";
+import { User } from "@/assets/interfaces/userInterface";
+import ColorPicker from "../components/Calendar/ColorPicker";
 
 const SysModal = ({
   visible,
   onHide,
-  onCreateEvent,
 }: {
   visible: any;
   onHide: any;
-  onCreateEvent: any;
 }) => {
   const today = new Date();
   const [title, setTitle] = useState("");
@@ -29,10 +32,14 @@ const SysModal = ({
   const [endDate, setEndDate] = useState(today);
   const [startTime, setStartTime] = useState(today);
   const [endTime, setEndTime] = useState(today);
+  const [color, setColor] = useState("red");
+  const [user, setUser] = useState<User | null>(null);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
+    const getUser = await AuthServices.getCurrentUser();
+    setUser(getUser?.data);
     if (title.trim() === "") {
       alert("Please fill in the event title");
       return;
@@ -45,15 +52,36 @@ const SysModal = ({
       alert("End time cannot be before start time");
       return;
     }
-    onCreateEvent(
-      startDate.toISOString().split("T")[0],
-      endDate.toISOString().split("T")[0],
+
+    let start =
+      startDate.toISOString().split("T")[0] +
+      "T" +
+      startTime.toLocaleString().split(", ")[1] +
+      "Z";
+    let end =
+      endDate.toISOString().split("T")[0] +
+      "T" +
+      endTime.toLocaleString().split(", ")[1] +
+      "Z";
+
+    const event = {
       title,
       description,
-      startTime,
-      endTime
-    );
-    setTitle("");
+      start,
+      end,
+      color,
+      user_id: user?.id,
+    };
+    console.log(event)
+    try {
+      const res = await CalenderService.submitCalendarData(event);
+    } catch (error: any) {
+      console.error("Error submitting calendar data:", error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+      }
+    }
+    onHide();
   };
 
   const handleStartDateChange = (event, date) => {
@@ -67,6 +95,10 @@ const SysModal = ({
     setShowEndDatePicker(false);
     setEndDate(currentDate);
   };
+
+  const handleSetColor = (color) => {
+    setColor(color);
+  }
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
@@ -117,7 +149,11 @@ const SysModal = ({
                   onPress={() => setShowStartDatePicker(true)}
                 />
               </View>
-              <Modal visible={showStartDatePicker} transparent animationType="slide">
+              <Modal
+                visible={showStartDatePicker}
+                transparent
+                animationType="slide"
+              >
                 <View style={styles.centeredView}>
                   <View style={styles.modalView}>
                     <DateTimePicker
@@ -152,7 +188,11 @@ const SysModal = ({
                   onPress={() => setShowEndDatePicker(true)}
                 />
               </View>
-              <Modal visible={showEndDatePicker} transparent animationType="slide">
+              <Modal
+                visible={showEndDatePicker}
+                transparent
+                animationType="slide"
+              >
                 <View style={styles.centeredView}>
                   <View style={styles.modalView}>
                     <DateTimePicker
@@ -179,7 +219,7 @@ const SysModal = ({
               <View style={styles.setTimeField}>
                 <Text style={styles.label}>Start Time:</Text>
                 <View style={styles.flexrow}>
-                  <DateTimePicker
+                  <RNDateTimePicker
                     value={startTime}
                     mode="time"
                     display="default"
@@ -203,6 +243,7 @@ const SysModal = ({
                   />
                 </View>
               </View>
+              <ColorPicker color={color} setColor={setColor}/>
             </View>
           </ScrollView>
           <View style={styles.btnContainer}>
@@ -367,5 +408,18 @@ const styles = StyleSheet.create({
   },
   flexrow: {
     flexDirection: "row",
+  },
+  colorField: {
+    width: "90%",
+    flexDirection: "row",
+    backgroundColor: "#fafafa",
+    marginTop: 10,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 10,
+  },
+  colorPicker: {
+    padding: 10,
   },
 });

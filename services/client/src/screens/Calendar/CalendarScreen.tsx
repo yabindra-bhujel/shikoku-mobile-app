@@ -81,6 +81,7 @@ const CalendarScreen = () => {
 
   useEffect(() => {
     const updatedMarkedDates = {};
+    const setColor = isDark ? "white" : "black";
     events.forEach(event => {
       const { startDate, endDate } = event;
       const currentDate = new Date(startDate);
@@ -89,11 +90,11 @@ const CalendarScreen = () => {
         const dateString = currentDate.toISOString().split('T')[0];
         if (!updatedMarkedDates[dateString]) {
           updatedMarkedDates[dateString] = {
-            dots: [{ color: 'blue' }],
+            dots: [{ color: setColor }],
             marked: true,
           };
         } else {
-          updatedMarkedDates[dateString].dots.push({ color: 'blue' });
+          updatedMarkedDates[dateString].dots.push({ color: setColor });
         }
         currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
       }
@@ -107,17 +108,6 @@ const CalendarScreen = () => {
 
   const handleSelected = (day: { dateString: string }) => {
     setSelectedDate(day.dateString);
-  };
-
-  const handleCreateEvent = (
-    startDate: string,
-    endDate: string,
-    title: string,
-    description: string,
-    startTime: Date,
-    endTime: Date
-  ) => {
-    setShowModal(false);
   };
 
   const currentDate: Date = new Date();
@@ -207,6 +197,8 @@ const CalendarScreen = () => {
   },
   eventTitle: {
     fontSize: 16,
+    height: 20,
+    maxWidth: 50,
   },
   noEventsText: {
     fontSize: 16,
@@ -268,7 +260,7 @@ const CalendarScreen = () => {
                 onPress={() => handleEventClick(event)}
               >
                 <View style={styles.eventItem}>
-                  <Text>{event.title}</Text>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
                   <View>
                     <Text>
                       Start: {event.startDate} {event.startTime}
@@ -295,7 +287,6 @@ const CalendarScreen = () => {
       <SysModal
         visible={showModal}
         onHide={handleShowModal}
-        onCreateEvent={handleCreateEvent}
       />
       {selectedEvent && (
         <EventModal
