@@ -316,3 +316,10 @@ package.lock
 
 # pdf
 *.pdf
+
+# image
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg

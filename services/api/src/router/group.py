@@ -10,7 +10,7 @@ from ..auth.router import get_current_user
 from ..auth.permissions import authenticate_user
 import shutil
 
-router = APIRouter(prefix="/group", tags=["Group"])
+router = APIRouter(prefix="/groups", tags=["Group"])
 db_dependency = Depends(get_db)
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -27,7 +27,7 @@ async def create_group(db: Session = db_dependency, user: User = Depends(get_cur
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 async def get_groups(request: Request, db: Session = Depends(get_db), user: User = Depends(authenticate_user)):
     try:
         # Filter groups where the user is either an admin or a member
@@ -56,12 +56,26 @@ async def get_groups(request: Request, db: Session = Depends(get_db), user: User
     
 
 @router.get("/{group_id}", status_code=status.HTTP_200_OK)
-async def get_group(group_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
+async def get_group(
+    request: Request,
+    group_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
     try:
         group = db.query(Group).filter(Group.id == group_id).first()
         if group is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
-        return group
+        
+        group_data = {
+                "id": group.id,
+                "name": group.name,
+                "admin_id": group.admin_id,
+                "created_at": group.created_at,
+            }
+        
+        if group.group_image:
+            group_data["group_image"] = str(request.url_for('static', path=group.group_image))
+
+        return group_data
+    
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
