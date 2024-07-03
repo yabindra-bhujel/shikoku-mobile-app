@@ -33,8 +33,12 @@ class User(Base):
     likes = relationship('Likes', back_populates='user', cascade='all, delete-orphan')
 
     # Relationships for groups
-    admin_group = relationship("Group", uselist=False, back_populates="admin")
+    admin_groups = relationship("Group", back_populates="admin")
     member_groups = relationship("Group", secondary=group_members_association, back_populates="group_members")
+
+    # Relationships for group messages
+    group_messages = relationship("GroupMessage", back_populates="sender")
+    
 
 
     def __repr__(self):

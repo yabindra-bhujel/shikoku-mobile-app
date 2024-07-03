@@ -23,12 +23,13 @@ class Group(Base):
     description = Column(String, nullable=True)
     group_type = Column(String, default=GroupType.PRIVATE.value)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    admin_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
+    admin_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     group_image = Column(String, nullable=True)
 
     # Relationships
-    admin = relationship("User", uselist=False, back_populates="admin_group")
+    admin = relationship("User", back_populates="admin_groups")
     group_members = relationship("User", secondary=group_members_association, back_populates="member_groups")
+    group_messages = relationship("GroupMessage", back_populates="group")
 
     def __repr__(self):
         return f'Group: {self.name}'
