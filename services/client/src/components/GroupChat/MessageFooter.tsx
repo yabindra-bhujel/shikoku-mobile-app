@@ -53,7 +53,6 @@ const MessageFooter = () => {
                     placeholder="メッセージを入力..."
                     style={styles.messageInput}
                     multiline
-                    // Add any necessary props for TextInput
                 />
                 <TouchableOpacity style={styles.sendButton}>
                     <Text style={styles.sendButtonText}>送信</Text>
