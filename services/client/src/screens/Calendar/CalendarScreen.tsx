@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-
 import {
   StyleSheet,
   Text,
@@ -12,47 +11,30 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
-import SysModal from '@/src/constants/sys_modal';
-import EventModal from './EventModal';
+import EventModal from '../../components/Calendar/EventModal';
 import CalenderService from '@/src/api/CalenderService';
+import CreateModal from "@/src/components/Calendar/CreateModal";
+import { User } from "@/assets/interfaces/userInterface";
+import AuthServices from "@/src/api/AuthServices";
+import { CalendarClientEvent } from "@/src/components/CalendarEventTypes";
 
 const CalendarScreen = () => {
   const isDark = useColorScheme() === 'dark';
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEventModal, setShowEventModal] = useState<boolean>(false);
-  const [selectedEvent, setSelectedEvent] = useState<{
-    id: number;
-    title: string;
-    description: string;
-    startDate: string;
-    startTime: string;
-    endDate: string;
-    endTime: string;
-    color: string;
-    isActive: boolean;
-    userId: number;
-  } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarClientEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [events, setEvents] = useState<
-    {
-      id: number;
-      title: string;
-      description: string;
-      startDate: string;
-      startTime: string;
-      endDate: string;
-      endTime: string;
-      color: string;
-      isActive: boolean;
-      userId: number;
-    }[]
+  const [events, setEvents] = useState<CalendarClientEvent[]
   >([]);
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const fetchData = async () => {
     try {
       const res = await CalenderService.getPosts();
+      const getUser = await AuthServices.getCurrentUser();
+      setUser(getUser?.data);
       const mappedData = res.data.map(event => {
         const startDate = event.start_time.split('T')[0];
         const startTime = event.start_time.split('T')[1].split('.')[0];
@@ -123,18 +105,13 @@ const CalendarScreen = () => {
 
   filteredEvents.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
+  const handleRefresh = () => {
+    fetchData();
+  };
+
   const handleEventClick = event => {
     setSelectedEvent(event);
     setShowEventModal(true);
-  };
-
-  const handleSaveEvent = updatedEvent => {
-    setEvents(prevEvents =>
-      prevEvents.map(event =>
-        event.id === updatedEvent.id ? updatedEvent : event
-      )
-    );
-    setShowEventModal(false);
   };
 
   const handleDeleteEvent = eventToDelete => {
@@ -165,54 +142,54 @@ const CalendarScreen = () => {
   },
   dateContainer: {
     padding: 20,
-  },
-  dateText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
+    backgroundColor: isDark ? "#333" : '#E8E8E8',
   },
   eventList: {
-    padding: 20,
-  },
-  eventGroup: {
-    marginVertical: 10,
-  },
-  eventDate: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    padding: 10,
   },
   eventItem: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 10,
+    padding: 15,
     marginBottom: 10,
-    borderLeftColor: 'red',
-    borderTopWidth: 1,
-    borderTopColor: '#111',
-    borderLeftWidth: 5,
+    borderRadius: 5,
+    borderLeftColor: "red",
+    borderLeftWidth: 10,
+    backgroundColor: isDark ? "#444" : '#fff',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    
+    elevation: 4,
   },
   eventTitle: {
     fontSize: 16,
     height: 20,
-    maxWidth: 50,
+    maxWidth: 100,
+    color: isDark ? "white" : '#666',
+  },
+  eventTime: {
+    color: isDark ? "white" : '#666',
   },
   noEventsText: {
     fontSize: 16,
-    color: '#666',
+    color: isDark ? "white" : '#666',
     textAlign: 'center',
     marginTop: 20,
   },
 });
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1,
+      backgroundColor: isDark ? "#333" : "white",
+     }}>
       <View
         style={{
-          backgroundColor: isDark ? '#333' : 'white',
+          backgroundColor: isDark ? '#111' : 'white',
           width: '100%',
         }}
       >
@@ -243,7 +220,7 @@ const CalendarScreen = () => {
             textMonthFontWeight: '900',
             textMonthFontSize: 20,
             textDayFontSize: 16,
-            calendarBackground: isDark ? '#333' : 'white',
+            calendarBackground: isDark ? '#111' : 'white',
             monthTextColor: isDark ? 'white' : 'black',
           }}
           style={{
@@ -262,11 +239,11 @@ const CalendarScreen = () => {
                 <View style={styles.eventItem}>
                   <Text style={styles.eventTitle}>{event.title}</Text>
                   <View>
-                    <Text>
-                      Start: {event.startDate} {event.startTime}
+                    <Text style={styles.eventTime}>
+                    {event.startTime.split("Z")[0]}
                     </Text>
-                    <Text>
-                      End: {event.endDate} {event.endTime}
+                    <Text style={styles.eventTime}>
+                   {event.endTime.split("Z")[0]}
                     </Text>
                   </View>
                 </View>
@@ -284,17 +261,21 @@ const CalendarScreen = () => {
         style={styles.addBtn}
         onPress={handleShowModal}
       />
-      <SysModal
+      <CreateModal
+      isDark={isDark}
         visible={showModal}
         onHide={handleShowModal}
+        userId={user?.id}
+        onEventCreated={handleRefresh}
       />
       {selectedEvent && (
         <EventModal
+        isDark={isDark}
           visible={showEventModal}
           event={selectedEvent}
           onClose={() => setShowEventModal(false)}
-          // onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
+          onUpdate={handleRefresh}
         />
       )}
     </SafeAreaView>

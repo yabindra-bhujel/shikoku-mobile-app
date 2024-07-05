@@ -1,4 +1,4 @@
-import { CalendarEvent } from "./CalendarEvent";
+import { CalendarEvent } from "./CalendarEventTypes";
 
 
 export interface EventModalProps {

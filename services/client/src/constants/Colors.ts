@@ -37,7 +37,7 @@ export const Colors:themtype = {
   },
   dark: {
     text: '#ECEDEE', //almost white
-    background: '#151718', // black
+    background: '#333', // black
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',

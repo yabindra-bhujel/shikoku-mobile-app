@@ -26,17 +26,6 @@ const TabLayout = () => {
         options={{
           headerTitle: "",
           headerBackTitle: "Back",
-          headerRight: () => {
-            return (
-              <View>
-                <AntDesign
-                  name="plus"
-                  size={24}
-                  color={isDark ? "white" : "black"}
-                />
-              </View>
-            );
-          },
           headerStyle: {
             backgroundColor: isDark ? "#333" : "white",
           },

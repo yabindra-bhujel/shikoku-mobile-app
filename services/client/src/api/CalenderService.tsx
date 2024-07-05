@@ -1,4 +1,6 @@
+import { CalendarEvent } from "../components/CalendarEventTypes";
 import axiosInstance from "../config/Api";
+
 
 const CalenderService = {
 
@@ -26,7 +28,7 @@ async updateEvent(id, event) {
   return response;
 },
 
-async submitCalendarData(data: any) {
+async submitCalendarData(data: CalendarEvent) {
   try {
     const result = await axiosInstance.post("/calenders", data);
     return result.data;
