@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
-import EventModal from '../../components/Calendar/EventModal';
+import EventModal from '../../components/Calendar/EventDetailUpdateModal';
 import CalenderService from '@/src/api/CalenderService';
 import CreateModal from "@/src/components/Calendar/EventCreateModal";
 import { User } from "@/assets/interfaces/userInterface";
