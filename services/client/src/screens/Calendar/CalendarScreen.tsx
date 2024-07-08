@@ -13,7 +13,7 @@ import { Calendar } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
 import EventModal from '../../components/Calendar/EventModal';
 import CalenderService from '@/src/api/CalenderService';
-import CreateModal from "@/src/components/Calendar/CreateModal";
+import CreateModal from "@/src/components/Calendar/EventCreateModal";
 import { User } from "@/assets/interfaces/userInterface";
 import AuthServices from "@/src/api/AuthServices";
 import { CalendarClientEvent } from "@/src/components/CalendarEventTypes";
@@ -27,7 +27,6 @@ const CalendarScreen = () => {
   const [events, setEvents] = useState<CalendarClientEvent[]
   >([]);
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
   const fetchData = async () => {
@@ -50,7 +49,7 @@ const CalendarScreen = () => {
       });
       setEvents(mappedData);
     } catch (err) {
-      setError('Error fetching data');
+      console.log(err)
     }
   };
 
@@ -197,7 +196,7 @@ const CalendarScreen = () => {
           current={currentDateString}
           markedDates={{ ...markedDates, [selectedDate || '']: { selected: true } }}
           onDayPress={handleSelected}
-          renderArrow={direction => {
+          renderArrow={(direction: string) => {
             return direction === 'right' ? (
               <FontAwesome
                 name="chevron-right"

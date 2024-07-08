@@ -113,7 +113,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
       if (nextStartDate.isAfter(moment().add(1, "year"))) {
         break;
       }
-
       const nextStart =
         nextStartDate.toISOString().split("T")[0] +
         "T" +

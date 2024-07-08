@@ -5,12 +5,13 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface TimePickerTypes {
     title: string;
+    currentTime?: string;
     value: Date;
     setValue: any;
     isDark: boolean;
 }
 
-const CustomTimePicker: React.FC<TimePickerTypes> = ({title, value, setValue, isDark}) => {
+const CustomTimePicker: React.FC<TimePickerTypes> = ({title, value, currentTime, setValue, isDark}) => {
   const styles = StyleSheet.create({
     setTimeField: {
         flexDirection: "row",
@@ -32,7 +33,7 @@ const CustomTimePicker: React.FC<TimePickerTypes> = ({title, value, setValue, is
 });
   return (
     <View style={styles.setTimeField}>
-      <Text style={styles.label}>{title}:</Text>
+      <Text style={styles.label}>{title}: {currentTime}</Text>
       <View style={styles.flexrow}>
         <DateTimePicker
           value={value}

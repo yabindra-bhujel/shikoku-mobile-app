@@ -9,15 +9,29 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import moment from "moment-timezone";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import CalenderService from "@/src/api/CalenderService";
+import CustomDatePicker from "./CustomDatePicker";
+import CustomTimePicker from "./CustomTimePicker";
+import {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
-const EventModal = ({ visible, event, onClose, onDelete, isDark, onUpdate }) => {
-  const today = moment().tz("Asia/Tokyo").toDate();
+const EventModal = ({
+  visible,
+  event,
+  onClose,
+  onDelete,
+  isDark,
+  onUpdate,
+}) => {
+  const today = new Date();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [startDateTime, setStartDateTime] = useState(today);
-  const [endDateTime, setEndDateTime] = useState(today);
+  const [startTime, setStartTime] = useState(today);
+  const [endTime, setEndTime] = useState(today);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
+
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
@@ -25,8 +39,8 @@ const EventModal = ({ visible, event, onClose, onDelete, isDark, onUpdate }) => 
     if (event) {
       setTitle(event.title || "");
       setDescription(event.description || "");
-      setStartDateTime(event.startTime ? new Date(event.startTime) : today);
-      setEndDateTime(event.endTime ? new Date(event.endTime) : today);
+      setStartDate(new Date(event.startDate) || today);
+      setEndDate(new Date(event.endDate) || today);
     }
   }, [event]);
 
@@ -36,41 +50,67 @@ const EventModal = ({ visible, event, onClose, onDelete, isDark, onUpdate }) => 
       return;
     }
 
+    let start =
+      startDate.toISOString().split("T")[0] +
+      "T" +
+      startTime.toLocaleTimeString();
+    let end =
+      endDate.toISOString().split("T")[0] + "T" + endTime.toLocaleTimeString();
+
     const eventData = {
       title,
       description,
-      start: startDateTime.toISOString(),
-      end: endDateTime.toISOString(),
+      start,
+      end,
     };
-
-    // Try to save the event (pseudo-code, replace with actual API call)
-    // try {
-    //   const res = await CalenderService.updateEvent(event.id, eventData);
-    //   if (res) {
-    //     onClose();
-    //     onUpdate();
-    //   }
-    // } catch (error) {
-    //   Alert.alert("Error", "Failed to update event");
-    // }
+    console.log(eventData);
+    try {
+      const res = await CalenderService.updateEvent(event.id, eventData);
+      if (res) {
+        onClose();
+        onUpdate();
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update event");
+    }
   };
 
   const handleDelete = async () => {
-    // Try to delete the event (pseudo-code, replace with actual API call)
-    // try {
-    //   const res = await CalenderService.deleteEvent(event.id);
-    //   if (res) {
-    //     onDelete(event);
-    //     onClose();
-    //   }
-    // } catch (error) {
-    //   Alert.alert("Error", "Failed to delete event");
-    // }
+    try {
+      const res = await CalenderService.deleteEvent(event.id);
+      if (res) {
+        onDelete(event);
+        onClose();
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete event");
+    }
   };
 
   if (!event) {
     return null;
   }
+
+  const handleSelectStartTime = (
+    event: DateTimePickerEvent,
+    selectedDate?: Date
+  ) => {
+    setStartTime(selectedDate || startTime);
+  };
+
+  const handleSelectEndTime = (
+    event: DateTimePickerEvent,
+    selectedDate?: Date
+  ) => {
+    setEndTime(selectedDate || endTime);
+  };
+
+  const currentStartTime = `${event.startTime.split(":")[0]}:${
+    event.startTime.split(":")[1]
+  }`;
+  const currentEndTime = `${event.endTime.split(":")[0]}:${
+    event.endTime.split(":")[1]
+  }`;
 
   return (
     <Modal
@@ -93,60 +133,56 @@ const EventModal = ({ visible, event, onClose, onDelete, isDark, onUpdate }) => 
             />
             <Text style={styles.label}>Description</Text>
             <TextInput
-              style={styles.input}
+              editable
+              multiline
+              style={styles.descriptionInput}
+              numberOfLines={5}
+              maxLength={200}
               value={description}
-              onChangeText={setDescription}
+              onChangeText={(text) => setDescription(text)}
+              placeholder="Enter event description"
+              placeholderTextColor={"gray"}
             />
-            <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
-              <Text style={styles.label}>Start Date</Text>
-              <Text style={styles.dateText}>
-                {startDateTime.toISOString().split("T")[0]}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
-              <Text style={styles.label}>End Date</Text>
-              <Text style={styles.dateText}>
-                {endDateTime.toISOString().split("T")[0]}
-              </Text>
-            </TouchableOpacity>
-            {showStartDatePicker && (
-              <DateTimePicker
-                value={startDateTime}
-                mode="date"
-                display="default"
-                onChange={(event, date) => {
-                  setShowStartDatePicker(false);
-                  setStartDateTime(date || startDateTime);
-                }}
-              />
-            )}
-            {showEndDatePicker && (
-              <DateTimePicker
-                value={endDateTime}
-                mode="date"
-                display="default"
-                onChange={(event, date) => {
-                  setShowEndDatePicker(false);
-                  setEndDateTime(date || endDateTime);
-                }}
-              />
-            )}
-            <DateTimePicker
-              value={startDateTime}
-              mode="time"
-              display="default"
-              onChange={(event, date) => {
-                setStartDateTime(date || startDateTime);
+            <CustomDatePicker
+              title="Start Date"
+              show={showStartDatePicker}
+              setShow={() => setShowStartDatePicker(!showStartDatePicker)}
+              value={startDate}
+              customHandle={(event, selectedDate) => {
+                const currentDate = selectedDate || startDate;
+                setShowStartDatePicker(false);
+                setStartDate(currentDate);
               }}
+              isDark={isDark}
             />
-            <DateTimePicker
-              value={endDateTime}
-              mode="time"
-              display="default"
-              onChange={(event, date) => {
-                setEndDateTime(date || endDateTime);
+            <CustomDatePicker
+              title="End Date"
+              show={showEndDatePicker}
+              setShow={() => setShowEndDatePicker(!showEndDatePicker)}
+              value={endDate}
+              customHandle={(event, selectedDate) => {
+                const currentDate = selectedDate || endDate;
+                setShowEndDatePicker(false);
+                setEndDate(currentDate);
               }}
+              isDark={isDark}
             />
+            <View style={styles.timesContainer}>
+            <CustomTimePicker
+              title="Start Time"
+              value={startTime}
+              setValue={handleSelectStartTime}
+              isDark={isDark}
+              currentTime={currentStartTime}
+            />
+            <CustomTimePicker
+              title="End Time"
+              value={endTime}
+              setValue={handleSelectEndTime}
+              isDark={isDark}
+              currentTime={currentEndTime}
+            />
+            </View>
           </ScrollView>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleSave}>
@@ -167,7 +203,6 @@ const EventModal = ({ visible, event, onClose, onDelete, isDark, onUpdate }) => 
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
@@ -227,10 +262,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-  dateText: {
+  descriptionInput: {
+    height: 150,
     padding: 10,
-    fontSize: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    backgroundColor: "#fff",
   },
+  timesContainer: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  }
 });
 
 export default EventModal;
