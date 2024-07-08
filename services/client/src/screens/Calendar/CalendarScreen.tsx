@@ -39,12 +39,14 @@ const CalendarScreen = () => {
         const startTime = event.start_time.split('T')[1].split('.')[0];
         const endDate = event.end_time.split('T')[0];
         const endTime = event.end_time.split('T')[1].split('.')[0];
+        const color = event.color;
         return {
           ...event,
           startDate,
           startTime,
           endDate,
           endTime,
+          color,
         };
       });
       setEvents(mappedData);
@@ -52,7 +54,6 @@ const CalendarScreen = () => {
       console.log(err)
     }
   };
-
 
   useFocusEffect(
     useCallback(() => {
@@ -62,7 +63,6 @@ const CalendarScreen = () => {
 
   useEffect(() => {
     const updatedMarkedDates = {};
-    const setColor = isDark ? "white" : "black";
     events.forEach(event => {
       const { startDate, endDate } = event;
       const currentDate = new Date(startDate);
@@ -71,11 +71,11 @@ const CalendarScreen = () => {
         const dateString = currentDate.toISOString().split('T')[0];
         if (!updatedMarkedDates[dateString]) {
           updatedMarkedDates[dateString] = {
-            dots: [{ color: setColor }],
+            dots: [{ color: event.color}],
             marked: true,
           };
         } else {
-          updatedMarkedDates[dateString].dots.push({ color: setColor });
+          updatedMarkedDates[dateString].dots.push({ color: event.color });
         }
         currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
       }

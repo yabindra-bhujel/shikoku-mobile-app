@@ -12,9 +12,7 @@ import {
 import CalenderService from "@/src/api/CalenderService";
 import CustomDatePicker from "./CustomDatePicker";
 import CustomTimePicker from "./CustomTimePicker";
-import {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
+import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 const EventModal = ({
   visible,
@@ -120,22 +118,45 @@ const EventModal = ({
       transparent={true}
     >
       <View style={styles.centeredView}>
-        <View style={styles.container}>
-          <View style={styles.headerContainer}>
+        <View
+          style={[
+            styles.container,
+            { backgroundColor: isDark ? "#333" : "#ddd" },
+          ]}
+        >
+          <View style={[styles.headerContainer,{
+            backgroundColor: isDark ? "#333" : "#0073e6"
+          }]}>
             <Text style={styles.headerText}>Edit event</Text>
           </View>
           <ScrollView style={styles.bodyContainer}>
-            <Text style={styles.label}>Title</Text>
+            <Text style={[styles.label, {
+              color: isDark ? "#ddd" : "#333",
+            }]}>Title</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: isDark ? "#111" : "#fff",
+                  color: isDark ? "#fff" : "#000",
+                },
+              ]}
               value={title}
               onChangeText={setTitle}
             />
-            <Text style={styles.label}>Description</Text>
+            <Text style={[styles.label, {
+                  color: isDark ? "#ddd" : "#000",
+                }]}>Description</Text>
             <TextInput
               editable
               multiline
-              style={styles.descriptionInput}
+              style={[
+                styles.descriptionInput,
+                {
+                  backgroundColor: isDark ? "#111" : "#fff",
+                  color: isDark ? "#fff" : "#000",
+                },
+              ]}
               numberOfLines={5}
               maxLength={200}
               value={description}
@@ -168,20 +189,20 @@ const EventModal = ({
               isDark={isDark}
             />
             <View style={styles.timesContainer}>
-            <CustomTimePicker
-              title="Start Time"
-              value={startTime}
-              setValue={handleSelectStartTime}
-              isDark={isDark}
-              currentTime={currentStartTime}
-            />
-            <CustomTimePicker
-              title="End Time"
-              value={endTime}
-              setValue={handleSelectEndTime}
-              isDark={isDark}
-              currentTime={currentEndTime}
-            />
+              <CustomTimePicker
+                title="Start Time"
+                value={startTime}
+                setValue={handleSelectStartTime}
+                isDark={isDark}
+                currentTime={currentStartTime}
+              />
+              <CustomTimePicker
+                title="End Time"
+                value={endTime}
+                setValue={handleSelectEndTime}
+                isDark={isDark}
+                currentTime={currentEndTime}
+              />
             </View>
           </ScrollView>
           <View style={styles.buttonContainer}>
@@ -212,16 +233,13 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "90%",
-    backgroundColor: "#ddd",
     borderRadius: 10,
   },
   headerContainer: {
     padding: 25,
     borderRadius: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
     alignItems: "center",
-    backgroundColor: "#00bfff",
   },
   headerText: {
     fontSize: 20,
@@ -234,16 +252,16 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: "bold",
+    marginBottom: 5,
     marginTop: 10,
+
   },
   input: {
     height: 40,
     borderColor: "gray",
     borderWidth: 1,
-    marginTop: 5,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: "#fff",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -267,13 +285,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     borderWidth: 1,
-    backgroundColor: "#fff",
   },
   timesContainer: {
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-  }
+  },
 });
 
 export default EventModal;

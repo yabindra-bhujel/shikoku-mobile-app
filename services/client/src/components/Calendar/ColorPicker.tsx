@@ -25,6 +25,7 @@ const ColorPicker = ({color, setColor, isDark}: {color: string, setColor: any, i
         <Picker.Item label="Pink" value="pink" />
         <Picker.Item label="Blue" value="blue" />
         <Picker.Item label="Green" value="green" />
+        <Picker.Item label="Yellow" value="yellow" />
       </Picker>
     </View>
   );
