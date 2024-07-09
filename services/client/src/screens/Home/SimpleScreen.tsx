@@ -10,6 +10,10 @@ interface ButtonData {
   title: string;
 }
 
+// webscoket connection
+
+// 
+
 const SimpleScreen = () => {
   const theme = useColorScheme();
 

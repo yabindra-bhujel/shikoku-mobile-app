@@ -13,6 +13,8 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
+import { Link } from 'expo-router';
+
 
 
 interface GroupData {
@@ -148,14 +150,17 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
             gap: 10,
           }}
         >
-          <TouchableOpacity >
+          <Link href="modal">
+          heeeeleleell
+          {/* <TouchableOpacity  >
             <AntDesign
               name="setting"
               size={24}
               color={theme === "dark" ? "#fff" : "#000"}
               style={{ marginRight: 10, fontWeight: "bold" }}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          </Link>
         </View>
       </View>
     </View>

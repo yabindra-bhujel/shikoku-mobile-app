@@ -1,3 +1,4 @@
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import axiosInstance from "../config/Api";
 
 const AuthServices = {
@@ -39,6 +40,15 @@ const AuthServices = {
 
       const result = await axiosInstance.post("/auth/refresh_token", data);
 
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getUserProfile() {
+    try {
+      const result = await axiosInstance.get("/user_profile");
       return result;
     } catch (error) {
       throw error;

@@ -35,10 +35,7 @@ class User(Base):
     # Relationships for groups
     admin_groups = relationship("Group", back_populates="admin")
     member_groups = relationship("Group", secondary=group_members_association, back_populates="group_members")
-
-    # Relationships for group messages
     group_messages = relationship("GroupMessage", back_populates="sender")
-    
 
 
     def __repr__(self):

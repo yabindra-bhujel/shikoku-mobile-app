@@ -4,12 +4,30 @@ import {
     View,
     TouchableOpacity,
     useColorScheme,
-    TextInput
+    TextInput,
 } from "react-native";
+import React, { useState } from "react";
 
+interface Props {
+    WebSocket: WebSocket;
+    messageData: {
+        message: string;
+        sender_id: string;
+        sender_fullname: string;
+        group_id: string;
+    };
+    setMessageData: (data: any) => void;
+}
 
-const MessageFooter = () => {
+const MessageFooter: React.FC<Props> = ({ WebSocket, messageData, setMessageData }) => {
     const theme = useColorScheme();
+
+    const sendMessage = () => {
+        if (messageData.message.trim()) {
+            WebSocket.send(JSON.stringify(messageData));
+            setMessageData({ ...messageData, message: "" }); // メッセージ送信後に入力フィールドをクリア
+        }
+    };
 
     const styles = StyleSheet.create({
         footerContainer: {
@@ -46,21 +64,21 @@ const MessageFooter = () => {
             fontWeight: "bold",
         },
     });
-    return(
-        <View>
-            <View style={styles.footerContainer}>
-                <TextInput
-                    placeholder="メッセージを入力..."
-                    style={styles.messageInput}
-                    multiline
-                />
-                <TouchableOpacity style={styles.sendButton}>
-                    <Text style={styles.sendButtonText}>送信</Text>
-                </TouchableOpacity>
-            </View>
-            </View>
-    )
 
-}
+    return (
+        <View style={styles.footerContainer}>
+            <TextInput
+                placeholder="メッセージを入力..."
+                style={styles.messageInput}
+                multiline
+                value={messageData.message}
+                onChangeText={(text) => setMessageData({ ...messageData, message: text })}
+            />
+            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                <Text style={styles.sendButtonText}>送信</Text>
+            </TouchableOpacity>
+        </View>
+    );
+};
 
 export default MessageFooter;

@@ -96,6 +96,7 @@ async def get_profile(request: Request, db: Session = db_dependency, user: User 
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found")
         
         profile_output = {
+            "user_id": user.id,
             "first_name": user_profile.first_name,
             "last_name": user_profile.last_name,
             "bio": user_profile.bio,

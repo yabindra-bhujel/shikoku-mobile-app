@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   useColorScheme,
   Modal,
+  TextInput,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import UserIconAndUsername from "@/src/components/GroupChat/UserIconAndUsername";
+import CreateGroup from "@/src/components/GroupChat/CreateGroup";
 
 const GroupChat = () => {
   const theme = useColorScheme();
@@ -21,10 +23,18 @@ const GroupChat = () => {
     router.back();
   };
 
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-    console.log("Modal visibility: ", isModalVisible);
-  };
+  const toggleOpneModal = () => {
+    setIsModalVisible(true);
+  }
+
+  const toggleCloseModal = () => {
+    setIsModalVisible(false);
+  }
+
+  // const toggleModal = () => {
+  //   setIsModalVisible(!isModalVisible);
+  //   console.log(isModalVisible);
+  // };
 
   const styles = StyleSheet.create({
     container: {
@@ -52,18 +62,9 @@ const GroupChat = () => {
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: "rgba(0, 0, 0, 0.5)", 
+
     },
-    modalContent: {
-      backgroundColor: "#fff",
-      padding: 20,
-      borderRadius: 10,
-      width: "80%",
-    },
-    modalCloseButton: {
-      position: "absolute",
-      top: 20,
-      right: 20,
-    },
+   
   });
 
   return (
@@ -117,7 +118,7 @@ const GroupChat = () => {
       <UserIconAndUsername />
 
       {/* Add button */}
-      <TouchableOpacity style={styles.addButton} onPress={toggleModal}>
+      <TouchableOpacity style={styles.addButton} onPress={toggleOpneModal}>
         <AntDesign name="plus" size={30} color="#fff" />
       </TouchableOpacity>
 
@@ -126,20 +127,38 @@ const GroupChat = () => {
         visible={isModalVisible}
         animationType="slide"
         transparent={true}
-        // onRequestClose={toggleModal} 
+        onRequestClose={toggleCloseModal}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
-              <AntDesign name="close" size={24} color="black" />
+        <CreateGroup toggleCloseModal={toggleCloseModal} />
+        {/* <View style={styles.modalContainer}>
+          <View style={{
+            backgroundColor: "#fff",
+            padding: 20,
+            borderRadius: 10,
+            width: "80%",
+
+          
+          }}>
+            <TouchableOpacity   onPress={toggleCloseModal}>
+              <AntDesign name="close" size={24} color="black"/>
             </TouchableOpacity>
             <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-              Add Form
+              Add Group Chat
             </Text>
-            {/* Your form components go here */}
-            <Text>Form inputs and buttons...</Text>
           </View>
-        </View>
+
+            <View style={{ marginBottom: 10 }}>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  borderColor: "lightgray",
+                  padding: 10,
+                  borderRadius: 5,
+                }}
+                placeholder="Group Name"
+              />
+            </View>
+        </View> */}
       </Modal>
     </View>
   );

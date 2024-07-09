@@ -7,19 +7,20 @@ from fastapi.security import OAuth2PasswordBearer
 from src.router.calender import router as calender_router
 from src.router.user_profile import router as user_profile_router
 import logging
-from src.message.ConnectionManager import ConnectionManager
-from src.message.PersonalMessage import PersonalMessage
 import os
 from fastapi.staticfiles import StaticFiles
 from src.router.posts import router as post_router
 from src.router.comments import router as comment_router
 from src.router.likes import router as like_router
 import logging
-from src.message.ConnectionManager import ConnectionManager
-from src.message.PersonalMessage import PersonalMessage
 from debug_toolbar.middleware import DebugToolbarMiddleware
 from src.router.group import router as group_router
-
+from src.messenging.ConnectionManager import ConnectionManager
+from fastapi.responses import HTMLResponse
+from src.models.database import get_db
+from sqlalchemy.orm import Session
+from src.messenging.GroupMessage import GroupMessage
+import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 
-
+# api の router を登録
 app.include_router(auth_router.router)
 app.include_router(calender_router)
 app.include_router(user_profile_router)
@@ -56,80 +57,75 @@ app.include_router(comment_router)
 app.include_router(like_router)
 app.include_router(group_router)
 
+
+
+
+html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>WebSocket Chat</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script>
+            var ws = new WebSocket("ws://localhost:8000/ws/1");
+            ws.onmessage = function(event) {
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(event.data)
+                message.appendChild(content)
+                messages.appendChild(message)
+            };
+            function sendMessage(event) {
+                var input = document.getElementById("messageText")
+                ws.send(input.value)
+                input.value = ''
+                event.preventDefault()
+            }
+        </script>
+    </body>
+</html>
+"""
+
+
 @app.get("/")
-async def root(user = Depends(authenticate_user)):
-    return {"message": "Hello World"}
+async def get():
+    return HTMLResponse(html)
+
 
 manager = ConnectionManager(logger=logger)
-personal_message = PersonalMessage(app=app, connection_manager=manager)
 
 
-
-
-@app.websocket("/ws")
-async def websocket_connection(websocket: WebSocket):
+@app.websocket("/ws/{group_id}")
+async def websocket_endpoint(websocket: WebSocket, group_id: int, db: Session = Depends(get_db)):
+    await manager.connect(websocket, group_id)
     try:
-        # auth_header = websocket.headers.get("Authorization")
-        # if not auth_header:
-        #     await websocket.close()
-        #     return
-
-        # token = auth_header.split("Bearer ")[1]
-        # try:
-        #     user = get_user(token=token)
-        #     if user is None:
-        #         await websocket.close()
-        #         return
-        # except JWTError as e:
-        #     await websocket.close()
-        #     return
-        user = manager.logined_user(websocket=websocket)
-        if user is None:
-            await websocket.close()
-            return
-        manager.print_active_connections()
-
-        if user:
-            await manager.connect(websocket=websocket, username=user)
-
-    except HTTPException as e:
-        await websocket.close()
-    except Exception as e:
-        await websocket.close()
-
-@app.websocket("/ws/send_message")
-async def send_message(websocket: WebSocket):
-    try:
-        # auth_header = websocket.headers.get("Authorization")
-        # if not auth_header:
-        #     await websocket.close()
-        #     return
-
-        # token = auth_header.split("Bearer ")[1]
-        # try:
-        #     user = get_user(token=token)
-        #     if user is None:
-        #         await websocket.close()
-        #         return
-        # except JWTError as e:
-        #     await websocket.close()
-        #     return
-        user = manager.logined_user(websocket=websocket)
-        if user is None:
-            await websocket.close()
-            return
-
-        if user:
-            manager.get_user_from_socket(username=user)
-            # await websocket.accept()
+        while True:
             data = await websocket.receive_text()
             print(data)
 
-            # send message
-            await websocket.send_text(data)
+            # JSON形式でデコード
+            message_data = json.loads(data)
 
-            
+            await manager.broadcast(f"Client #{group_id} says: {message_data['message']}", group_id)
+
+            # メッセージをデータベースに保存
+            # if not message_data.get("message") or not message_data.get("sender_fullname") or not message_data.get("group_id") or not message_data.get("sender_id"):
+            #     continue
+            try:
+
+                GroupMessage.saveMessage(db, message_data)
+            except ValueError as e:
+                await websocket.send_text(f"Error: {e}")
+
     except WebSocketDisconnect:
-        await manager.disconnect(websocket)
-    except Exception as e:
-        print(e)
+        manager.disconnect(websocket, group_id)
+        await manager.broadcast(f"Client #{group_id} left the chat", group_id)
+

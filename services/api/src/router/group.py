@@ -17,6 +17,7 @@ db_dependency = Depends(get_db)
 async def create_group(db: Session = db_dependency, user: User = Depends(get_current_user),
     name: str = Form(...), description: Optional[str] = Form(None), group_type: Optional[str] = Form(None)
 ):
+    print(name, description, group_type)
     try:
         new_group = Group(name=name, description=description, group_type=group_type, admin_id=user.id)
         db.add(new_group)

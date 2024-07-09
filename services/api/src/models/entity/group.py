@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from ..database import Base
 import enum
 from sqlalchemy.orm import relationship
+from .group_message import GroupMessage
 
 class GroupType(enum.Enum):
     PUBLIC = 'public'
