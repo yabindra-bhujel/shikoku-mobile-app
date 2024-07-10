@@ -184,7 +184,7 @@ const CalendarScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1,
-      backgroundColor: isDark ? "#333" : "white",
+      backgroundColor: isDark ? "#333" : "#E8E8E8",
      }}>
       <View
         style={{

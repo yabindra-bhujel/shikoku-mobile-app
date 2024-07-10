@@ -209,8 +209,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
     inputContainer: {
       marginTop: 20,
       marginHorizontal: 20,
-      justifyContent: "center",
-      alignItems: "center",
     },
     input: {
       width: "100%",
@@ -223,10 +221,9 @@ const CreateModal: React.FC<CreateModalProps> = ({
       padding: 10,
     },
     inputTitle: {
-      fontSize: 20,
+      fontSize: 16,
       fontWeight: "bold",
-      marginBottom: 10,
-      color: isDark ? "#ddd" : "#fff",
+      color: isDark ? "#fff" : "#000",
     },
     descriptionContainer: {
       marginHorizontal: 20,
@@ -234,7 +231,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     descriptionTitle: {
       marginTop: 10,
       fontSize: 16,
-      color: isDark ? "#fff" : "#ddd",
+      color: isDark ? "#fff" : "#000",
     },
     descriptionInput: {
       height: 150,
@@ -272,7 +269,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           </LinearGradient>
           <ScrollView style={{ backgroundColor: isDark ? "#333" : "#ddd" }}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputTitle}>Event Title</Text>
+              <Text style={styles.inputTitle}>Event Title:</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Enter event title"
@@ -282,13 +279,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
               />
             </View>
             <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionTitle}>Description</Text>
+              <Text style={styles.descriptionTitle}>Description: </Text>
               <TextInput
                 editable
                 multiline
                 style={styles.descriptionInput}
-                numberOfLines={4}
-                maxLength={40}
+                numberOfLines={5}
+                maxLength={200}
                 value={description}
                 onChangeText={(text) => setDescription(text)}
                 placeholder="Enter event description"

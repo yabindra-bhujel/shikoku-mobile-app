@@ -23,10 +23,26 @@ const EventModal = ({
   onUpdate,
 }) => {
   const today = new Date();
+
+  // Function to create a date object with a specific time
+  const setSpecificTime = (date, timeString) => {
+    const [hours, minutes, seconds] = timeString.split(":").map(Number);
+    const newDate = new Date(date);
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+    newDate.setSeconds(seconds || 0);
+    newDate.setMilliseconds(0);
+    return newDate;
+  };
+
+  // Initial state values
+  const initialStartTime = setSpecificTime(today, "09:00:00");
+  const initialEndTime = setSpecificTime(today, "18:00:00");
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [startTime, setStartTime] = useState(today);
-  const [endTime, setEndTime] = useState(today);
+  const [startTime, setStartTime] = useState(initialStartTime);
+  const [endTime, setEndTime] = useState(initialEndTime);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
 
@@ -37,14 +53,36 @@ const EventModal = ({
     if (event) {
       setTitle(event.title || "");
       setDescription(event.description || "");
-      setStartDate(new Date(event.startDate) || today);
-      setEndDate(new Date(event.endDate) || today);
+
+      const parsedStartDate = event.start ? new Date(event.start) : today;
+      const parsedEndDate = event.end ? new Date(event.end) : today;
+      setStartDate(isNaN(parsedStartDate.getTime()) ? today : parsedStartDate);
+      setEndDate(isNaN(parsedEndDate.getTime()) ? today : parsedEndDate);
+
+      // Extract and set the start and end times from the event
+      const parsedStartTime = event.startTime ? setSpecificTime(today, event.startTime) : initialStartTime;
+      const parsedEndTime = event.endTime ? setSpecificTime(today, event.endTime) : initialEndTime;
+      setStartTime(isNaN(parsedStartTime.getTime()) ? initialStartTime : parsedStartTime);
+      setEndTime(isNaN(parsedEndTime.getTime()) ? initialEndTime : parsedEndTime);
+    } else {
+      setStartTime(initialStartTime);
+      setEndTime(initialEndTime);
     }
   }, [event]);
 
   const handleSave = async () => {
     if (!title) {
       Alert.alert("Please enter title");
+      return;
+    }
+
+    // Validate dates and times
+    if (startDate > endDate) {
+      Alert.alert("Error", "Start date cannot be later than end date.");
+      return;
+    }
+    if (startDate.getTime() === endDate.getTime() && startTime > endTime) {
+      Alert.alert("Error", "Start time cannot be later than end time on the same date.");
       return;
     }
 
@@ -103,13 +141,6 @@ const EventModal = ({
     setEndTime(selectedDate || endTime);
   };
 
-  const currentStartTime = `${event.startTime.split(":")[0]}:${
-    event.startTime.split(":")[1]
-  }`;
-  const currentEndTime = `${event.endTime.split(":")[0]}:${
-    event.endTime.split(":")[1]
-  }`;
-
   return (
     <Modal
       visible={visible}
@@ -124,15 +155,25 @@ const EventModal = ({
             { backgroundColor: isDark ? "#333" : "#ddd" },
           ]}
         >
-          <View style={[styles.headerContainer,{
-            backgroundColor: isDark ? "#333" : "#0073e6"
-          }]}>
+          <View
+            style={[
+              styles.headerContainer,
+              { backgroundColor: isDark ? "#333" : "#0073e6" },
+            ]}
+          >
             <Text style={styles.headerText}>Edit event</Text>
           </View>
           <ScrollView style={styles.bodyContainer}>
-            <Text style={[styles.label, {
-              color: isDark ? "#ddd" : "#333",
-            }]}>Title</Text>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: isDark ? "#ddd" : "#333",
+                },
+              ]}
+            >
+              Title
+            </Text>
             <TextInput
               style={[
                 styles.input,
@@ -144,9 +185,16 @@ const EventModal = ({
               value={title}
               onChangeText={setTitle}
             />
-            <Text style={[styles.label, {
+            <Text
+              style={[
+                styles.label,
+                {
                   color: isDark ? "#ddd" : "#000",
-                }]}>Description</Text>
+                },
+              ]}
+            >
+              Description
+            </Text>
             <TextInput
               editable
               multiline
@@ -194,14 +242,12 @@ const EventModal = ({
                 value={startTime}
                 setValue={handleSelectStartTime}
                 isDark={isDark}
-                currentTime={currentStartTime}
               />
               <CustomTimePicker
                 title="End Time"
                 value={endTime}
                 setValue={handleSelectEndTime}
                 isDark={isDark}
-                currentTime={currentEndTime}
               />
             </View>
           </ScrollView>
@@ -224,6 +270,7 @@ const EventModal = ({
     </Modal>
   );
 };
+
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
@@ -254,7 +301,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
     marginTop: 10,
-
   },
   input: {
     height: 40,
