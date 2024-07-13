@@ -113,6 +113,8 @@ const ChatDetail = () => {
     };
 
 
+
+
     return (
         <View style={{ flex: 1 }}>
             {/* ヘッダー */}
