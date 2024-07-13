@@ -24,60 +24,17 @@ const ChatDetail = () => {
     const [group, setGroup] = useState<any>([]);
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [messages, setMessages] = useState<any>([]);
+    const [userId, setUserId] = useState<string>("");
 
     const [messageData, setMessageData] = useState({
         message: "",
-        sender_id:"",
+        sender_id: "",
         sender_fullname: "",
         group_id: groupId || "",
     });
 
-    useEffect(() => {
-        const getUser = async () => {
-            const user = await AuthServices.getUserProfile();
-            setUser(user.data);
-            setMessageData((prevData) => ({
-                ...prevData,
-                sender_id: user.data.user_id,
-                sender_fullname: `${user.data.first_name} ${user.data.last_name}`,
-            }));
-        };
-        getUser();
-    }, []);
-
-    useEffect(() => {
-        const initializeWebSocket = () => {
-            if (!groupId) return;
-
-            const ws = new WebSocket(`ws://localhost:8000/ws/1`);
-
-            ws.onopen = () => {
-                ws.send(JSON.stringify({ message: "Hello from client!" }));
-            };
-
-            ws.onmessage = (e) => {
-                // handle message
-            };
-
-            setWs(ws);
-        };
-
-        initializeWebSocket();
-
-        return () => {
-            if (ws) {
-                ws.close();
-            }
-        };
-    }, [groupId]);
-
-    const sendMessage = () => {
-        if (messageData.message.trim()) {
-            ws?.send(JSON.stringify(messageData));
-            setMessageData({ ...messageData, message: "" });
-        }
-    };
-
+    // グループ情報の取得
     useEffect(() => {
         const fetchGroup = async () => {
             if (!groupId) return;
@@ -93,34 +50,98 @@ const ChatDetail = () => {
         fetchGroup();
     }, [groupId]);
 
+    // ユーザー情報を取得
+    useEffect(() => {
+        const getUser = async () => {
+            const user = await AuthServices.getUserProfile();
+            setUser(user.data);
+            setUserId(user.data.user_id);
+            setMessageData((prevData) => ({
+                ...prevData,
+                sender_id: user.data.user_id,
+                sender_fullname: `${user.data.first_name} ${user.data.last_name}`,
+            }));
+        };
+        getUser();
+    }, []);
+
+
+
+    // WebSocketの初期化
+    useEffect(() => {
+        const initializeWebSocket = () => {
+            if (!groupId) return;
+
+            const socketUrl = `ws://localhost:8000/ws/${groupId}`;
+
+            const ws = new WebSocket(socketUrl);
+
+            ws.onopen = () => {
+                // 初期メッセージを送信しない
+            };
+
+
+            ws.onmessage = (e) => {
+                const message = JSON.parse(e.data);
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        ...message,
+                    },
+                ]);
+            };
+
+
+            setWs(ws);
+        };
+
+        initializeWebSocket();
+
+        return () => {
+            if (ws) {
+                ws.close();
+            }
+        };
+    }, [groupId]);
+
+    // メッセージ送信
+    const sendMessage = () => {
+        if (messageData.message.trim()) {
+            ws?.send(JSON.stringify(messageData));
+            setMessageData({ ...messageData, message: "" });
+        }
+    };
+
+
     return (
         <View style={{ flex: 1 }}>
-            {/* Header */}
+            {/* ヘッダー */}
             <View style={{ height: 54, backgroundColor: theme === "dark" ? "#333" : "#fff" }} />
             <GroupHeader groupData={group} />
 
-            {/* Message List */}
+            {/* メッセージリスト */}
             <ScrollView>
-            <Link href="/modal">Present modal</Link>
-                 {/* <GroupMessageList /> */}
+                <GroupMessageList messages={messages} userId={userId} />
+                {/* {renderMessages()} */}
             </ScrollView>
 
-            {/* Footer */}
+            {/* フッター */}
             <View style={styles.footerContainer}>
-            <TextInput
-                placeholder="メッセージを入力..."
-                style={styles.messageInput}
-                multiline
-                value={messageData.message}
-                onChangeText={(text) => setMessageData({ ...messageData, message: text })}
-            />
-            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                <Text style={styles.sendButtonText}>送信</Text>
-            </TouchableOpacity>
-        </View>
+                <TextInput
+                    placeholder="メッセージを入力..."
+                    style={styles.messageInput}
+                    multiline
+                    value={messageData.message}
+                    onChangeText={(text) => setMessageData({ ...messageData, message: text })}
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                    <Text style={styles.sendButtonText}>送信</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
+
 const styles = StyleSheet.create({
     footerContainer: {
         minHeight: 90,
@@ -153,6 +174,33 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
+    },
+    messageContainer: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    messageMeta: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 4,
+    },
+    senderName: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    timestamp: {
+        color: '#666',
+        fontSize: 12,
+    },
+    messageContent: {
+        backgroundColor: '#f0f0f0',
+        padding: 12,
+        borderRadius: 10,
+    },
+    messageText: {
+        fontSize: 14,
     },
 });
 

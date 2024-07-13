@@ -1,41 +1,11 @@
 import React, { useRef, useEffect } from "react";
 import { View, Text, StyleSheet, useColorScheme, FlatList } from "react-native";
-import { useRouter, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 
-
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: string;
-  isCurrentUser?: boolean;
-}
-
-interface GroupMessageListProps {
-  groupId?: string;
-}
-
-const GroupMessageList = (props: GroupMessageListProps) => {
+const GroupMessageList = ({ messages, userId }) => {
   const theme = useColorScheme();
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
-
-
-  const dummyMessages: Message[] = [
-    { id: "1", sender: "Alice", content: "Hello!", timestamp: "10:00 AM", isCurrentUser: false },
-    { id: "2", sender: "Bob", content: "Hi Alice!", timestamp: "10:05 AM", isCurrentUser: false },
-    { id: "3", sender: "Alice", content: "How are you?", timestamp: "10:10 AM", isCurrentUser: false },
-    { id: "4", sender: "Bob", content: "I'm good, thanks!", timestamp: "10:15 AM", isCurrentUser: false },
-    { id: "5", sender: "Alice", content: "Great!", timestamp: "10:20 AM", isCurrentUser: false },
-    { id: "6", sender: "You", content: "Hey everyone!", timestamp: "11:00 AM", isCurrentUser: true },
-    { id: "7", sender: "You", content: "This is a test message.", timestamp: "11:05 AM", isCurrentUser: true },
-    { id: "8", sender: "You", content: "How's everyone doing?", timestamp: "11:10 AM", isCurrentUser: true },
-    { id: "9", sender: "You", content: "Feel free to ask any questions!", timestamp: "11:15 AM", isCurrentUser: true },
-    { id: "10", sender: "Alice", content: "How are you? Thanks for joining this group let's make some fun..", timestamp: "10:10 AM", isCurrentUser: false },
-    { id: "11", sender: "You", content: "Feel free to ask any questions!", timestamp: "11:15 AM", isCurrentUser: true },
-    { id: "12", sender: "You", content: "Feel free to ask any questions!", timestamp: "11:15 AM", isCurrentUser: true },
-
-  ];
 
   const styles = StyleSheet.create({
     container: {
@@ -80,44 +50,47 @@ const GroupMessageList = (props: GroupMessageListProps) => {
     },
   });
 
-  const renderMessageItem = ({ item }: { item: Message }) => {
-    const messageContainerStyle = item.isCurrentUser
+  const scrollToBottom = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', scrollToBottom);
+
+    return unsubscribe;
+  }, [navigation, messages]); 
+
+  const renderMessageItem = ({ item }) => {
+    const isCurrentUser = item.sender_id === userId;
+
+    const messageContainerStyle = isCurrentUser
       ? [styles.messageContainer, styles.currentUserMessage]
       : [styles.messageContainer, styles.otherUserMessage];
 
-    const messageTextStyle = item.isCurrentUser
+    const messageTextStyle = isCurrentUser
       ? [styles.messageText, styles.currentUserMessageText]
       : [styles.messageText, styles.otherUserMessageText];
 
     return (
       <View key={item.id} style={messageContainerStyle}>
-        {!item.isCurrentUser && (
-          <Text style={styles.senderText}>{item.sender}</Text>
+        {!isCurrentUser && (
+          <Text style={styles.senderText}>{item.sender_fullname}</Text>
         )}
-        <Text style={messageTextStyle}>{item.content}</Text>
+        <Text style={messageTextStyle}>{item.message}</Text>
         <Text style={styles.timestampText}>{item.timestamp}</Text>
       </View>
     );
   };
 
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
   return (
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={dummyMessages}
+        data={messages}
         renderItem={renderMessageItem}
-        keyExtractor={(item) => item.id}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        onContentSizeChange={scrollToBottom} 
         scrollEnabled={false}
       />
     </View>
