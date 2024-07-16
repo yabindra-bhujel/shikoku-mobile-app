@@ -1,12 +1,13 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from ..models.entity.group_message import GroupMessage as GroupMessageModel
-from ..models.entity.group import Group
-from ..models.entity.users import User
 from datetime import datetime
+from src.models.entity.group_message import GroupMessage as GroupMessageModel
+from src.models.entity.group import Group
+from src.models.entity.users import User
+from ....schemas.GroupMessageSchema import GroupMessageSchema
+from typing import List
 
-
-class GroupMessage:
+class GroupMessageLogic:
 
     @staticmethod
     def saveMessage(db: Session, message: dict) -> GroupMessageModel:
@@ -39,14 +40,14 @@ class GroupMessage:
             db.refresh(new_message)
 
             return new_message
-
+        
         except SQLAlchemyError as e:
             db.rollback()
             raise e
-
+        
     # グループIDを指定してメッセージを取得
     @staticmethod
-    def getMessages(db: Session, group_id: int) -> list:
+    def getMessages(db: Session, group_id: int) -> List[GroupMessageSchema]:
         try:
             messages = (
                 db.query(GroupMessageModel)

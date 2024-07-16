@@ -7,6 +7,9 @@ const GroupMessageList = ({ messages, userId }) => {
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
 
+  console.log(messages);
+  console.log(userId);
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,

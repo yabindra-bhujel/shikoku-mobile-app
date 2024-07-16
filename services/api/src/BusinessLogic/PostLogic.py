@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
+from fastapi import HTTPException, status
 from typing import List
 from ..models.entity.post import Post, PostImage, PostVideo, PostFile
 from ..models.entity.comments import Comment
 from ..models.entity.likes import Likes
 from ..utils.post_utils import PostUtils
 
-class PostService:
+class PostLogic:
 
     @staticmethod
     def create_post(db: Session, user_id: int, content: str, files_data: dict) -> Post:
@@ -53,7 +54,7 @@ class PostService:
             joinedload(Post.files)
         ).all()
 
-        return [PostService._format_post_data(db, post) for post in posts]
+        return [PostLogic._format_post_data(db, post) for post in posts]
 
     @staticmethod
     def get_post_by_id(db: Session, post_id: int) -> dict:
@@ -66,8 +67,8 @@ class PostService:
         if not post:
             return None
 
-        post_data = PostService._format_post_data(db, post)
-        post_data["comments"] = PostService._get_comment(db, post_id)
+        post_data = PostLogic._format_post_data(db, post)
+        post_data["comments"] = PostLogic._get_comment(db, post_id)
         return post_data
 
 
@@ -82,8 +83,8 @@ class PostService:
             "created_at": post.created_at,
             "user_id": post.user_id,
             "is_active": post.is_active,
-            "total_comments": PostService._get_total_comments(db, post.id),
-            "total_likes": PostService._get_total_likes(db, post.id),
+            "total_comments": PostLogic._get_total_comments(db, post.id),
+            "total_likes": PostLogic._get_total_likes(db, post.id),
         }
 
     @staticmethod
@@ -104,7 +105,7 @@ class PostService:
                 "created_at": comment.created_at,
                 "user_id": comment.user_id,
                 "post_id": comment.post_id,
-                "replies": PostService._get_reply(db, comment.id),
+                "replies": PostLogic._get_reply(db, comment.id),
             }
             for comment in comments
         ]
@@ -122,3 +123,16 @@ class PostService:
             }
             for reply in replies
         ]
+    
+    @staticmethod
+    def delete_post(db: Session, post_id: int, user_id: int) -> None:
+        post = db.query(Post).filter(Post.id == post_id).first()
+
+        if post is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+        if post.user_id != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not allowed to delete this post")
+
+        db.delete(post)
+        db.commit()

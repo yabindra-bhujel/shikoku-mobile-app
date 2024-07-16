@@ -7,15 +7,15 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
+    ActivityIndicator,
 } from "react-native";
 import GroupHeader from "@/src/components/GroupChat/GroupHeader";
-import MessageFooter from "@/src/components/GroupChat/MessageFooter";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
 import { useEffect, useState } from "react";
 import AuthServices from "@/src/api/AuthServices";
 import GroupMessageList from "@/src/components/GroupChat/GroupMessageList";
-import { Link } from 'expo-router';
+import GroupMessageServices from "@/src/api/GroupMessageServices";
 
 const ChatDetail = () => {
     const theme = useColorScheme();
@@ -26,6 +26,7 @@ const ChatDetail = () => {
     const [user, setUser] = useState<any>(null);
     const [messages, setMessages] = useState<any>([]);
     const [userId, setUserId] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [messageData, setMessageData] = useState({
         message: "",
@@ -34,16 +35,39 @@ const ChatDetail = () => {
         group_id: groupId || "",
     });
 
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!groupId) return;
+
+            try {
+                setLoading(true);
+                const response = await GroupMessageServices.getGroupMessages(groupId);
+                sendMessage();
+                setMessages(response.data);
+            } catch (error) {
+                Alert.alert("Error", "Failed to fetch group messages from server. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMessages();
+    }, [groupId]);
+
     // グループ情報の取得
     useEffect(() => {
         const fetchGroup = async () => {
             if (!groupId) return;
 
             try {
+                setLoading(true);
                 const response = await GroupServices.getGroup(groupId);
                 setGroup(response.data);
             } catch (error) {
                 Alert.alert("Error", "Failed to fetch group data from server. Please try again later.");
+            }
+            finally {
+                setLoading(false);
             }
         };
 
@@ -112,8 +136,22 @@ const ChatDetail = () => {
         }
     };
 
+    // メッセージの履歴は なんか変ので メセッジの表示を変更　するかな
+
+    const renderMessages = () => {
+        if (loading) {
+            return <ActivityIndicator style={{
+                // make in the center
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
 
 
+
+            }} size="large" color="#00ff00" />;
+        }
+        return <GroupMessageList messages={messages} userId={userId} />;
+    };
 
     return (
         <View style={{ flex: 1 }}>
@@ -123,9 +161,11 @@ const ChatDetail = () => {
 
             {/* メッセージリスト */}
             <ScrollView>
-                <GroupMessageList messages={messages} userId={userId} />
-                {/* {renderMessages()} */}
+
+                {renderMessages()}
             </ScrollView>
+
+
 
             {/* フッター */}
             <View style={styles.footerContainer}>
