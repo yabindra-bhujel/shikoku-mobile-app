@@ -30,7 +30,7 @@ class Group(Base):
     # Relationships
     admin = relationship("User", back_populates="admin_groups")
     group_members = relationship("User", secondary=group_members_association, back_populates="member_groups")
-    group_messages = relationship("GroupMessage", back_populates="group")
+    group_messages = relationship("GroupMessage", back_populates="group", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'Group: {self.name}'
