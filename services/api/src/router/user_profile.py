@@ -145,28 +145,15 @@ async def update_profile(user_profile: UserProfileInput, request: Request, db: S
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
 
-    # グループ作成 ユーザ一覧の取得
-@router.get("/{group_id}", status_code=status.HTTP_200_OK)
+@router.get("/group_create", status_code=status.HTTP_200_OK)
 async def get_users(request: Request, group_id = int, db: Session = db_dependency, user: User = Depends(get_current_user)):
     try:
-        # グループに所属しているユーザを取得
-        group = db.query(Group).filter(Group.id == group_id).first()
-        if not group:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
-
         # すべてのユーザーを取得
         all_users = db.query(User).all()
 
-        # グループに所属しているユーザーIDのセットを取得
-        group_user_ids = {user.id for user in group.group_members}
-
-        # グループに所属していないユーザーをリストに追加、かつ現在のユーザーを除外 admin_id と user_id が同じ場合除外
         user_list = []
         for user in all_users:
-            if user.id not in group_user_ids and (group.admin_id != user.id or user.id != user.id):
-
                 user_profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
-
                 # ユーザの last name と first name を取得
                 if user_profile:
                     first_name = user_profile.first_name or ""
