@@ -81,19 +81,20 @@ const CreateGroup = ({ toggleCloseModal }) => {
 
   const handleCreateGroup = async () => {
     if (!groupName) {
-      Alert.alert("Please fill all the fields");
+      Alert.alert("Please fill the group name");
       return;
     }
-    const data = {
-      name: groupName,
-      description: description,
-      group_type: "Test",
-    };
     try {
+      const data = {
+        name: groupName,
+        description,
+        group_type: "private",
+      };
+      console.log(data, "anh ey..");
       const res = await GroupServices.createGroup(data);
       toggleCloseModal();
     } catch (error) {
-      Alert.alert("Something went wrong. Please try again.");
+      throw error;
     }
   };
 
