@@ -1,10 +1,14 @@
 from typing import List, Optional
+from sqlalchemy import func, desc
 import os
 import shutil
 from fastapi import HTTPException, Request, status
+from ..models.entity.user_profile import UserProfile
+from ..models.entity.group_message import GroupMessage
 from sqlalchemy.orm import Session
 from ..models.entity.users import User
 from ..models.entity.group import Group
+import pytz
 
 class GroupLogic:
     @staticmethod
@@ -26,29 +30,59 @@ class GroupLogic:
             db.rollback()
             raise HTTPException(detail=str(e))
 
-    @staticmethod
-    def get_groups(db: Session, user: User, request: Request) -> List[Group]:
-        try:
-            groups = db.query(Group).filter(
-                (Group.admin_id == user.id) |
-                (Group.group_members.any(id=user.id))
-            ).all()
 
-            for group in groups:
-                group.member_count = len(group.group_members)
+    @staticmethod
+    def get_groups(db: Session, user: User, request: Request):
+        try:
+            subquery = (
+                db.query(
+                    Group.id.label('group_id'),
+                    func.max(GroupMessage.created_at).label('last_message_time')
+                )
+                .outerjoin(GroupMessage, Group.id == GroupMessage.group_id)
+                .group_by(Group.id)
+                .subquery()
+            )
+
+            groups = (
+                db.query(Group, subquery.c.last_message_time)
+                .outerjoin(subquery, Group.id == subquery.c.group_id)
+                .filter(
+                    (Group.admin_id == user.id) |
+                    (Group.group_members.any(id=user.id))
+                )
+                .order_by(desc(subquery.c.last_message_time).nullslast())
+                .all()
+            )
 
             group_list = []
-            for group in groups:
+            for group, last_message_time in groups:
                 group_data = {
                     "id": group.id,
                     "name": group.name,
                     "admin_id": group.admin_id,
-                    "created_at": group.created_at,
-                    "member_count": group.member_count
+                    "created_at": group.created_at.astimezone(pytz.utc), 
+                    "member_count": len(group.group_members),
+                    "last_message": None,
+                    "group_image": str(request.url_for('static', path=group.group_image)) if group.group_image else None
                 }
 
-                if group.group_image:
-                    group_data["group_image"] = str(request.url_for('static', path=group.group_image))
+                if last_message_time:
+                    last_message = db.query(GroupMessage).filter(
+                        GroupMessage.group_id == group.id,
+                        GroupMessage.created_at == last_message_time
+                    ).first()
+
+                    if last_message:
+                        user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
+                        username = user_profile.first_name + " " + user_profile.last_name if user_profile else last_message.sender.username
+
+                        group_data["last_message"] = {
+                            "sender_id": last_message.sender_id,
+                            "message": last_message.message,
+                            "created_at": last_message.created_at.astimezone(pytz.utc),  
+                            "sender": username
+                        }
 
                 group_list.append(group_data)
 
@@ -56,6 +90,7 @@ class GroupLogic:
 
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
 
     @staticmethod
     def get_group(db: Session, group_id: int, request: Request) -> Group:
