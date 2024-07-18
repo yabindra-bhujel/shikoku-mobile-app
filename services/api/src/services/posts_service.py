@@ -9,7 +9,7 @@ from ..utils.post_utils import PostUtils
 from ..models.entity.user_profile import UserProfile
 from ..models.entity.users import User
 from fastapi import Request
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 import shutil
 
@@ -36,6 +36,7 @@ class PostService:
         with open(image_path, "rb") as file:
             file.write(image)
         return image_path
+    
     @staticmethod
     def create_post(db: Session, user_id: int, content: str, image_data: List[dict]) -> Post:
         try:
@@ -59,7 +60,7 @@ class PostService:
 
                     image_name = f"{new_post.id}_{image_info.filename}"
                     
-                    post_image = PostImage(post_id=new_post.id, url=image_name, image_data=image_bytes)
+                    post_image = PostImage(post_id=new_post.id, url=image_name)
                     db.add(post_image)
 
             db.commit()
@@ -127,11 +128,11 @@ class PostService:
         post_data =  {
             "id": post.id,
             "content": post.content,
-            "created_at": PostService._format_time(str(post.created_at)),
+            "created_at": post.created_at,
             "user": user,
             "is_active": post.is_active,
-            "total_comments": PostService._get_total_comments(db, post.id),
-            "total_likes": PostService._get_total_likes(db, post.id),
+            "total_comments": post.total_comments,
+            "total_likes": post.total_likes,
             "is_liked": is_liked,
         }
 
@@ -160,7 +161,7 @@ class PostService:
             {
                 "id": comment.id,
                 "content": comment.content,
-                "created_at": PostService._format_time(str(comment.created_at)),
+                "created_at": comment.created_at,
                 "post_id": comment.post_id,
                 "user": PostService.get_user_profile_by_user_id(db, comment.user_id, request),
             }
@@ -193,3 +194,4 @@ class PostService:
             return f"{minutes} 分{'' if minutes > 1 else ''}"
         else:
             return "今" 
+  

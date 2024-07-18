@@ -20,7 +20,7 @@ const CommentBox = ({comment, setComment, submitComment}) => {
         onChangeText={(text) => setComment(text)}
         multiline={true} 
         numberOfLines={1} 
-        maxLength={100} 
+        maxLength={5} 
       />
       <TouchableOpacity style={styles.sendButton} onPress={submitComment}>
         <Ionicons name="send" size={24} color="black" />

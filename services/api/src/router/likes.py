@@ -21,6 +21,7 @@ async def like_toggle(like: LikeInput, db: Session = db_dependency, user: User =
         if existing_like:
             db.delete(existing_like)
             db.commit()
+            like.post.total_likes -= 1
             return {"message": "Like removed successfully"}
         else:
             new_like = Likes(
@@ -32,6 +33,7 @@ async def like_toggle(like: LikeInput, db: Session = db_dependency, user: User =
             db.add(new_like)
             db.commit()
             db.refresh(new_like)
+            like.post.total_likes += 1
             return new_like
 
     except Exception as e:

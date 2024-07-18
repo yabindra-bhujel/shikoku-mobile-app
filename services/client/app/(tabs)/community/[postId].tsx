@@ -42,12 +42,14 @@ const PostDetail = () => {
       const data: PostDetailInterface = await response.data;
       setPost(data);
     } catch (error) {
-      console.error("Error fetching post:", error);
+      Alert.alert("Error", "Failed to fetch post. Please try again later.");
     }
   }
 
   const submitComment = async () => {
-    if (!comment) return;
+    if(comment.trim().length === 0) {
+      return;
+    }
 
     const commentData = {
       content: comment,
