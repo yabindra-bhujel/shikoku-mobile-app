@@ -48,7 +48,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ toggleCloseModal }) => {
         name: groupName,
         description,
         group_type: "private",
-        members: selectedUsers,
+        member_list: selectedUsers,
       };
       console.log(data, "group data");
       await GroupServices.createGroup(data);
