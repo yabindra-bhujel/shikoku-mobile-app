@@ -1,7 +1,5 @@
-from datetime import datetime, timezone
 from typing import List, Optional
-from sqlalchemy import func, select
-from sqlalchemy.orm import aliased
+from sqlalchemy import func, desc
 import os
 import shutil
 from fastapi import HTTPException, Request, status
@@ -32,53 +30,59 @@ class GroupLogic:
             db.rollback()
             raise HTTPException(detail=str(e))
 
+
     @staticmethod
-    def get_groups(db: Session, user: User, request: Request) -> List[Group]:
+    def get_groups(db: Session, user: User, request: Request):
         try:
-            groups = db.query(Group).filter(
-                (Group.admin_id == user.id) |
-                (Group.group_members.any(id=user.id))
-            ).all()
+            subquery = (
+                db.query(
+                    Group.id.label('group_id'),
+                    func.max(GroupMessage.created_at).label('last_message_time')
+                )
+                .outerjoin(GroupMessage, Group.id == GroupMessage.group_id)
+                .group_by(Group.id)
+                .subquery()
+            )
 
-            # 最新のメッセージを取得
-            for group in groups:
-                last_message = db.query(GroupMessage).filter(
-                    GroupMessage.group_id == group.id
-                ).order_by(GroupMessage.created_at.desc()).first()
-                if last_message:
-                    user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
-                    if user_profile:
-                        first_name = user_profile.first_name or ""
-                        last_name = user_profile.last_name or ""
-                        username = f"{first_name} {last_name}".strip()
-                    else:
-                        username = last_message.sender.username
-
-                    group.last_message = {
-                        "sender_id": last_message.sender_id,
-                        "message": last_message.message,
-                        "created_at": last_message.created_at.astimezone(pytz.utc),  # UTCに変換
-                        "sender": username
-                    }
-                else:
-                    group.last_message = None
-
-            for group in groups:
-                group.member_count = len(group.group_members)
+            groups = (
+                db.query(Group, subquery.c.last_message_time)
+                .outerjoin(subquery, Group.id == subquery.c.group_id)
+                .filter(
+                    (Group.admin_id == user.id) |
+                    (Group.group_members.any(id=user.id))
+                )
+                .order_by(desc(subquery.c.last_message_time).nullslast())
+                .all()
+            )
 
             group_list = []
-            for group in groups:
+            for group, last_message_time in groups:
                 group_data = {
                     "id": group.id,
                     "name": group.name,
                     "admin_id": group.admin_id,
-                    "created_at": group.created_at.astimezone(pytz.utc),  # UTCに変換
-                    "member_count": group.member_count,
-                    "last_message": group.last_message,
+                    "created_at": group.created_at.astimezone(pytz.utc), 
+                    "member_count": len(group.group_members),
+                    "last_message": None,
+                    "group_image": str(request.url_for('static', path=group.group_image)) if group.group_image else None
                 }
 
-                if group.group_image:
-                    group_data["group_image"] = str(request.url_for('static', path=group.group_image))
+                if last_message_time:
+                    last_message = db.query(GroupMessage).filter(
+                        GroupMessage.group_id == group.id,
+                        GroupMessage.created_at == last_message_time
+                    ).first()
+
+                    if last_message:
+                        user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
+                        username = user_profile.first_name + " " + user_profile.last_name if user_profile else last_message.sender.username
+
+                        group_data["last_message"] = {
+                            "sender_id": last_message.sender_id,
+                            "message": last_message.message,
+                            "created_at": last_message.created_at.astimezone(pytz.utc),  
+                            "sender": username
+                        }
 
                 group_list.append(group_data)
 
@@ -86,6 +90,7 @@ class GroupLogic:
 
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
 
     @staticmethod
     def get_group(db: Session, group_id: int, request: Request) -> Group:
