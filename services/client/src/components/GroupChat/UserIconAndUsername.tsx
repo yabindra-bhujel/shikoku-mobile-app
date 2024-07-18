@@ -1,95 +1,126 @@
-import React, { useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from "react-native";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import Feather from "@expo/vector-icons/Feather";
-import { useRouter, useNavigation } from "expo-router";
-import GroupServices from "@/src/api/GroupServices";
+import React from "react";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { Group } from "@/src/screens/Chat/GroupChat";
 
-interface Group {
-  id: number;
-  name: string;
-  description: string;
-  group_image?: string;
+interface UserIconAndUsernameProps {
+  groups: Group[];
 }
 
-const UserIconAndUsername = () => {
-  const router = useRouter();
-  const navigation = useNavigation();
-  const [groups, setGroups] = React.useState<Group[]>([]);
-
+const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
+  groups = [],
+}) => {
   const navigationToChatDetail = (groupId: number) => {
-    router.navigate(`chat/${groupId}`);
+    router.push(`chat/${groupId}`);
   };
 
-  const openButtonSheet = () => {
-  }
+  // Sort groups alphabetically by name
+  const sortedGroups = [...groups].sort((a, b) => a.name.localeCompare(b.name));
 
-  const fetchGroups = async () => {
-    try {
-      const response = await GroupServices.getGroups();
-      setGroups(response.data.groups);
-    } catch (error) {
-      Alert.alert("Error", "Failed to fetch groups data from server. Please try again later.");
+  // Group the sorted groups by their initial letter
+  const groupedGroups = sortedGroups.reduce((acc, group) => {
+    const firstLetter = group.name.charAt(0).toUpperCase();
+    if (!acc[firstLetter]) {
+      acc[firstLetter] = [];
     }
-  };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      fetchGroups();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+    acc[firstLetter].push(group);
+    return acc;
+  }, {} as Record<string, Group[]>);
 
   return (
-    <View>
-      {groups.map((group) => (
-        <TouchableOpacity key={group.id} onPress={() => navigationToChatDetail(group.id)}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 10,
-              borderBottomWidth: 1,
-              borderBottomColor: "lightgray",
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={{
-                  height: 50,
-                  width: 50,
-                  borderRadius: 50,
-                  backgroundColor: "lightgray",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      style={styles.GroupListContainer}
+    >
+      {Object.keys(groupedGroups)
+        .sort()
+        .map((letter) => (
+          <View key={letter}>
+            <Text style={styles.sectionHeader}>{letter}</Text>
+            {groupedGroups[letter].map((group: Group) => (
+              <TouchableOpacity
+                key={group.id}
+                onPress={() => navigationToChatDetail(group.id)}
               >
-                {group.group_image ? (
-                  <Image
-                    source={{ uri: group.group_image }}
-                    style={{ height: 50, width: 50, borderRadius: 50 }}
-                  />
-                ) : (
-                  <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-                    {group.name.charAt(0).toUpperCase()}
-                  </Text>
-                )}
-              </View>
-              <View style={{ marginLeft: 10 }}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>{group.name}</Text>
-              </View>
-            </View>
+                <View style={styles.groupItem}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View style={styles.groupImageContainer}>
+                      {group.group_image ? (
+                        <Image
+                          source={{ uri: group.group_image }}
+                          style={styles.groupImage}
+                        />
+                      ) : (
+                        <Text style={styles.groupInitial}>
+                          {group.name.charAt(0).toUpperCase()}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={{ marginLeft: 10 }}>
+                      <Text style={styles.groupName}>{group.name}</Text>
+                    </View>
+                  </View>
 
-            <TouchableOpacity>
-              <Feather name="more-horizontal" size={24} color="green" />
-            </TouchableOpacity>
+                  <TouchableOpacity>
+                    <AntDesign name="right" size={22} color="green" />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
-        </TouchableOpacity>
-      ))}
-    </View>
+        ))}
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  GroupListContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  sectionHeader: {
+    fontSize: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  groupItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 1,
+    backgroundColor: "#fff",
+    borderBottomColor: "lightgray",
+  },
+  groupImageContainer: {
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+    backgroundColor: "lightgray",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  groupImage: {
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+  },
+  groupInitial: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  groupName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+});
 
 export default UserIconAndUsername;

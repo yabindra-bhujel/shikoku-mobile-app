@@ -1,5 +1,6 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
 
 const StackLayout = () => {
   return (
@@ -7,24 +8,36 @@ const StackLayout = () => {
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false,
+          title: "Group Chat",
+          headerTitleStyle: {
+            fontSize: 20,
+            fontWeight: "bold",
+          },
+          headerLeft: () => (
+            <AntDesign
+              name="left"
+              size={22}
+              color="black"
+              onPress={() => router.back()}
+            />
+          ),
+          headerShadowVisible: false,
         }}
       />
 
-    <Stack.Screen
+      <Stack.Screen
         name="[groupId]"
         options={{
           headerShown: false,
         }}
       />
 
-<Stack.Screen
+      <Stack.Screen
         name="modal"
         options={{
-          presentation: 'modal',
+          presentation: "modal",
         }}
       />
-
     </Stack>
   );
 };

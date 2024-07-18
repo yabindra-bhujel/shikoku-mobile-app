@@ -9,11 +9,10 @@ import {
   Alert,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { SimpleLineIcons } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
-import { Link } from 'expo-router';
 
 
 
@@ -145,22 +144,10 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
         </View>
         <View
           style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 10,
+            
           }}
         >
-          <Link href="modal">
-          heeeeleleell
-          {/* <TouchableOpacity  >
-            <AntDesign
-              name="setting"
-              size={24}
-              color={theme === "dark" ? "#fff" : "#000"}
-              style={{ marginRight: 10, fontWeight: "bold" }}
-            />
-          </TouchableOpacity> */}
-          </Link>
+          <SimpleLineIcons name="options" size={24} color="black" />
         </View>
       </View>
     </View>

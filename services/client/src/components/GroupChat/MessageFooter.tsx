@@ -32,7 +32,7 @@ const MessageFooter: React.FC<Props> = ({ WebSocket, messageData, setMessageData
     const styles = StyleSheet.create({
         footerContainer: {
             minHeight: 90,
-            maxHeight: 120,
+            maxHeight: 150,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",

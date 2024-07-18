@@ -16,9 +16,13 @@ import UserServices, { UserData } from "@/src/api/UserServices";
 
 interface CreateGroupProps {
   toggleCloseModal: () => void;
+  refreshGroupList: () => void;
 }
 
-const CreateGroup: React.FC<CreateGroupProps> = ({ toggleCloseModal }) => {
+const CreateGroup: React.FC<CreateGroupProps> = ({
+  toggleCloseModal,
+  refreshGroupList,
+}) => {
   const [groupName, setGroupName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
@@ -43,16 +47,18 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ toggleCloseModal }) => {
       Alert.alert("Please fill the group name");
       return;
     }
+    const data = {
+      name: groupName,
+      description,
+      group_type: "private",
+      member_list: selectedUsers,
+    };
     try {
-      const data = {
-        name: groupName,
-        description,
-        group_type: "private",
-        member_list: selectedUsers,
-      };
-      console.log(data, "group data");
-      await GroupServices.createGroup(data);
-      toggleCloseModal();
+      const res = await GroupServices.createGroup(data);
+      if (res) {
+        refreshGroupList();
+        toggleCloseModal();
+      }
     } catch (error) {
       Alert.alert("Something went wrong. Please try again.");
     }
@@ -79,47 +85,49 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ toggleCloseModal }) => {
             <Ionicons name="close-sharp" size={24} color="black" />
           </TouchableOpacity>
         </View>
-        <TextInput
-          label="Group Name"
-          mode="outlined"
-          value={groupName}
-          onChangeText={setGroupName}
-          style={styles.input}
-        />
-        <TextInput
-          label="Description"
-          mode="outlined"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          style={[styles.input, styles.description]}
-        />
-        <TextInput
-          label="Search Users"
-          mode="outlined"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={styles.input}
-        />
-        <ScrollView style={styles.userListContainer}>
-          {filteredUsers.map((user) => (
-            <View key={user.user_id} style={styles.userItem}>
-              <View style={styles.userInfo}>
-                <UserAvatar url={user.user_image} width={30} height={30} />
-                <Text style={styles.userName}>{user.username}</Text>
+        <View>
+          <TextInput
+            label="Group Name"
+            mode="outlined"
+            value={groupName}
+            onChangeText={setGroupName}
+            style={styles.input}
+          />
+          <TextInput
+            label="Description"
+            mode="outlined"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            style={[styles.input, styles.description]}
+          />
+          <TextInput
+            label="Search Users"
+            mode="outlined"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.input}
+          />
+          <ScrollView style={styles.userListContainer}>
+            {filteredUsers.map((user) => (
+              <View key={user.user_id} style={styles.userItem}>
+                <View style={styles.userInfo}>
+                  <UserAvatar url={user.user_image} width={30} height={30} />
+                  <Text style={styles.userName}>{user.username}</Text>
+                </View>
+                <CheckBox
+                  checkedIcon="checkbox-marked"
+                  uncheckedIcon="checkbox-blank-outline"
+                  iconType="material-community"
+                  checkedColor="green"
+                  checked={selectedUsers.includes(user.user_id)}
+                  onPress={() => toggleUserSelection(user.user_id)}
+                />
               </View>
-              <CheckBox
-                checkedIcon="checkbox-marked"
-                uncheckedIcon="checkbox-blank-outline"
-                iconType="material-community"
-                checkedColor="green"
-                checked={selectedUsers.includes(user.user_id)}
-                onPress={() => toggleUserSelection(user.user_id)}
-              />
-            </View>
-          ))}
-        </ScrollView>
-        <View style={styles.footer}>
+            ))}
+          </ScrollView>
+        </View>
+        <View>
           <Button
             mode="contained"
             onPress={handleCreateGroup}
@@ -139,11 +147,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   container: {
-    marginTop: 20,
     padding: 20,
     backgroundColor: "white",
     borderRadius: 10,
-    height: "92%",
   },
   header: {
     flexDirection: "row",
@@ -153,15 +159,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    fontWeight: "bold",
   },
   input: {
-    marginBottom: 20,
+    marginBottom: 20
   },
   description: {
     height: 100,
   },
   userListContainer: {
-    maxHeight: "40%", // Adjust as necessary
+    maxHeight: 300,
   },
   userItem: {
     flexDirection: "row",
@@ -179,9 +186,12 @@ const styles = StyleSheet.create({
     color: "black",
     marginLeft: 10,
   },
-  footer: {},
+  footer: {
+    justifyContent: "center",
+  },
   createButton: {
-    marginTop: 10,
+    marginTop: 15,
+    padding: 5,
   },
 });
 
