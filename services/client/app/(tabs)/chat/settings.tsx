@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import SettingModal from "@/src/components/GroupChat/SettingModel";
 
-const ChatSettings = () => {
+const ChatSettings = (groupId )=> {
   return (
-    <View>
-      <Text>ChatSettings</Text>
-    </View>
+    <SettingModal/>
   );
 };
 

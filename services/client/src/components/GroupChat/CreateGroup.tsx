@@ -47,6 +47,10 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       Alert.alert("Please fill the group name");
       return;
     }
+    if (!selectedUsers.length) {
+      Alert.alert("Please select at least one user");
+      return;
+      }
     const data = {
       name: groupName,
       description,

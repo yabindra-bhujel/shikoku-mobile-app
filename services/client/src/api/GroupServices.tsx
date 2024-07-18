@@ -10,7 +10,7 @@ const GroupServices = {
     }
   },
 
-  async getGroup(id: string) {
+  async getGroupById(id: string) {
     try {
       const result = await axiosInstance.get(`/groups/${id}`);
       return result;
@@ -46,7 +46,7 @@ const GroupServices = {
     }
   },
 
-  async chnageGroupImage(id: string, data: any) {
+  async changeGroupImage(id: string, data: any) {
     try {
       const result = await axiosInstance.post(
         `/groups/${id}/update_icon`,

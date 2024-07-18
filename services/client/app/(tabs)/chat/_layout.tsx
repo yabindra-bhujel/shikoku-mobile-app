@@ -38,6 +38,10 @@ const StackLayout = () => {
           presentation: "modal",
         }}
       />
+      <Stack.Screen name="settings" options={{
+        title: "Settings",
+        headerBackTitle: "Back"
+      }} />
     </Stack>
   );
 };
