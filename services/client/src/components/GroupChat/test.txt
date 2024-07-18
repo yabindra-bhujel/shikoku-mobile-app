@@ -1,0 +1,46 @@
+import React, { useState } from 'react';
+import { View, Text, FlatList, SafeAreaView } from 'react-native';
+import { CheckBox } from 'react-native-elements';
+
+// Sample data representing the users fetched from the database
+const users = [
+  { id: '1', name: 'User 1' },
+  { id: '2', name: 'User 2' },
+  { id: '3', name: 'User 3' },
+];
+
+const UserList = (toggleCloseModal) => {
+  const [checkedUserIds, setCheckedUserIds] = useState<string[]>([]);
+
+  const toggleCheckbox = (userId: string) => {
+    setCheckedUserIds(prevCheckedUserIds =>
+      prevCheckedUserIds.includes(userId)
+        ? prevCheckedUserIds.filter(id => id !== userId)
+        : [...prevCheckedUserIds, userId]
+    );
+  };
+
+  const renderItem = ({ item }: { item: { id: string; name: string } }) => (
+    <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}>
+      <CheckBox
+        checked={checkedUserIds.includes(item.id)}
+        onPress={() => toggleCheckbox(item.id)}
+      />
+      <Text>{item.name}</Text>
+    </View>
+  );
+
+  return (
+    <SafeAreaView>
+      <FlatList
+        data={users}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+      />
+      {/* For debugging purposes, you can display the list of checked user IDs */}
+      <Text>Checked User IDs: {checkedUserIds.join(', ')}</Text>
+    </SafeAreaView>
+  );
+};
+
+export default UserList;

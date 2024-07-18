@@ -22,6 +22,9 @@ const GroupChat = () => {
     router.back();
   };
 
+  const toggleOpenCloseModal = () => {
+    setIsModalVisible(!isModalVisible);
+  }
   const toggleOpneModal = () => {
     setIsModalVisible(true);
   };
@@ -105,13 +108,13 @@ const GroupChat = () => {
       <UserIconAndUsername />
 
       {/* Add button */}
-      <TouchableOpacity style={styles.addButton} onPress={toggleOpneModal}>
+      <TouchableOpacity style={styles.addButton} onPress={toggleOpenCloseModal}>
         <AntDesign name="plus" size={30} color="#fff" />
       </TouchableOpacity>
 
       {/* Modal for Add Form */}
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
-        <CreateGroup toggleCloseModal={toggleCloseModal} />
+        <CreateGroup toggleCloseModal={toggleOpenCloseModal} />
       </Modal>
     </View>
   );
