@@ -1,10 +1,16 @@
+from datetime import datetime, timezone
 from typing import List, Optional
+from sqlalchemy import func, select
+from sqlalchemy.orm import aliased
 import os
 import shutil
 from fastapi import HTTPException, Request, status
+from ..models.entity.user_profile import UserProfile
+from ..models.entity.group_message import GroupMessage
 from sqlalchemy.orm import Session
 from ..models.entity.users import User
 from ..models.entity.group import Group
+import pytz
 
 class GroupLogic:
     @staticmethod
@@ -34,6 +40,29 @@ class GroupLogic:
                 (Group.group_members.any(id=user.id))
             ).all()
 
+            # 最新のメッセージを取得
+            for group in groups:
+                last_message = db.query(GroupMessage).filter(
+                    GroupMessage.group_id == group.id
+                ).order_by(GroupMessage.created_at.desc()).first()
+                if last_message:
+                    user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
+                    if user_profile:
+                        first_name = user_profile.first_name or ""
+                        last_name = user_profile.last_name or ""
+                        username = f"{first_name} {last_name}".strip()
+                    else:
+                        username = last_message.sender.username
+
+                    group.last_message = {
+                        "sender_id": last_message.sender_id,
+                        "message": last_message.message,
+                        "created_at": last_message.created_at.astimezone(pytz.utc),  # UTCに変換
+                        "sender": username
+                    }
+                else:
+                    group.last_message = None
+
             for group in groups:
                 group.member_count = len(group.group_members)
 
@@ -43,8 +72,9 @@ class GroupLogic:
                     "id": group.id,
                     "name": group.name,
                     "admin_id": group.admin_id,
-                    "created_at": group.created_at,
-                    "member_count": group.member_count
+                    "created_at": group.created_at.astimezone(pytz.utc),  # UTCに変換
+                    "member_count": group.member_count,
+                    "last_message": group.last_message,
                 }
 
                 if group.group_image:
