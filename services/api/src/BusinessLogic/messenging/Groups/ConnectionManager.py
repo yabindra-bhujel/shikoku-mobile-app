@@ -19,10 +19,20 @@ class ConnectionManager:
 
     # ユーザーが接続を切断したときに呼び出される
     def disconnect(self, websocket: WebSocket, group_id: int):
-        # グループからソケットを削除
-        self.active_connections[group_id].remove(websocket)
-        if not self.active_connections[group_id]:
-            del self.active_connections[group_id]
+        # グループIDがアクティブな接続に存在するか確認
+        if group_id in self.active_connections:
+            # グループからソケットを削除
+            try:
+                self.active_connections[group_id].remove(websocket)
+                # グループ内の接続が空になった場合はグループを削除
+                if not self.active_connections[group_id]:
+                    del self.active_connections[group_id]
+            except ValueError:
+                # ソケットがリストに見つからない場合は無視
+                pass
+        else:
+            pass
+
 
     # グループ ID に関連付けられたすべての接続にメッセージを送信
     async def broadcast(self, message: dict, group_id: int):
