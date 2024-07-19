@@ -67,6 +67,7 @@ const MessageFooter: React.FC<Props> = ({ WebSocket, messageData, setMessageData
 
     return (
         <View style={styles.footerContainer}>
+        
             <TextInput
                 placeholder="メッセージを入力..."
                 style={styles.messageInput}

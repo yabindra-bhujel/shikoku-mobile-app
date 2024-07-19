@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Modal, StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
-import { TextInput, Button, Text as PaperText } from "react-native-paper";
+import { Modal, StyleSheet, Text, View, Alert } from "react-native";
+import { TextInput, Button } from "react-native-paper";
 import GroupServices from "@/src/api/GroupServices";
 
 interface ChangeModalTypes {
@@ -9,6 +9,7 @@ interface ChangeModalTypes {
   currentGroupId: number;
   groupInfo: any;
   refresDetaiScreen: () => void;
+  onUpdateGroup: (data: { name: string; description: string }) => void;
 }
 
 const ChangeNameModal: React.FC<ChangeModalTypes> = ({
@@ -17,25 +18,41 @@ const ChangeNameModal: React.FC<ChangeModalTypes> = ({
   currentGroupId,
   groupInfo,
   refresDetaiScreen,
+  onUpdateGroup,
 }) => {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
+  const [initialGroupName, setInitialGroupName] = useState("");
+  const [initialGroupDescription, setInitialGroupDescription] = useState("");
 
   useEffect(() => {
     setGroupName(groupInfo.name);
     setGroupDescription(groupInfo.description);
+    setInitialGroupName(groupInfo.name);
+    setInitialGroupDescription(groupInfo.description);
   }, [groupInfo]);
 
   const handleUpdateGroup = async () => {
+    // Check if the name or description has changed
+    if (
+      groupName === initialGroupName &&
+      groupDescription === initialGroupDescription
+    ) {
+      onClose();
+      return;
+    }
+
     const data = {
-        name: groupName,
-        description: groupDescription,
-        group_type: "private"
+      name: groupName,
+      description: groupDescription,
+      group_type: "private",
     };
-    console.log(data)
     try {
-      await GroupServices.updateGroup(currentGroupId, data);
+      const res = await GroupServices.updateGroup(currentGroupId, data);
+      Alert.alert("Success", "Group updated successfully.");
       refresDetaiScreen();
+      onUpdateGroup(data);
+      onClose();
     } catch (error) {
       Alert.alert("Error", "Failed to update group. Please try again.");
     }
@@ -45,22 +62,22 @@ const ChangeNameModal: React.FC<ChangeModalTypes> = ({
     <Modal visible={visible} transparent={true} animationType="slide">
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalText}>グループの更新</Text>
-          </View>
+          <Text style={styles.modalText}>グループの更新</Text>
           <View style={styles.modalBody}>
             <TextInput
               label="グループ名"
               mode="outlined"
               value={groupName}
-              onChangeText={setGroupName}
+              onChangeText={(newGroupName) => setGroupName(newGroupName)}
               style={styles.input}
             />
             <TextInput
               label="グループの説明"
               mode="outlined"
               value={groupDescription}
-              onChangeText={setGroupDescription}
+              onChangeText={(newDescription) =>
+                setGroupDescription(newDescription)
+              }
               multiline
               style={[styles.input, styles.description]}
             />
@@ -95,33 +112,27 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalHeader: {
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    borderRadius: 20,
+    width: "90%",
   },
   modalBody: {
     marginTop: 20,
   },
   modalText: {
     fontSize: 20,
+    marginTop: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    alignItems: "flex-start",
   },
   input: {
     marginBottom: 20,
-    width: 250,
-    maxWidth: 270,
+    width: "100%",
   },
   description: {
     height: 100,
   },
   modalFooter: {
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",

@@ -8,7 +8,7 @@ const StackLayout = () => {
       <Stack.Screen
         name="index"
         options={{
-          title: "Group Chat",
+          title: "チャットリスト",
           headerTitleStyle: {
             fontSize: 20,
             fontWeight: "bold",
@@ -39,13 +39,13 @@ const StackLayout = () => {
         }}
       />
       <Stack.Screen name="settings" options={{
-        title: "Settings",
-        headerBackTitle: "Back"
+        title: "グループの設定",
+        headerBackTitle: "戻る"
       }} />
 
       <Stack.Screen name="members" options={{
-        title: "Member list",
-        headerBackTitle: "Back"
+        title: "メンバーリスト",
+        headerBackTitle: "戻る"
       }} />
 
     </Stack>

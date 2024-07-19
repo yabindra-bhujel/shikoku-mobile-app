@@ -7,52 +7,6 @@ const GroupMessageList = ({ messages, userId }) => {
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation();
 
-  console.log(messages);
-  console.log(userId);
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingHorizontal: 10,
-      paddingTop: 10,
-    },
-    messageContainer: {
-      maxWidth: "80%",
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 8,
-      marginBottom: 10,
-    },
-    currentUserMessage: {
-      alignSelf: "flex-end",
-      backgroundColor: "#DCF8C6",
-    },
-    otherUserMessage: {
-      alignSelf: "flex-start",
-      backgroundColor: "#E8E8E8",
-    },
-    senderText: {
-      fontSize: 12,
-      marginBottom: 2,
-      color: "#666",
-    },
-    messageText: {
-      fontSize: 16,
-      lineHeight: 20,
-      color: "#000",
-    },
-    currentUserMessageText: {
-      color: "#000",
-    },
-    otherUserMessageText: {},
-    timestampText: {
-      fontSize: 10,
-      alignSelf: "flex-end",
-      color: "#999",
-      marginTop: 2,
-    },
-  });
-
   const scrollToBottom = () => {
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd({ animated: true });
@@ -101,3 +55,46 @@ const GroupMessageList = ({ messages, userId }) => {
 };
 
 export default GroupMessageList;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+  },
+  messageContainer: {
+    maxWidth: "80%",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  currentUserMessage: {
+    alignSelf: "flex-end",
+    backgroundColor: "#DCF8C6",
+  },
+  otherUserMessage: {
+    alignSelf: "flex-start",
+    backgroundColor: "#E8E8E8",
+  },
+  senderText: {
+    fontSize: 12,
+    marginBottom: 2,
+    color: "#666",
+  },
+  messageText: {
+    fontSize: 16,
+    lineHeight: 20,
+    color: "#000",
+  },
+  currentUserMessageText: {
+    color: "#000",
+  },
+  otherUserMessageText: {},
+  timestampText: {
+    fontSize: 10,
+    alignSelf: "flex-end",
+    color: "#999",
+    marginTop: 2,
+  },
+});

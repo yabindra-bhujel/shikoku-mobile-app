@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import UserIconAndUsername from "@/src/components/GroupChat/UserIconAndUsername";
 import CreateGroup from "@/src/components/GroupChat/CreateGroup";
 import GroupServices from "@/src/api/GroupServices";
+import { useFocusEffect } from "@react-navigation/native";
 
 export interface Group {
   id: number;
@@ -41,10 +42,11 @@ const GroupChat = () => {
     }
   };
 
-  useEffect(() => {
-    fetchGroups();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroups();
+    }, [])
+  );
   const handleRefreshGroup = () => {
     fetchGroups();
   };

@@ -30,7 +30,11 @@ const GroupServices = {
 
   async updateGroup(id: number, data: any) {
     try {
-      const result = await axiosInstance.put(`/groups/${id}`, data);
+      const result = await axiosInstance.put(`/groups/${id}`, data, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
       return result;
     } catch (error) {
       throw error;
@@ -77,6 +81,14 @@ const GroupServices = {
           },
         }
       );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async leaveGroup(id: number) {
+    try {
+      const result = await axiosInstance.post(`/groups/${id}/leave`);
       return result;
     } catch (error) {
       throw error;
