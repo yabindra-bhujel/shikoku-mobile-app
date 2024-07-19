@@ -17,11 +17,17 @@ import GroupServices from "@/src/api/GroupServices";
 export interface GroupData {
   id: string;
   name: string;
+  admin_id: number;
   description: string;
   group_image?: string;
   member_count?: number;
+  group_members?: {
+    id: number;
+    profile: {
+      fullname: string;
+    };
+  }[];
 }
-
 const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
   const theme = useColorScheme();
   const router = useRouter();

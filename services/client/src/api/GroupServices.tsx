@@ -46,6 +46,26 @@ const GroupServices = {
     }
   },
 
+  async removeMemberFromGroup(groupId: number, deleteId: number) {
+    try {
+      const formData = new URLSearchParams();
+      formData.append("member_id", deleteId.toString());
+
+      const result = await axiosInstance.post(
+        `/groups/${groupId}/remove_members`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async changeGroupImage(id: string, data: any) {
     try {
       const result = await axiosInstance.post(
@@ -57,7 +77,6 @@ const GroupServices = {
           },
         }
       );
-
       return result;
     } catch (error) {
       throw error;

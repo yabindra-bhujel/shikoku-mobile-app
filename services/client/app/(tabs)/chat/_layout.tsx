@@ -42,6 +42,12 @@ const StackLayout = () => {
         title: "Settings",
         headerBackTitle: "Back"
       }} />
+
+      <Stack.Screen name="members" options={{
+        title: "Member list",
+        headerBackTitle: "Back"
+      }} />
+
     </Stack>
   );
 };

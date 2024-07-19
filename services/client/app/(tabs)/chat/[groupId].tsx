@@ -23,6 +23,7 @@ import {
     description: string;
     group_image?: string;
     member_count?: number;
+    admin_id: number;
   }
   
   const ChatDetail = () => {

@@ -13,6 +13,7 @@ import UserAvatar from "../UserAvatar";
 import { CheckBox } from "react-native-elements";
 import GroupServices from "@/src/api/GroupServices";
 import UserServices, { UserData } from "@/src/api/UserServices";
+import { useUser } from "@/src/hooks/UserContext";
 
 interface CreateGroupProps {
   toggleCloseModal: () => void;
@@ -23,11 +24,18 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   toggleCloseModal,
   refreshGroupList,
 }) => {
+  const { loggedInUserId } = useUser();
   const [groupName, setGroupName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  useEffect(() => {
+    if (loggedInUserId !== null) {
+      setSelectedUsers([loggedInUserId]);
+    }
+  }, [loggedInUserId]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,13 +58,14 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
     if (!selectedUsers.length) {
       Alert.alert("Please select at least one user");
       return;
-      }
+    }
     const data = {
       name: groupName,
       description,
       group_type: "private",
       member_list: selectedUsers,
     };
+    console.log(data);
     try {
       const res = await GroupServices.createGroup(data);
       if (res) {
@@ -76,8 +85,10 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
     );
   };
 
-  const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      user.user_id !== loggedInUserId // Exclude logged-in user
   );
 
   return (
@@ -166,7 +177,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   input: {
-    marginBottom: 20
+    marginBottom: 20,
   },
   description: {
     height: 100,

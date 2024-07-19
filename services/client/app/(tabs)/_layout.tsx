@@ -1,7 +1,9 @@
+import { UserProvider } from "@/src/hooks/UserContext";
 import { Stack } from "expo-router";
 
 const TabLayout = () => {
   return (
+    <UserProvider>
     <Stack>
       <Stack.Screen
         name="home"
@@ -45,6 +47,7 @@ const TabLayout = () => {
       />
     
     </Stack>
+    </UserProvider>
   );
 };
 

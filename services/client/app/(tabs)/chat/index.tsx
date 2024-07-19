@@ -1,4 +1,3 @@
-import { View, Text } from "react-native";
 import React from "react";
 import GroupChat from "@/src/screens/Chat/GroupChat";
 
