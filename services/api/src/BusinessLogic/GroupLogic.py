@@ -18,6 +18,26 @@ class GroupLogic:
           member_list: List[int]
           ) -> Group:
         try:
+            if not name:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group name is required")
+            
+            if not member_list:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group members are required")
+            
+            if user.id not in member_list:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admin must be a member of the group")
+            
+            if len(member_list) != len(set(member_list)):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Duplicate members are not allowed")
+            
+            if len(member_list) == 0:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group must have at least 1 member")
+            
+            # check self in member list
+            if user.id  in member_list:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admin must be a member of the group")
+        
+            
             new_group = Group(name=name, description=description, group_type=group_type, admin_id=user.id)
             db.add(new_group)
             db.commit()
@@ -230,6 +250,8 @@ class GroupLogic:
     @staticmethod
     def add_member(db: Session, group: Group, member_ids: List) -> Group:
         try:
+            if not member_ids:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Member ids are required")
 
             for member_id in member_ids:
                 member = db.query(User).filter(User.id == member_id).first()
@@ -250,7 +272,13 @@ class GroupLogic:
     @staticmethod
     def remove_member(db: Session, group: Group, member_id: int) -> Group:
         try:
+            # check if member is in the group
             member = db.query(User).filter(User.id == member_id).first()
+
+            # check member is group admin
+            if member.id == group.admin_id:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin cannot be removed self from the group")
+            
             if not member:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
             
