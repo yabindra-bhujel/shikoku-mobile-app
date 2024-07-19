@@ -33,11 +33,6 @@ class GroupLogic:
             if len(member_list) == 0:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group must have at least 1 member")
             
-            # check self in member list
-            if user.id  in member_list:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admin must be a member of the group")
-        
-            
             new_group = Group(name=name, description=description, group_type=group_type, admin_id=user.id)
             db.add(new_group)
             db.commit()
