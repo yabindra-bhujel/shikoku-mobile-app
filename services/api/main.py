@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from src.router.posts import router as post_router
 from src.router.comments import router as comment_router
 from src.router.likes import router as like_router
+from src.router.reminder import router as reminder_router
 import logging
 from src.message.ConnectionManager import ConnectionManager
 from src.message.PersonalMessage import PersonalMessage
@@ -53,6 +54,7 @@ app.include_router(user_profile_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(like_router)
+app.include_router(reminder_router)
 
 @app.get("/")
 async def root(user = Depends(authenticate_user)):
