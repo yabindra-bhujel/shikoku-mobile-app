@@ -14,9 +14,9 @@ class GroupLogic:
     @staticmethod
     def create_group(
         db: Session, user: User, name: str,
-          description: Optional[str], group_type: Optional[str],
-          member_list: List[int]
-          ) -> Group:
+        description: Optional[str], group_type: Optional[str],
+        member_list: List[int]
+    ) -> Group:
         try:
             if not name:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group name is required")
@@ -43,8 +43,7 @@ class GroupLogic:
             return new_group
         except Exception as e:
             db.rollback()
-            raise HTTPException(detail=str(e))
-
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     @staticmethod
     def get_groups(db: Session, user: User, request: Request):

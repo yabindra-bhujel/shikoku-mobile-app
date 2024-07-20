@@ -55,7 +55,7 @@ async def create_group(
 
 
 @router.get("", status_code=status.HTTP_200_OK)
-async def get_groups(
+async def get_group_list(
     request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(authenticate_user),
