@@ -300,12 +300,17 @@ class GroupLogic:
             
             if user.id == group.admin_id:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin cannot leave the group")
-
-            group.group_members.remove(user)
+            
+            # Ensure the user is attached to the session
+            user_in_db = db.query(User).filter(User.id == user.id).one_or_none()
+            if not user_in_db:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in database")
+            
+            group.group_members.remove(user_in_db)
             db.commit()
 
-        except HTTPException:
-            raise 
+        except HTTPException as http_exc:
+            raise http_exc
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
