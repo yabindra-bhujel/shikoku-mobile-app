@@ -57,6 +57,14 @@ const TabLayout = () => {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="reminder"
+        options={{
+          headerShown: false,
+        }}
+        />
+
     </Stack>
   );
 };
