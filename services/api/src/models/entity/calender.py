@@ -9,11 +9,13 @@ class Calendar(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
-    description = Column(String, nullable=False)
+    description = Column(String, nullable=True)
     start_time = Column(DateTime(timezone=True), nullable=False)
     end_time = Column(DateTime(timezone=True), nullable=False)
     is_active = Column(Boolean, default=True)
-    color = Column(String, nullable=False)
+    color = Column(String, nullable=False, default='#6d62a8')
+    reminder_offset = Column(Integer, nullable=True)
+    is_reminder = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), default=func.now())
     
     user_id = Column(Integer, ForeignKey('users.id'))
