@@ -5,6 +5,7 @@ from src.models.entity.group_message import GroupMessage as GroupMessageModel
 from src.models.entity.group import Group
 from src.models.entity.users import User
 from ....schemas.GroupMessageSchema import GroupMessageSchema
+from ....models.entity.user_profile import UserProfile
 from typing import List
 
 class GroupMessageLogic:
@@ -54,6 +55,14 @@ class GroupMessageLogic:
                 .filter(GroupMessageModel.group_id == group_id)
                 .all()
             )
+            # メッセージの送信者の名前を取得
+            for message in messages:
+                user_profile = db.query(UserProfile).filter(UserProfile.user_id == message.sender_id).first()
+                first_name = user_profile.first_name or ""
+                last_name = user_profile.last_name or ""
+                username = f"{first_name} {last_name}"
+                message.username = username
+
             return messages
         except SQLAlchemyError as e:
             db.rollback()
