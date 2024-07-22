@@ -113,7 +113,7 @@ cd client || exit 1
 # シミュレータ　を動いている状態
 if [ "$START_IOS_APP" = true ]; then
     cd ../api
-    uvicorn main:app --host 0.0.0.0 --port 8000 &
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 
     cd ../client
     npm install
@@ -121,7 +121,7 @@ if [ "$START_IOS_APP" = true ]; then
     npm run ios 
    
 elif [ "$START_ANDROID" = true ]; then
-    uvicorn main:app --host 0.0.0.0 --port 8000 &
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 
     cd ../client
     npm install
@@ -129,5 +129,5 @@ elif [ "$START_ANDROID" = true ]; then
     npm run androidC
 else
     cd ../api
-    uvicorn main:app --host 0.0.0.0 --port 8000 &
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 fi
