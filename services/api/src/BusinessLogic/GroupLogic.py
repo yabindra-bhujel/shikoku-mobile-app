@@ -297,9 +297,6 @@ class GroupLogic:
             if not group:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
             
-            if user.id == group.admin_id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin cannot leave the group")
-            
             # Ensure the user is attached to the session
             user_in_db = db.query(User).filter(User.id == user.id).one_or_none()
             if not user_in_db:
