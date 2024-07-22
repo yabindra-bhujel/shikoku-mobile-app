@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
-import { View, Text, StyleSheet, useColorScheme, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 
-const GroupMessageList = ({ messages, userId ,senderFullname}) => {
+const GroupMessageList = ({ messages, userId, senderFullname }) => {
   const flatListRef = useRef<FlatList>(null);
 
   const renderMessageItem = ({ item }) => {
@@ -15,14 +15,40 @@ const GroupMessageList = ({ messages, userId ,senderFullname}) => {
       ? [styles.messageText, styles.currentUserMessageText]
       : [styles.messageText, styles.otherUserMessageText];
 
+    const showTime = () => {
+      const todaytime = new Date();
+      const time = new Date(item.created_at);
+      if (time.getFullYear() === todaytime.getFullYear()) {
+      if (time.getDate() === todaytime.getDate()) {
+        const timestamp = `${item.created_at.split("T")[1].split(":")[0]}:${
+          item.created_at.split("T")[1].split(":")[1]
+        }`;
+        return timestamp;
+      } else {
+        const eventDate = `${
+          new Date(item.created_at).getMonth() + 1
+        }/${new Date(item.created_at).getDate()} ${
+          item.created_at.split("T")[1].split(":")[0]
+        }:${item.created_at.split("T")[1].split(":")[1]}`;
+        return eventDate;
+      }}
+      else {
+        const eventDate = `${new Date(item.created_at).getFullYear()}/${
+          new Date(item.created_at).getMonth() + 1
+          }/${new Date(item.created_at).getDate()} ${
+            item.created_at.split("T")[1].split(":")[0]
+            }:${item.created_at.split("T")[1].split(":")[1]}`;
+            return eventDate;
+      }
+    };
+
     return (
       <View key={item.id} style={messageContainerStyle}>
         {!isCurrentUser && (
-          <Text style={styles.senderText}>{senderFullname} {item.sender_id}</Text>
+          <Text style={styles.senderText}>{item.username}</Text>
         )}
         <Text style={messageTextStyle}>{item.message}</Text>
-
-        <Text style={styles.timestampText}>{item.timestamp}</Text>
+        <Text style={styles.timestampText}>{showTime()}</Text>
       </View>
     );
   };
@@ -34,6 +60,7 @@ const GroupMessageList = ({ messages, userId ,senderFullname}) => {
         ref={flatListRef}
         data={[...messages].reverse()}
         renderItem={renderMessageItem}
+        keyExtractor={(item) => item.id.toString()}
         scrollEnabled={true}
       />
     </View>
