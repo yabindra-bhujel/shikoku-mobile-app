@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import SettingModal from "@/src/components/GroupChat/SettingModel";
+import SettingModal from "@/src/components/GroupChat/settings/SettingModel";
 
-const ChatSettings = (groupId )=> {
+const ChatSettings = ()=> {
   return (
     <SettingModal/>
   );

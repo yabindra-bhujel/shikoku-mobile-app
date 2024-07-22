@@ -1,23 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { View, Text, StyleSheet, useColorScheme, FlatList } from "react-native";
-import { useNavigation } from "expo-router";
 
-const GroupMessageList = ({ messages, userId }) => {
-  const theme = useColorScheme();
+const GroupMessageList = ({ messages, userId ,senderFullname}) => {
   const flatListRef = useRef<FlatList>(null);
-  const navigation = useNavigation();
-
-  const scrollToBottom = () => {
-    if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', scrollToBottom);
-
-    return unsubscribe;
-  }, [navigation, messages]); 
 
   const renderMessageItem = ({ item }) => {
     const isCurrentUser = item.sender_id === userId;
@@ -33,9 +18,10 @@ const GroupMessageList = ({ messages, userId }) => {
     return (
       <View key={item.id} style={messageContainerStyle}>
         {!isCurrentUser && (
-          <Text style={styles.senderText}>{item.sender_fullname}</Text>
+          <Text style={styles.senderText}>{senderFullname} {item.sender_id}</Text>
         )}
         <Text style={messageTextStyle}>{item.message}</Text>
+
         <Text style={styles.timestampText}>{item.timestamp}</Text>
       </View>
     );
@@ -44,11 +30,11 @@ const GroupMessageList = ({ messages, userId }) => {
   return (
     <View style={styles.container}>
       <FlatList
+        inverted
         ref={flatListRef}
-        data={messages}
+        data={[...messages].reverse()}
         renderItem={renderMessageItem}
-        onContentSizeChange={scrollToBottom} 
-        scrollEnabled={false}
+        scrollEnabled={true}
       />
     </View>
   );

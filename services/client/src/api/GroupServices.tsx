@@ -50,6 +50,23 @@ const GroupServices = {
     }
   },
 
+  async addMember(groupId: number, data: any) {
+    try {
+      const result = await axiosInstance.post(
+        `/groups/${groupId}/add_members`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async removeMemberFromGroup(groupId: number, deleteId: number) {
     try {
       const formData = new URLSearchParams();

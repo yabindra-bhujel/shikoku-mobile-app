@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   ScrollView,
@@ -10,17 +10,20 @@ import {
 } from "react-native";
 import { Text as PaperText } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect } from '@react-navigation/native';
 import GroupServices from "@/src/api/GroupServices";
-import { GroupData } from "./GroupHeader";
+import { GroupData } from "../GroupHeader";
 import { useUser } from "@/src/hooks/UserContext";
-import ChangeNameModal from "./settings/ChangeNameModal";
+import ChangeNameModal from "./ChangeNameModal";
 import {
   FontAwesome6,
   MaterialIcons,
   SimpleLineIcons,
   Entypo,
   AntDesign,
+  Ionicons,
 } from "@expo/vector-icons";
+import AddMemberModal from "./AddMemberModal";
 
 export default function SettingModal() {
   const { groupId = "0" } = useLocalSearchParams<{ groupId?: string }>();
@@ -28,6 +31,7 @@ export default function SettingModal() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [showNameChange, setShowNameChange] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
 
   const { loggedInUserId } = useUser();
 
@@ -51,6 +55,12 @@ export default function SettingModal() {
     fetchGroupInfo();
   }, [groupId]);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroupInfo();
+    }, [])
+  );
+
   const handleRefreshGroupDetail = () => {
     fetchGroupInfo();
   };
@@ -58,11 +68,21 @@ export default function SettingModal() {
   const handleShowNameChange = () => {
     setShowNameChange(!showNameChange);
   };
+  const handleShowAddMember = () => {
+    setShowAddMember(!showAddMember);
+  };
+
+  const updateGroupMembers = (newMembers) => {
+    setGroupInfo((prev) => prev ? ({
+      ...prev,
+      group_members: newMembers,
+    }) : null);
+  };
 
   const deleteGroup = async () => {
     try {
       await GroupServices.deleteGroup(parseInt(groupId, 10));
-      router.push("/groups");
+      router.dismiss(3);
     } catch (error) {
       Alert.alert("Error", "Failed to delete group. Please try again.");
     }
@@ -87,11 +107,11 @@ export default function SettingModal() {
   };
 
   const handleUpdateGroup = (data: { name: string; description: string }) => {
-    setGroupInfo((prev) => ({
-      ...prev!,
+    setGroupInfo((prev) => prev ? ({
+      ...prev,
       name: data.name,
       description: data.description,
-    }));
+    }) : null);
   };
 
   const leaveGroup = async () => {
@@ -102,7 +122,7 @@ export default function SettingModal() {
       [
         {
           text: "キャンセル",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "退出",
@@ -110,16 +130,19 @@ export default function SettingModal() {
             try {
               const res = await GroupServices.leaveGroup(numericGroupId);
               Alert.alert("成功", "グループを退出しました。");
-              router.push("/chat");
+              router.dismiss(3);
             } catch (error) {
-              Alert.alert("エラー", "退出際に問題が発生しました。もう一度試してみてください。");
+              Alert.alert(
+                "エラー",
+                "退出際に問題が発生しました。もう一度試してみてください。"
+              );
             }
           },
-          style: "destructive"
-        }
+          style: "destructive",
+        },
       ]
     );
-  }
+  };
 
   if (loading) {
     return (
@@ -147,13 +170,16 @@ export default function SettingModal() {
             <TouchableOpacity onPress={handleShowNameChange}>
               <PaperText style={styles.changeName}>名前と説明の変更</PaperText>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.addMember} onPress={handleShowAddMember}>
+              <Ionicons name="person-add" size={24} color="black" />
+            </TouchableOpacity>
           </View>
           <View style={styles.groupInfo}>
-            <View style={[styles.rowgap10, { marginBottom: 10 }]}>
+            <View style={styles.rowgap10}>
               <Entypo name="info-with-circle" size={24} color="black" />
               <Text style={styles.groupDescription}>グループの説明:</Text>
             </View>
-            <View style={styles.descriptionText}>
+            <View style={styles.descriptionTextContainer}>
               <Text>{groupInfo.description}</Text>
             </View>
             <View style={styles.TopLineContainer} />
@@ -174,9 +200,8 @@ export default function SettingModal() {
               <View style={styles.rowgap10}>
                 <FontAwesome6
                   name="people-group"
-                  size={24}
+                  size={22}
                   color="black"
-                  style={styles.memberList}
                 />
                 <Text style={styles.memberList}>メンバーリスト</Text>
               </View>
@@ -185,21 +210,25 @@ export default function SettingModal() {
           </View>
           {groupInfo.admin_id === loggedInUserId ? (
             <View style={[styles.leaveGroup, styles.rowBetween]}>
-              <View style={styles.rowgap10}>
+                <TouchableOpacity onPress={confirmDeleteGroup}  style={styles.rowgap10}>
                 <MaterialIcons name="delete" size={24} color="black" />
-                <TouchableOpacity onPress={confirmDeleteGroup}>
-                  <PaperText style={styles.leaveGroupTitle}>
+                  <PaperText style={[styles.leaveGroupTitle, styles.margin10]}>
                     グループの削除
                   </PaperText>
                 </TouchableOpacity>
-              </View>
               <AntDesign name="right" size={24} color="black" />
             </View>
           ) : null}
           <View style={styles.leaveGroup}>
             <TouchableOpacity style={styles.rowgap10} onPress={leaveGroup}>
-              <SimpleLineIcons name="logout" size={24} color="red" />
-              <PaperText style={[styles.leaveGroupTitle, { color: "red" }]}>
+              <SimpleLineIcons name="logout" size={21} color="red" />
+              <PaperText
+                style={[
+                  styles.leaveGroupTitle,
+                  styles.margin10,
+                  { color: "red" },
+                ]}
+              >
                 グループ退出
               </PaperText>
             </TouchableOpacity>
@@ -213,6 +242,12 @@ export default function SettingModal() {
         groupInfo={groupInfo}
         refresDetaiScreen={handleRefreshGroupDetail}
         onUpdateGroup={handleUpdateGroup}
+      />
+      <AddMemberModal 
+        visible={showAddMember} 
+        onClose={handleShowAddMember} 
+        groupInfo={groupInfo} 
+        onMemberAdded={(newMembers) => updateGroupMembers(newMembers)} 
       />
     </View>
   );
@@ -240,33 +275,40 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  addMember: {
+    backgroundColor: "#ddd",
+    padding: 12,
+    borderRadius: 25,
+    marginTop: 10,
+  },
   rowgap10: {
     gap: 10,
     flexDirection: "row",
     alignItems: "center",
   },
-  rowBetween: {
+  margin10: {
+    marginTop: 10,
     marginBottom: 10,
+  },
+  rowBetween: {
+    marginBottom: 5,
     flexDirection: "row",
     justifyContent: "space-between",
   },
   groupName: {
     fontSize: 20,
-    marginBottom: 10,
+    marginBottom: 20,
     fontWeight: "bold",
   },
   changeName: {
     fontSize: 16,
-    marginBottom: 10,
     color: "blue",
   },
   groupInfo: {
     padding: 10,
     borderRadius: 10,
-    marginTop: 80,
-    marginBottom: 20,
-    borderTopWidth: 10,
-    borderTopColor: "#4da6ff",
+    marginTop: 60,
+    marginBottom: 5,
     backgroundColor: "#fff",
   },
   TopLineContainer: {
@@ -276,11 +318,8 @@ const styles = StyleSheet.create({
   groupDescription: {
     fontSize: 18,
   },
-  descriptionText: {
-    marginBottom: 10,
+  descriptionTextContainer: {
     padding: 10,
-    borderLeftWidth: 1,
-    borderLeftColor: "red",
   },
   memberList: {
     fontSize: 18,
@@ -289,11 +328,10 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 10,
     borderRadius: 10,
-    borderTopWidth: 10,
+    marginTop: 10,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderTopColor: "#4da6ff",
   },
   leaveGroupTitle: {
     fontSize: 18,

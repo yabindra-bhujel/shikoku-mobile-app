@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,20 +11,24 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
 
 export default function Members() {
-  const { group_members, admin_id, logged_in_user_id, group_id } = useLocalSearchParams<{
-    group_members: string;
-    admin_id: string;
-    logged_in_user_id: string;
-    group_id: string;
-  }>();
+  const { group_members, admin_id, logged_in_user_id, group_id } =
+    useLocalSearchParams<{
+      group_members: string;
+      admin_id: string;
+      logged_in_user_id: string;
+      group_id: string;
+    }>();
 
-  const members = group_members ? JSON.parse(group_members) : [];
+  // Ensure group_id is a string
+  const groupId = group_id || "0";
+
+  const [members, setMembers] = useState(group_members ? JSON.parse(group_members) : []);
   const router = useRouter();
 
   const handleRemoveMember = async (memberId: number) => {
-    const numericGroupId = Number(group_id);
+    const numericGroupId = Number(groupId);
 
-    if (isNaN(numericGroupId)) {
+    if (isNaN(numericGroupId) || numericGroupId === 0) {
       Alert.alert("Error", "Invalid group ID.");
       return;
     }
@@ -35,32 +39,44 @@ export default function Members() {
       [
         {
           text: "Cancel",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Remove",
           onPress: async () => {
             try {
-              await GroupServices.removeMemberFromGroup(numericGroupId, memberId);
+              await GroupServices.removeMemberFromGroup(
+                numericGroupId,
+                memberId
+              );
               Alert.alert("Success", "Member removed successfully.");
-              router.push({
-                pathname: `/chat/members`,
-                params: {
-                  group_members: JSON.stringify(members.filter(member => member.id !== memberId)),
-                  admin_id,
-                  logged_in_user_id,
-                  group_id
-                }
-              });
+              // Update the local state to remove the member from the list
+              setMembers(members.filter((member) => member.id !== memberId));
             } catch (error) {
-              Alert.alert("Error", "Failed to remove member. Please try again later.");
+              Alert.alert(
+                "Error",
+                "Failed to remove member. Please try again later."
+              );
             }
           },
-          style: "destructive"
-        }
+          style: "destructive",
+        },
       ]
     );
   };
+
+  useEffect(() => {
+    const updateMembers = async () => {
+      try {
+        const response = await GroupServices.getGroupById(groupId);
+        setMembers(response.data.group_members);
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch updated members. Please try again later.");
+      }
+    };
+
+    updateMembers();
+  }, [groupId]);
 
   if (members.length === 0) {
     return (
@@ -76,17 +92,20 @@ export default function Members() {
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <View style={styles.memberItem}>
-          <Text>{item.profile.fullname}</Text>
-          {(logged_in_user_id === admin_id && item.id !== admin_id && item.id !== Number(logged_in_user_id)) && (
-            <TouchableOpacity
-              onPress={() => handleRemoveMember(item.id)}
-              style={styles.removeButton}
-            >
-              <Text style={styles.removeButtonText}>Remove</Text>
-            </TouchableOpacity>
-          )}
+          <Text>{item.profile?.fullname || "No name available"}</Text>
+          {logged_in_user_id === admin_id &&
+            item.id !== admin_id &&
+            item.id !== Number(logged_in_user_id) && (
+              <TouchableOpacity
+                onPress={() => handleRemoveMember(item.id)}
+                style={styles.removeButton}
+              >
+                <Text style={styles.removeButtonText}>Remove</Text>
+              </TouchableOpacity>
+            )}
         </View>
       )}
+      style={styles.container}
     />
   );
 }
@@ -101,8 +120,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "red",
   },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
   memberItem: {
-    padding: 10,
+    padding: 20,
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
     flexDirection: "row",

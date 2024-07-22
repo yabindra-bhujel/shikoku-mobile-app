@@ -2,7 +2,6 @@ import {
     Text,
     View,
     useColorScheme,
-    ScrollView,
     Alert,
     TextInput,
     TouchableOpacity,
@@ -147,7 +146,7 @@ import {
           />
         );
       }
-      return <GroupMessageList messages={messages} userId={userId} />;
+      return <GroupMessageList messages={messages} userId={userId} senderFullname={messageData.sender_fullname} />;
     };
   
     return (
@@ -155,9 +154,7 @@ import {
         <View style={{ height: 54, backgroundColor: theme === "dark" ? "#333" : "#fff" }} />
         {group && <GroupHeader groupData={group} />}
   
-        <ScrollView>
-          {renderMessages()}
-        </ScrollView>
+        {renderMessages()}
   
         <View style={styles.footerContainer}>
           <TextInput
