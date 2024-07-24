@@ -52,12 +52,12 @@ const TabLayout = () => {
           headerShown: false,
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="createpost"
         options={{
           headerShown: false,
-        }}
-      />
+        }} */}
+      {/* /> */}
 
       <Stack.Screen
         name="reminder"
