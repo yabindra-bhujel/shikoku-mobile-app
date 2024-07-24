@@ -3,7 +3,6 @@ from sqlalchemy.sql import func
 from ..database import Base
 import enum
 from sqlalchemy.orm import relationship
-from .notification import user_notifications
 
 class UserRole(enum.Enum):
     ADMIN = 'admin'
@@ -32,8 +31,8 @@ class User(Base):
     comment_replies = relationship('CommentReply', back_populates='user', cascade='all, delete-orphan')
     likes = relationship('Likes', back_populates='user', cascade='all, delete-orphan')
 
-    notifications = relationship('Notification',secondary=user_notifications,back_populates='users')
-
+    notifications = relationship('Notification', secondary='user_notifications', back_populates='users')
+    user_notifications = relationship('UserNotification', back_populates='user')
 
 
     def __repr__(self):
