@@ -1,32 +1,34 @@
 import React from "react";
-import { StyleSheet, View, Image } from "react-native";
+import { StyleSheet, View, Image, Dimensions } from "react-native";
 
-const ImagePost = () => {
+interface ImagePostProps {
+  images: string[];
+}
+
+const ImagePost: React.FC<ImagePostProps> = ({ images }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.row}>
-        <View style={styles.imageContainer}>
+    <View style={styles.container} >
+      {images.map((image, index) => (
+        <View
+          key={index}
+          style={[
+            images.length === 1 ? styles.singleImage: null,
+          ]}
+        >
           <Image
-            style={styles.image}
-            source={{
-              uri: 'https://fastly.picsum.photos/id/11/2500/1667.jpg?hmac=xxjFJtAPgshYkysU_aqx2sZir-kIOjNR9vx0te7GycQ'
-            }}
-            resizeMode="cover"
+            source={{ uri: image }}
+            style={[
+              styles.image,
+              images.length === 1 ? styles.singleImageStyle : null,
+            ]}
           />
         </View>
-        <View style={styles.imageContainer}>
-          <Image
-            style={styles.image}
-            source={{
-              uri: 'https://picsum.photos/seed/picsum/200/300'
-            }}
-            resizeMode="cover"
-          />
-        </View>
-      </View>
+      ))}
     </View>
   );
 }
+
+const screenWidth = Dimensions.get("window").width;
 
 const styles = StyleSheet.create({
   container: {
@@ -34,23 +36,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f0f0f0",
-  },
-  row: {
     flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexWrap: "wrap",
+    padding: 5,
   },
-  imageContainer: {
-    width: 200,
-    height: 200,
-    overflow: "hidden",
-    borderWidth: 0.1,
-    borderColor: "#ccc",
+
+  singleImage: {
+    width: "100%",
+  },
+  doubleImage: {
+    width: (screenWidth - 30) / 2, 
+    height: 150,
   },
   image: {
     width: "100%",
     height: "100%",
+    borderRadius: 10,
   },
+  singleImageStyle: {
+    height: 350,
+  },
+
 });
 
 export default ImagePost;

@@ -1,5 +1,6 @@
+from email.mime import image
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
+from sqlalchemy import func, exists, join, and_,desc
 from typing import List, Optional
 from ..models.entity.post import Post, PostImage, PostVideo, PostFile
 from ..models.entity.comments import Comment
@@ -8,12 +9,36 @@ from ..utils.post_utils import PostUtils
 from ..models.entity.user_profile import UserProfile
 from ..models.entity.users import User
 from fastapi import Request
+from datetime import datetime, timezone
+import os
+import shutil
+
 
 
 class PostService:
+    POST_IMAGE_PATH = "static/post/post_images"
 
     @staticmethod
-    def create_post(db: Session, user_id: int, content: str, files_data: dict) -> Post:
+    def _create_save_dirs():
+        os.makedirs(PostService.POST_IMAGE_PATH, exist_ok=True)
+    
+    @staticmethod
+    def get_timestamp_filename() -> str:
+        # Generate a new filename with current timestamp (milliseconds)
+        timestamp = datetime.now().timestamp()
+        return f"{int(timestamp * 1000)}.jpg"
+
+    @staticmethod
+    def save_post_image(post_id: int, image: bytes) -> str:
+        PostService._create_save_dirs()
+        file_name = PostService.get_timestamp_filename()
+        image_path = os.path.join(PostService.POST_IMAGE_PATH, f"{post_id}_{file_name}")
+        with open(image_path, "rb") as file:
+            file.write(image)
+        return image_path
+    
+    @staticmethod
+    def create_post(db: Session, user_id: int, content: str, image_data: List[dict]) -> Post:
         try:
             new_post = Post(user_id=user_id, is_active=True, created_at=PostUtils.get_current_time())
             db.add(new_post)
@@ -23,20 +48,20 @@ class PostService:
             if content:
                 new_post.content = content
 
-            if 'image' in files_data:
-                image_path = PostUtils.save_post_image(new_post.id, files_data['image'])
-                post_image = PostImage(post_id=new_post.id, url=image_path)
-                db.add(post_image)
+            timestamp = datetime.now().timestamp()
+            file_path = os.path.join("static", "user_profile", f"{new_post.id}_{int(timestamp * 1000)}.png")
 
-            if 'video' in files_data:
-                video_path = PostUtils.save_post_video(new_post.id, files_data['video']['data'], files_data['video']['ext'])
-                post_video = PostVideo(post_id=new_post.id, url=video_path)
-                db.add(post_video)
+            
 
-            if 'file' in files_data:
-                file_path = PostUtils.save_post_file(new_post.id, files_data['file']['data'], files_data['file']['filename'])
-                post_file = PostFile(post_id=new_post.id, url=file_path)
-                db.add(post_file)
+            if image_data:
+                for image_info in image_data:
+                    with open(file_path, "wb") as file:
+                        shutil.copyfileobj(image_info['file_object'], file)
+
+                    image_name = f"{new_post.id}_{image_info.filename}"
+                    
+                    post_image = PostImage(post_id=new_post.id, url=image_name)
+                    db.add(post_image)
 
             db.commit()
             db.refresh(new_post)
@@ -50,17 +75,17 @@ class PostService:
             db.close()
 
     @staticmethod
-    def get_post(db: Session, request: Request) -> List[dict]:
+    def get_post(db: Session, request: Request, user: User) -> List[dict]:
         posts = db.query(Post).options(
             joinedload(Post.images),
             joinedload(Post.videos),
             joinedload(Post.files)
-        ).all()
+        ).order_by(desc(Post.created_at)).all()
 
-        return [PostService._format_post_data(db, post, request) for post in posts]
+        return [PostService._format_post_data(db, post, request, user) for post in posts]
 
     @staticmethod
-    def get_post_by_id(db: Session, post_id: int) -> dict:
+    def get_post_by_id(db: Session, post_id: int, user: User, request: Request) -> dict:
         post = db.query(Post).options(
             joinedload(Post.images),
             joinedload(Post.videos),
@@ -70,8 +95,8 @@ class PostService:
         if not post:
             return None
 
-        post_data = PostService._format_post_data(db, post)
-        post_data["comments"] = PostService._get_comment(db, post_id)
+        post_data = PostService._format_post_data(db, post,request, user)
+        post_data["comments"] = PostService._get_comment(db, post_id, request)
         return post_data
 
     @staticmethod
@@ -93,22 +118,30 @@ class PostService:
         return None
 
     @staticmethod
-    def _format_post_data(db: Session, post: Post, request: Request) -> dict:
+    def _format_post_data(db: Session, post: Post, request: Request, request_user: User) -> dict:
+
+        is_liked = db.query(exists().where(and_(Likes.user_id == request_user.id, Likes.post_id == post.id))).scalar()
 
         user = PostService.get_user_profile_by_user_id(db, post.user_id, request)
 
-        return {
+
+        post_data =  {
             "id": post.id,
             "content": post.content,
-            "images": [image.url for image in post.images],
-            "videos": [video.url for video in post.videos],
-            "files": [file.url for file in post.files],
             "created_at": post.created_at,
             "user": user,
             "is_active": post.is_active,
-            "total_comments": PostService._get_total_comments(db, post.id),
-            "total_likes": PostService._get_total_likes(db, post.id),
+            "total_comments": post.total_comments,
+            "total_likes": post.total_likes,
+            "is_liked": is_liked,
         }
+
+        if post.images:
+            base_url = str(request.base_url)
+            post_data["images"] = [base_url + image.url for image in post.images]
+
+        return post_data    
+
 
     @staticmethod
     def _get_total_comments(db: Session, post_id: int) -> int:
@@ -119,30 +152,46 @@ class PostService:
         return db.query(func.count(Likes.id)).filter(Likes.post_id == post_id).scalar()
 
     @staticmethod
-    def _get_comment(db: Session, post_id: int) -> List[dict]:
-        comments = db.query(Comment).filter(Comment.post_id == post_id).all()
+    def _get_comment(db: Session, post_id: int, request: Request) -> List[dict]:
+        try:
+            comments = db.query(Comment).filter(Comment.post_id == post_id).order_by(desc(Comment.created_at)).all()
+        except Exception as e:
+            raise e
         return [
             {
                 "id": comment.id,
                 "content": comment.content,
                 "created_at": comment.created_at,
-                "user_id": comment.user_id,
                 "post_id": comment.post_id,
-                "replies": PostService._get_reply(db, comment.id),
+                "user": PostService.get_user_profile_by_user_id(db, comment.user_id, request),
             }
             for comment in comments
         ]
 
+
     @staticmethod
-    def _get_reply(db: Session, comment_id: int) -> List[dict]:
-        replies = db.query(Comment).filter(Comment.parent_comment_id == comment_id).all()
-        return [
-            {
-                "id": reply.id,
-                "content": reply.content,
-                "created_at": reply.created_at,
-                "user_id": reply.user_id,
-                "post_id": reply.post_id,
-            }
-            for reply in replies
-        ]
+    def _format_time(time: str) -> str:
+        parsed_time = datetime.fromisoformat(time[:-6])
+
+        current_time = datetime.utcnow()
+        time_difference = current_time - parsed_time
+
+        years = time_difference.days // 365
+        months = time_difference.days // 30
+        days = time_difference.days
+        hours = time_difference.seconds // 3600
+        minutes = (time_difference.seconds // 60) % 60
+
+        if years > 0:
+            return f"{years} 年{'' if years > 1 else ''}"
+        elif months > 0:
+            return f"{months} 月{'' if months > 1 else ''}"
+        elif days > 0:
+            return f"{days} 日{'' if days > 1 else ''}"
+        elif hours > 0:
+            return f"{hours} 時間{'' if hours > 1 else ''}"
+        elif minutes > 0:
+            return f"{minutes} 分{'' if minutes > 1 else ''}"
+        else:
+            return "今" 
+  

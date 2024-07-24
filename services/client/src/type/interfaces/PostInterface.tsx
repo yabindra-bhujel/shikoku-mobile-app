@@ -2,8 +2,6 @@ export interface PostInterface {
     id: number;
     content: string;
     images: string[];
-    videos: string[];
-    files: string[];
     created_at: string;
     user: {
         id: number;
@@ -14,4 +12,5 @@ export interface PostInterface {
     is_active: boolean;
     total_comments: number;
     total_likes: number;
+    is_liked: boolean;
 }

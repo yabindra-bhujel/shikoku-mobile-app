@@ -317,8 +317,6 @@ package.lock
 # pdf
 *.pdf
 
-# Ignore .env
-.env
 
 # images
 *.png
@@ -326,4 +324,3 @@ package.lock
 *.jpeg
 *.gif
 *.svg
-

@@ -1,24 +1,38 @@
 import axiosInstance from "../config/Api";
 
 const PostServices = {
-  async getPosts() {
-    try {
-      const result = await axiosInstance.get("/posts");
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  },
 
-  // submit calendar data code
-  async submitCalendarData(data: any) {
-    try {
-      const result = await axiosInstance.post("/calendars", data);
-      return result.data;
-    } catch (error:any) {
-      throw error;
+    async getPosts(){
+        try {
+            const result = await axiosInstance.get("/posts");
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async sendPost(formData: FormData){
+        try {
+            const result = await axiosInstance.post("/posts", formData,{
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async getPostById(id: string){
+        try {
+            const result = await axiosInstance.get(`/posts/${id}`);
+            return result;
+        } catch (error) {
+            throw error;
+        }
     }
-  },
-};
+  }
+
 
 export default PostServices;

@@ -18,15 +18,16 @@ async def create_comment(comment: CommentInput, user: User = Depends(get_current
     try:
         new_comment = Comment(
             content=comment.content,
-            user_id=comment.user_id,
+            user_id=user.id,
             post_id=comment.post_id,
-            created_at=datetime.now(datetime.timezone.utc)
+            created_at=datetime.utcnow()
         )
         db.add(new_comment)
         db.commit()
         db.refresh(new_comment)
         return new_comment
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)

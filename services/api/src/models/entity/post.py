@@ -10,6 +10,8 @@ class Post(Base):
     content = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
+    total_likes = Column(Integer, default=0)
+    total_comments = Column(Integer, default=0)
     
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='posts')

@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { View, useColorScheme } from "react-native";
 import { useState } from "react";
+import React from "react";
 
 const TabLayout = () => {
   const isDark = useColorScheme() === "dark";
@@ -24,7 +25,7 @@ const TabLayout = () => {
       <Stack.Screen
         name="calendar"
         options={{
-          headerTitle: "",
+          headerTitle: "Calendar",
           headerBackTitle: "Back",
           headerStyle: {
             backgroundColor: isDark ? "#333" : "white",

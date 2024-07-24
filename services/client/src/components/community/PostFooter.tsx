@@ -1,28 +1,67 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import LikeServices from "@/src/api/LikeServices";
+import { useRouter } from "expo-router";
 
 interface PostFooterProps {
   totalLikes?: number;
   totalComments?: number;
+  postId: number;
+  alreadyLiked: boolean;
+  showComments?: boolean;
 }
 
 const PostFooter: React.FC<PostFooterProps> = ({
-  totalLikes,
-  totalComments,
+  totalLikes = 0,
+  totalComments = 0,
+  postId,
+  alreadyLiked,
+  showComments = true,
 }) => {
+  const [isLiked, setIsLiked] = useState<boolean>(alreadyLiked);
+  const [likesCount, setLikesCount] = useState<number>(totalLikes);
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsLiked(alreadyLiked);
+    setLikesCount(totalLikes);
+  }, [alreadyLiked, totalLikes]);
+
+  const toggleLike = async () => {
+    try {
+      const result = await LikeServices.likePost(postId.toString());
+      if (result.status === 201) {
+        setIsLiked(!isLiked);
+        setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const navigateToComments = () => {
+    router.push(`community/${postId}`);
+  };
+
   return (
     <View style={styles.postFooter}>
-      <View style={styles.actionContainer}>
-        <TouchableOpacity style={styles.actionButton}>
-          <AntDesign name="heart" size={24} color="red" />
-          <Text style={styles.actionText}>{totalLikes} Likes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
+      <TouchableOpacity style={styles.actionButton} onPress={toggleLike}>
+        <AntDesign
+          name={isLiked ? "heart" : "hearto"}
+          size={24}
+          color={isLiked ? "red" : "black"}
+        />
+        <Text style={[styles.actionText, { color: isLiked ? "red" : "#333" }]}>
+          {likesCount} Likes
+        </Text>
+      </TouchableOpacity>
+      {showComments && (
+        <TouchableOpacity style={styles.actionButton} onPress={navigateToComments}>
           <AntDesign name="message1" size={24} color="black" />
           <Text style={styles.actionText}>{totalComments} Comments</Text>
         </TouchableOpacity>
-      </View>
+      )}
     </View>
   );
 };
@@ -37,12 +76,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
   },
-  actionContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flex: 1,
-  },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -53,9 +86,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#333",
     fontWeight: "600",
-  },
-  moreButton: {
-    padding: 5,
   },
 });
 

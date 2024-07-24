@@ -4,7 +4,6 @@ from typing import Optional
 class CommentInput(BaseModel):
     content: Optional[str] = None
     post_id: int
-    user_id: int
 
 class CommentRepliesInput(BaseModel):
     content: Optional[str] = None

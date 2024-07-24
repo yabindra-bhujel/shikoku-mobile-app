@@ -1,63 +1,41 @@
-import { StyleSheet, ScrollView, View, Platform, Text } from "react-native";
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useRouter } from "expo-router";
+import React, { useState, useCallback } from "react";
+import { StyleSheet, View, ScrollView, RefreshControl } from "react-native";
 import CommunityPageHeader from "@/src/components/community/CommunityPageHeader";
 import Post from "@/src/components/community/Post";
-import IPost from "@/src/components/community/IPost";
 
 const Community = () => {
-  return (
-    <View>
-      <CommunityPageHeader headerTitle="Community" />
+  const [refreshing, setRefreshing] = useState(false);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // fetchPosts().then(() => setRefreshing(false));
+    setTimeout(() => setRefreshing(false), 2000); // Simulate a 2s delay
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <CommunityPageHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ paddingHorizontal: 20, marginTop: 20 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={styles.scrollViewContent}
       >
-        <View
-          style={{
-            flex: 1,
-            marginBottom: 20,
-          }}
-        >
-          <View
-            style={{
-              width: "100%",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                marginBottom: 10,
-                textAlign: "center",
-              }}
-            >
-              This is Test Data
-            </Text>
-          </View>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: "red",
-              padding: 10,
-              marginBottom: 20,
-            }}
-          >
-            <Text style={{ color: "blue" }} onPress={()=>router.push({
-              pathname: "/post/[username]",
-              params: {username :"Tanaka"
-                }
-              })}
-                >This is Tanaka's Post</Text>
-          </View>
-        </View>
+        <Post />
       </ScrollView>
     </View>
   );
 };
 
-export default Community;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+});
 
-const styles = StyleSheet.create({});
+export default Community;
