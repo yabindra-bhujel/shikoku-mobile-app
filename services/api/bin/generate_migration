@@ -1,16 +1,13 @@
 #!/bin/bash
 
-# ユーザーがメッセージを入力したか確認
-if [ -z "$1" ]; then
-  echo "Usage: $0 <migration_message>"
-  exit 1
-fi
-
 # 仮想環境を有効化
 source venv/bin/activate
 
-# ユーザー入力メッセージを取得
-MIGRATION_MESSAGE="$1"
+# 現在の日時を取得
+CURRENT_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+
+# マイグレーションメッセージを生成
+MIGRATION_MESSAGE="Migration at $CURRENT_TIME"
 
 # マイグレーションファイルを生成
 alembic revision --autogenerate -m "$MIGRATION_MESSAGE"
