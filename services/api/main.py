@@ -18,6 +18,7 @@ import logging
 from src.message.ConnectionManager import ConnectionManager
 from src.message.PersonalMessage import PersonalMessage
 from debug_toolbar.middleware import DebugToolbarMiddleware
+from src.services.NotificationService.NotificationConnectionManager import NotificationConnectionManager
 
 
 logging.basicConfig(level=logging.INFO)
@@ -131,3 +132,31 @@ async def send_message(websocket: WebSocket):
         await manager.disconnect(websocket)
     except Exception as e:
         print(e)
+
+
+
+notification_manager = NotificationConnectionManager()
+@app.websocket("/ws/notification/user_id")
+async def notification(websocket: WebSocket, user_id: str):
+    try:
+        await notification_manager.connect(websocket=websocket, username=user_id)
+
+    except WebSocketDisconnect:
+        await notification_manager.disconnect(websocket, username=user_id)
+    
+    except Exception as e:
+        print(e)
+        await websocket.close()
+
+
+@app.websocket("/ws/send_notification")
+async def send_notification(websocket: WebSocket):
+    try:
+        await notification_manager.send_notification(username="user_id", data={"message": "Hello World"})
+    except WebSocketDisconnect:
+        await notification_manager.disconnect(websocket)
+    except Exception as e:
+        print(e)
+        await websocket.close()
+
+        

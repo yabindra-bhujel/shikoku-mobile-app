@@ -21,6 +21,7 @@ const SimpleScreen = () => {
   const buttonData: ButtonData[] = [
     { route: "/community", icon: <FontAwesome6 name="people-roof" size={45} color="#ff6666" />, title: "Community" },
     { route: "/calendar", icon: <FontAwesome5 name="calendar" size={45} color="blue" />, title: "Calendar" },
+    { route: "/reminder", icon: <FontAwesome5 name="bell" size={45} color="orange" />, title: "Reminder" },
     { route: "/chatbot", icon: <FontAwesome5 name="robot" size={45} color="green" />, title: "ChatBot" },
     { route: "/chat", icon: <FontAwesome name="wechat" size={45} color="#00A5CF" />, title: "Chat" },
     { route: "/frequen", icon: <FontAwesome5 name="question" size={45} color="red" />, title: "A&Q" },

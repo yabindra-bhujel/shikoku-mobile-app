@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# apply  migration file
+
+# 仮想環境を有効化
+source venv/bin/activate
+
+echo "apply migration ...."
+
+#generate migration file
+alembic upgrade head
+
+echo "apply migration done"
+
+# 仮想環境を無効化
+deactivate
+
