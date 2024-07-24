@@ -42,7 +42,7 @@ const ChatDetail = () => {
   const [messageData, setMessageData] = useState({
     message: "",
     sender_id: "",
-    sender_fullname: "",
+    username: "",
     group_id: groupId || "",
   });
 
@@ -96,7 +96,7 @@ const ChatDetail = () => {
       setMessageData((prevData) => ({
         ...prevData,
         sender_id: user.data.user_id,
-        sender_fullname: `${user.data.first_name} ${user.data.last_name}`,
+        username: `${user.data.first_name} ${user.data.last_name}`,
       }));
     };
     getUser();
