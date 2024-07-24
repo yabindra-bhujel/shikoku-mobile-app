@@ -121,12 +121,13 @@ if [ "$START_IOS_APP" = true ]; then
     npm run ios 
    
 elif [ "$START_ANDROID" = true ]; then
+    cd ../api
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 
     cd ../client
     npm install
     echo "Starting the Android emulator..."
-    npm run androidC
+    npm run android
 else
     cd ../api
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload &

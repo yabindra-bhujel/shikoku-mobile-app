@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Text as PaperText } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from '@react-navigation/native';
 import GroupServices from "@/src/api/GroupServices";
 import { GroupData } from "../GroupHeader";
 import { useUser } from "@/src/hooks/UserContext";
@@ -27,10 +27,7 @@ import {
 import AddMemberModal from "./AddMemberModal";
 
 export default function SettingModal() {
-  const { groupId = "0", groupImage = "" } = useLocalSearchParams<{
-    groupId?: string;
-    groupImage?: string;
-  }>();
+  const { groupId = "0" } = useLocalSearchParams<{ groupId?: string }>();
   const [groupInfo, setGroupInfo] = useState<GroupData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -77,14 +74,10 @@ export default function SettingModal() {
   };
 
   const updateGroupMembers = (newMembers) => {
-    setGroupInfo((prev) =>
-      prev
-        ? {
-            ...prev,
-            group_members: newMembers,
-          }
-        : null
-    );
+    setGroupInfo((prev) => prev ? ({
+      ...prev,
+      group_members: newMembers,
+    }) : null);
   };
 
   const deleteGroup = async () => {
@@ -115,15 +108,11 @@ export default function SettingModal() {
   };
 
   const handleUpdateGroup = (data: { name: string; description: string }) => {
-    setGroupInfo((prev) =>
-      prev
-        ? {
-            ...prev,
-            name: data.name,
-            description: data.description,
-          }
-        : null
-    );
+    setGroupInfo((prev) => prev ? ({
+      ...prev,
+      name: data.name,
+      description: data.description,
+    }) : null);
   };
 
   const leaveGroup = async () => {
@@ -177,9 +166,11 @@ export default function SettingModal() {
       <ScrollView>
         <View style={styles.groupInfoContainer}>
           <View style={styles.headerContainer}>
+            <Text>Image</Text>
+            {/* <TouchableOpacity onPress={pickImage}>
             {groupImage ? (
               <Image
-                source={{ uri: groupImage }}
+                source={{ uri: groupImage[groupImage.length - 1] }}
                 style={{ height: 50, width: 50, borderRadius: 50 }}
               />
             ) : (
@@ -187,21 +178,17 @@ export default function SettingModal() {
                 style={{
                   fontSize: 20,
                   fontWeight: "bold",
-                  color: "#000",
                 }}
               >
-                {groupInfo?.name?.charAt(0).toUpperCase()}
+                {groupData?.name?.charAt(0).toUpperCase()}
               </Text>
             )}
-            <Text>Image</Text>
+          </TouchableOpacity> */}
             <Text style={styles.groupName}>{groupInfo.name}</Text>
             <TouchableOpacity onPress={handleShowNameChange}>
               <PaperText style={styles.changeName}>名前と説明の変更</PaperText>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.addMember}
-              onPress={handleShowAddMember}
-            >
+            <TouchableOpacity style={styles.addMember} onPress={handleShowAddMember}>
               <Ionicons name="person-add" size={24} color="black" />
             </TouchableOpacity>
           </View>
@@ -229,26 +216,26 @@ export default function SettingModal() {
               style={[styles.rowBetween, { marginTop: 15 }]}
             >
               <View style={styles.rowgap10}>
-                <FontAwesome6 name="people-group" size={22} color="black" />
+                <FontAwesome6
+                  name="people-group"
+                  size={22}
+                  color="black"
+                />
                 <Text style={styles.memberList}>メンバーリスト</Text>
               </View>
               <AntDesign name="right" size={24} color="black" />
             </TouchableOpacity>
           </View>
           {groupInfo.admin_id === loggedInUserId ? (
-            <TouchableOpacity
-              onPress={confirmDeleteGroup}
-              style={[styles.leaveGroup, styles.rowBetween]}
-            >
-              <View style={[styles.rowgap10]}>
+            <View style={[styles.leaveGroup, styles.rowBetween]}>
+                <TouchableOpacity onPress={confirmDeleteGroup}  style={styles.rowgap10}>
                 <MaterialIcons name="delete" size={24} color="black" />
-                <PaperText style={[styles.leaveGroupTitle, styles.margin10]}>
-                  グループの削除
-                </PaperText>
-              </View>
-
+                  <PaperText style={[styles.leaveGroupTitle, styles.margin10]}>
+                    グループの削除
+                  </PaperText>
+                </TouchableOpacity>
               <AntDesign name="right" size={24} color="black" />
-            </TouchableOpacity>
+            </View>
           ) : null}
           <View style={styles.leaveGroup}>
             <TouchableOpacity style={styles.rowgap10} onPress={leaveGroup}>
@@ -274,11 +261,11 @@ export default function SettingModal() {
         refresDetaiScreen={handleRefreshGroupDetail}
         onUpdateGroup={handleUpdateGroup}
       />
-      <AddMemberModal
-        visible={showAddMember}
-        onClose={handleShowAddMember}
-        groupInfo={groupInfo}
-        onMemberAdded={(newMembers) => updateGroupMembers(newMembers)}
+      <AddMemberModal 
+        visible={showAddMember} 
+        onClose={handleShowAddMember} 
+        groupInfo={groupInfo} 
+        onMemberAdded={(newMembers) => updateGroupMembers(newMembers)} 
       />
     </View>
   );

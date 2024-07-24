@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, StyleSheet, Text, View, Alert } from "react-native";
+import { Modal, StyleSheet, Text, View, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import GroupServices from "@/src/api/GroupServices";
 
@@ -60,7 +60,9 @@ const ChangeNameModal: React.FC<ChangeModalTypes> = ({
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
-      <View style={styles.modalContainer}>
+      <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.modalContainer}>
         <View style={styles.modalContent}>
           <Text style={styles.modalText}>グループの更新</Text>
           <View style={styles.modalBody}>
@@ -95,7 +97,7 @@ const ChangeNameModal: React.FC<ChangeModalTypes> = ({
             </Button>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

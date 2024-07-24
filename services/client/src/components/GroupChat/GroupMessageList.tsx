@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 
-const GroupMessageList = ({ messages, userId, senderFullname }) => {
+const GroupMessageList = ({ messages, userId }) => {
   const flatListRef = useRef<FlatList>(null);
 
   const renderMessageItem = ({ item }) => {
@@ -38,7 +38,7 @@ const GroupMessageList = ({ messages, userId, senderFullname }) => {
           }/${new Date(item.created_at).getDate()} ${
             item.created_at.split("T")[1].split(":")[0]
             }:${item.created_at.split("T")[1].split(":")[1]}`;
-            return eventDate;
+            
       }
     };
 

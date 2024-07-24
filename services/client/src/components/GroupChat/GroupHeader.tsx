@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { SimpleLineIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
@@ -148,14 +148,16 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
           </View>
         </View>
       </View>
-      <TouchableOpacity onPress={() => {
-        if (groupData.id) {
-          router.push(`/chat/settings?groupId=${groupData.id}`);
-        } else {
-          Alert.alert("Error", "Group ID is missing.");
-        }
-      }}>
-        <SimpleLineIcons name="options" size={24} color="black" />
+      <TouchableOpacity
+        onPress={() => {
+          if (groupData.id) {
+            router.push(`/chat/settings?groupId=${groupData.id}`);
+          } else {
+            Alert.alert("Error", "Group ID is missing.");
+          }
+        }}
+      >
+        <AntDesign name="setting" size={24} color="black" />
       </TouchableOpacity>
     </View>
   );

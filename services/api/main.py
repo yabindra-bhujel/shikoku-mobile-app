@@ -118,7 +118,7 @@ async def websocket_endpoint(websocket: WebSocket, group_id: int, db: Session = 
             database_message = GroupMessageLogic.saveMessage(db, message_data)
 
             # 送信されたデータに id と created_at を追加
-            message_data["created_at"] = database_message.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            message_data["created_at"] = database_message.created_at.isoformat()
             message_data["id"] = database_message.id
 
             # メッセージを送信
@@ -133,5 +133,4 @@ async def websocket_endpoint(websocket: WebSocket, group_id: int, db: Session = 
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

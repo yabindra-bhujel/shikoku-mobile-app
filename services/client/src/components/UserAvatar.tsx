@@ -6,13 +6,11 @@ type UserImageType = {
   height?: number;
   width?: number;
 }
-const UserAvatar = (
-  props
-: UserImageType) => {
+const UserAvatar: React.FC<UserImageType> = ({url = "http://127.0.0.1:8000/static/user_profile/1.png", height = 50, width = 50}) => {
   const styles = StyleSheet.create({
     avatar: {
-      width: props.width = 50,
-      height: props.height = 50,
+      width: height,
+      height: width,
       borderRadius: 25,
       marginRight: 10,
     },
@@ -21,7 +19,8 @@ const UserAvatar = (
     <View>
       <Image
         source={{
-          uri: props.url = 'https://randomuser.me/api/portraits/men/75.jpg'
+          uri: url
+          // https://randomuser.me/api/portraits/men/75.jpg
         }}
         style={styles.avatar}
       />

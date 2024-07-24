@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
@@ -92,7 +93,16 @@ export default function Members() {
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <View style={styles.memberItem}>
+          <View style={styles.leftSide}>
+          <Image source={{
+            uri: item.profile?.profile_picture
+          }}
+          height={50}
+          width={50}
+          borderRadius={50}
+          />
           <Text>{item.profile?.fullname || "No name available"}</Text>
+          </View>
           {logged_in_user_id === admin_id &&
             item.id !== admin_id &&
             item.id !== Number(logged_in_user_id) && (
@@ -126,11 +136,11 @@ const styles = StyleSheet.create({
   },
   memberItem: {
     padding: 20,
+    gap: 15,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "lightgray",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
   },
   removeButton: {
@@ -141,4 +151,10 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: "white",
   },
+  leftSide: {
+    flex: 1,
+    gap: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  }
 });
