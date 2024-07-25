@@ -19,6 +19,8 @@ from src.BusinessLogic.messenging.Groups.ConnectionManager import ConnectionMana
 from config.logging_config import setup_logging
 from config.middlewares import LogRequestsMiddleware
 from config.exception.exception import ExceptionHandlerMiddleware
+from fastapi_pagination import add_pagination
+from fastapi_pagination import add_pagination, Page, LimitOffsetPage
 
 # 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
@@ -40,6 +42,14 @@ app.add_middleware(
 
 # ログミドルウェアの設定
 app.add_middleware(LogRequestsMiddleware, logger=logger)
+
+
+# ...
+
+# ページネーションの設定
+add_pagination(app)
+
+# ...
 
 # 例外ミドルウェアの設定
 app.add_exception_handler(Exception, ExceptionHandlerMiddleware)

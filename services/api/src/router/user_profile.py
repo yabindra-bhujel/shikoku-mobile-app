@@ -1,19 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Request
-from ..models.entity.group import Group
+from sqlalchemy.future import select
 from sqlalchemy.orm import Session
-from ..models.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..models.database import get_db, get_async_db
 from ..models.entity.user_profile import UserProfile
 from ..models.entity.users import User
 from ..auth.router import get_current_user
 import shutil
 from ..schemas.user_profile import *
 import os
+from ..filters.UserFilter import UserFilter
+from fastapi_pagination import  paginate, Page
+from typing import Optional
+from pydantic import BaseModel
+
 
 # ユーザ プロファイル api の ルータ
 router = APIRouter(prefix="/user_profile", tags=["User"])
 
 # Dependency to get database session
 db_dependency = Depends(get_db)
+async_db_dependency = Depends(get_async_db)
 
 # ユーザ プロファイルの作成
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=UserProfileOutput)
@@ -112,8 +119,6 @@ async def get_profile(request: Request, db: Session = db_dependency, user: User 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-
-
 # ユーザ プロファイルの更新
 @router.put("", status_code=status.HTTP_200_OK, response_model=UserProfileOutput)
 async def update_profile(user_profile: UserProfileInput, request: Request, db: Session = db_dependency, user: User = Depends(get_current_user)):
@@ -143,36 +148,60 @@ async def update_profile(user_profile: UserProfileInput, request: Request, db: S
     
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
 
-@router.get("/group_create", status_code=status.HTTP_200_OK)
-async def get_users(request: Request, group_id = int, db: Session = db_dependency, user: User = Depends(get_current_user)):
+class UserOutput(BaseModel):
+    user_id: int
+    username: str
+    user_image: Optional[str] = None
+
+@router.get("/group_create", response_model=Page[UserOutput], status_code=status.HTTP_200_OK)
+async def get_users(
+    request: Request,
+    db: AsyncSession = Depends(get_async_db),
+    user: User = Depends(get_current_user),
+    user_filter: UserFilter = Depends(UserFilter),
+    page: int = 1,
+    page_size: int = 50
+):
     try:
-        # すべてのユーザーを取得
-        all_users = db.query(User).all()
+        # クエリの作成
+        query = select(User)
+
+        # フィルタリング
+        query = user_filter.filter_query(query)
+        
+        # ページネーションの適用
+        query = query.limit(page_size).offset((page - 1) * page_size)
+        
+        # クエリの実行
+        result = await db.execute(query)
+        all_users = result.scalars().all()
 
         user_list = []
         for user in all_users:
-                user_profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
-                # ユーザの last name と first name を取得
-                if user_profile:
-                    first_name = user_profile.first_name or ""
-                    last_name = user_profile.last_name or ""
-                    username = f"{first_name} {last_name}".strip()
-                else:
-                    username = user.username
+            # ユーザープロファイルの取得
+            user_profile_query = select(UserProfile).where(UserProfile.user_id == user.id)
+            user_profile_result = await db.execute(user_profile_query)
+            user_profile = user_profile_result.scalars().first()
 
-                user_data = {
-                    "user_id": user.id,
-                    "username": username
-                }
+            # ユーザの last name と first name を取得
+            if user_profile:
+                first_name = user_profile.first_name or ""
+                last_name = user_profile.last_name or ""
+                username = f"{first_name} {last_name}".strip()
+            else:
+                username = user.username
 
-                if user_profile and user_profile.profile_picture:
-                    user_data["user_image"] = str(request.url_for('static', path=user_profile.profile_picture))
-                
-                user_list.append(user_data)
+            user_data = UserOutput(
+                user_id=user.id,
+                username=username,
+                user_image=str(request.url_for('static', path=user_profile.profile_picture)) if user_profile and user_profile.profile_picture else None
+            )
+            
+            user_list.append(user_data)
         
-        return user_list
+        # ページネーションの適用
+        return paginate(user_list)
     
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
