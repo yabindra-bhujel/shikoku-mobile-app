@@ -12,6 +12,17 @@ class UserRole(enum.Enum):
     TEACHER = 'teacher'
     USER = 'user'
 
+class Department(enum.Enum):
+    JAPANESE_LITERATURE = 'literature'
+    CALLIGRAPHY_AND_CULTURE = 'culture'
+    INTERNATIONAL_CULTURE = 'international'
+    BUSINESS_INFORMATION = 'business'
+    MEDIA_INFORMATION = 'media'
+    HUMAN_LIFE_SCIENCES = 'human_life'
+    HEALTH_NUTRITION = 'health_nutrition'
+    CHILD_STUDIES = 'child_studies'
+    NURSING = 'nursing'
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -22,6 +33,12 @@ class User(Base):
     joined_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
     role = Column(String, default=UserRole.USER.value)
+
+    # 大学の情報
+    department = Column(String, default=Department.JAPANESE_LITERATURE.value)
+    is_student = Column(Boolean, default=True)
+    is_international_student = Column(Boolean, default=False)
+    
 
     # Relationships
     calendars = relationship("Calendar", back_populates="user")
