@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# sql
+*.sqlite3
+*.sql
+
 # Distribution / packaging
 .Python
 build/
@@ -280,7 +284,7 @@ lib-cov
 pids
 logs
 results
-tmp
+temp
 
 # Build
 public/css/main.css
@@ -323,3 +327,10 @@ package.lock
 *.jpeg
 *.gif
 *.svg
+
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.temp

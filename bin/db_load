@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+# ユーザーに確認を求める
+read -p "この操作はデータベースを上書きします。続行してもよろしいですか？ (y/N): " confirm
+
+# ユーザーの入力が 'y' または 'Y' でない場合、スクリプトを終了
+if [[ ! "$confirm" =~ ^[yY]$ ]]; then
+  echo "操作がキャンセルされました。"
+  exit 1
+fi
+
+echo "Loading database..."
+
+# データベースにデータをロード
+docker exec -i postgres_db psql -U postgres -p 5432 school_db < mock_data/data.sql > /dev/null 2>&1
+
+echo "Database loaded successfully"
