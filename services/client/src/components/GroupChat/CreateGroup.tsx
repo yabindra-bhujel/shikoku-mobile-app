@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -14,12 +15,13 @@ import { CheckBox } from "react-native-elements";
 import GroupServices from "@/src/api/GroupServices";
 import UserServices, { UserData } from "@/src/api/UserServices";
 import { useUser } from "@/src/hooks/UserContext";
+import axiosInstance from "@/src/config/Api";
 
 interface CreateGroupProps {
   toggleCloseModal: () => void;
   refreshGroupList: () => void;
 }
-
+// ユーザー型の定義
 const CreateGroup: React.FC<CreateGroupProps> = ({
   toggleCloseModal,
   refreshGroupList,
@@ -30,6 +32,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (loggedInUserId !== null) {
@@ -40,10 +43,21 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const allUsers: UserData[] = await UserServices.GetAllUser();
-        setUsers(allUsers);
+        // サーバ api pagenation と filter 実装した のでデータの形が変わる
+        const response = await axiosInstance.get('/user_profile/group_create?page=1&page_size=50&size=50');
+        
+        // レスポンスデータの検証と処理
+        const data = response.data;
+        if (data && Array.isArray(data.items)) {
+          setUsers(data.items); // items プロパティをセット
+        } else {
+          throw new Error("Invalid response format");
+        }
+
       } catch (error) {
         Alert.alert("Error fetching users. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -65,7 +79,6 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       group_type: "private",
       member_list: selectedUsers,
     };
-    console.log(data);
     try {
       const res = await GroupServices.createGroup(data);
       if (res) {

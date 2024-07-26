@@ -15,11 +15,14 @@ DATABASE_PORT = os.getenv("DATABASE_PORT")
 
 DATABASE_URL = f"postgresql+asyncpg://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
-# 同期エンジン
-engine = create_engine(DATABASE_URL.replace("asyncpg", "psycopg2"))
+DATABASE_URL_FOR_MIGRATION = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+
+# Synchronous engine
+sync_database_url = DATABASE_URL.replace("asyncpg", "psycopg2")
+engine = create_engine(sync_database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 非同期エンジン
+# Asynchronous engine
 async_engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -31,7 +34,7 @@ def get_db():
         yield db
     finally:
         db.close()
-        
+
 async def get_async_db():
     async with AsyncSessionLocal() as session:
         yield session
