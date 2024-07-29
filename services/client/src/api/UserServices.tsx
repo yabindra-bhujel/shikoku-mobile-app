@@ -8,7 +8,7 @@ export interface UserData {
 }
 
 const GetAllUser = async (): Promise<UserData[]> => {
-  const response = await axiosInstance.get<UserData[]>("/user_profile/group_create");
+  const response = await axiosInstance.get<UserData[]>("/user_profile/group_create?page=1&page_size=50&size=50");
   return response.data; // Access the data property to get the user data
 };
 

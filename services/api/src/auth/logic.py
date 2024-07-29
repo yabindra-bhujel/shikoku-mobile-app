@@ -13,7 +13,6 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import secrets
 
-
 class AuthLogic:
     def __init__(self, logger=None):
         # ユーザーの認証と メール送信設定情報を取得
@@ -68,7 +67,48 @@ class AuthLogic:
         except Exception as e:
             db.rollback()
             return HTTPException(status_code=500, detail="Internal Server Error")
+    
+    def create_user_from_file(self, db: Session, data: dict):
+        username = data['username']
+        email = data['email']
+        password = data['password']
+        role = data['role']
+        department = data['department']
+        is_student = data['is_student'].lower() == 'true'
+        is_international_student = data['is_international_student'] .lower() == 'true'
+        first_name = data['first_name']
+        last_name = data['last_name']
 
+        try:
+            user = db.query(users.User).filter(users.User.username == username,users.User.email == email).first()
+            if user:
+                raise HTTPException(status_code=400, detail="User already exists")
+            
+            hashed_password = self.pwd_context.hash(password)
+            user = users.User(
+                username=username,
+                email=email,
+                hashed_password=hashed_password, 
+                role=role, department=department,
+                is_student=is_student, 
+                is_international_student=is_international_student)
+
+            try:
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+
+            except IntegrityError as e:
+                raise HTTPException(status_code=500, detail="Internal Server Error")
+            
+            user_profile = UserProfile(user_id=user.id, first_name=first_name, last_name=last_name)
+            db.add(user_profile)
+            db.commit()
+            db.refresh(user_profile)
+        
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
 
     def login_token(self, db: Session, username: str, password: str)->str:
         # ユーザーの認証　ユーザが 存在するかないか を確認
