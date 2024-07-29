@@ -12,7 +12,7 @@ class UserProfile(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
-    profile_picture = Column(String, default='static/default_image/shikoon.png')
+    profile_picture = Column(String, default='default_image/shikopon.png')
     bio = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
 

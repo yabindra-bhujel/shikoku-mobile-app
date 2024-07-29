@@ -192,11 +192,13 @@ async def get_users(
             else:
                 username = user.username
 
-            user_data = UserOutput(
-                user_id=user.id,
-                username=username,
-                user_image=str(request.url_for('static', path=user_profile.profile_picture)) if user_profile and user_profile.profile_picture else None
-            )
+            user_data = {
+                "user_id": user.id,
+                "username": username
+            }
+
+            if user_profile and user_profile.profile_picture:
+                user_data["user_image"] = str(request.url_for('static', path=user_profile.profile_picture))
             
             user_list.append(user_data)
         
