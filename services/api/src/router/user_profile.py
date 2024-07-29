@@ -10,7 +10,7 @@ import shutil
 from ..schemas.user_profile import *
 import os
 from ..filters.UserFilter import UserFilter
-from fastapi_pagination import  paginate, Page
+from fastapi_pagination import  paginate, Page, LimitOffsetPage
 from typing import Optional
 from pydantic import BaseModel
 

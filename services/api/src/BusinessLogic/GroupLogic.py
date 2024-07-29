@@ -235,9 +235,6 @@ class GroupLogic:
             if not group:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
 
-            if group.admin_id != user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the admin of this group")
-
             if name:
                 group.name = name
             if description:
@@ -367,8 +364,15 @@ class GroupLogic:
             if not user_in_db:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in database")
             
-            group.group_members.remove(user_in_db)
+            if user_in_db.id == group.admin_id:
+                # chnage admin to another user
+                group.admin_id = group.group_members[0].id
+            else:
+                group.group_members.remove(user_in_db)
+            
             db.commit()
+            db.refresh(group)
+            
 
         except HTTPException as http_exc:
             raise http_exc
