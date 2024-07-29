@@ -89,7 +89,10 @@ class GroupLogic:
 
                     if last_message:
                         user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
-                        username = user_profile.first_name + " " + user_profile.last_name if user_profile else last_message.sender.username
+                        if user_profile:
+                            username = (user_profile.first_name or "") + " " + (user_profile.last_name or "")
+                        else:
+                            username = last_message.sender.username if last_message.sender else "Unknown"
 
                         group_data["last_message"] = {
                             "sender_id": last_message.sender_id,
@@ -103,7 +106,69 @@ class GroupLogic:
             return group_list
 
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+    # @staticmethod
+    # def get_groups(db: Session, user: User, request: Request):
+    #     try:
+    #         subquery = (
+    #             db.query(
+    #                 Group.id.label('group_id'),
+    #                 func.max(GroupMessage.created_at).label('last_message_time')
+    #             )
+    #             .outerjoin(GroupMessage, Group.id == GroupMessage.group_id)
+    #             .group_by(Group.id)
+    #             .subquery()
+    #         )
+
+    #         groups = (
+    #             db.query(Group, subquery.c.last_message_time)
+    #             .outerjoin(subquery, Group.id == subquery.c.group_id)
+    #             .filter(
+    #                 (Group.admin_id == user.id) |
+    #                 (Group.group_members.any(id=user.id))
+    #             )
+    #             .order_by(desc(subquery.c.last_message_time).nullslast())
+    #             .all()
+    #         )
+
+    #         group_list = []
+    #         for group, last_message_time in groups:
+    #             group_data = {
+    #                 "id": group.id,
+    #                 "name": group.name,
+    #                 "admin_id": group.admin_id,
+    #                 "created_at": group.created_at.astimezone(pytz.utc), 
+    #                 "member_count": len(group.group_members),
+    #                 "last_message": None,
+    #                 "group_image": str(request.url_for('static', path=group.group_image)) if group.group_image else None
+    #             }
+
+    #             if last_message_time:
+    #                 last_message = db.query(GroupMessage).filter(
+    #                     GroupMessage.group_id == group.id,
+    #                     GroupMessage.created_at == last_message_time
+    #                 ).first()
+
+    #                 if last_message is not None:
+    #                     user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
+    #                     username = user_profile.first_name + " " + user_profile.last_name if user_profile else last_message.sender.username
+
+    #                     group_data["last_message"] = {
+    #                         "sender_id": last_message.sender_id,
+    #                         "message": last_message.message,
+    #                         "created_at": last_message.created_at.astimezone(pytz.utc),  
+    #                         "sender": username
+    #                     }
+
+    #             group_list.append(group_data)
+
+    #         return group_list
+
+    #     except Exception as e:
+    #         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
     @staticmethod

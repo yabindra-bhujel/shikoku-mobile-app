@@ -112,10 +112,10 @@ export default function Members() {
                 style={styles.profileImage}
               />
             )} */}
-            <Image
-            source={require('@/assets/images/shikopon.png')}
-            style={{height: 50, width: 50}}/>
-            <Text>{item.profile?.fullname || "No name available"}</Text>
+            {/* <Image */}
+            {/* // source={require('@/assets/images/shikopon.png')}
+            // style={{height: 50, width: 50}}/>
+            // <Text>{item.profile?.fullname || "No name available"}</Text> */}
           </View>
           {logged_in_user_id === admin_id &&
             item.id !== admin_id &&
