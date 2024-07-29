@@ -13,7 +13,6 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - school_app
-
 volumes:
   db_data:
 
