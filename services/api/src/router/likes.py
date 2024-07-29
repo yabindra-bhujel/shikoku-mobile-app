@@ -1,12 +1,9 @@
-from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..models.database import get_db
-from datetime import datetime
 from ..schemas.calender import *
 from ..auth.router import get_current_user
 from ..models.entity.users import User
-from ..models.entity.likes import Likes
 from ..schemas.like import LikeInput
 from ..BusinessLogic.LikeLogic import LikeLogic
 

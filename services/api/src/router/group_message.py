@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from fastapi_pagination import Page, Params
 from ..models.database import get_db
 from ..auth.router import get_current_user
 from ..models.entity.users import User
 from ..BusinessLogic.messenging.Groups.GroupMessageLogic import GroupMessageLogic
 from ..schemas.GroupMessageSchema import GroupMessageSchema
-from fastapi_pagination import Page, Params
 
 
 router = APIRouter(prefix="/group_messages", tags=["Group Message"])

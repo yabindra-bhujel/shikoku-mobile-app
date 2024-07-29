@@ -1,5 +1,4 @@
 from ast import List
-import os
 from fastapi import (
     APIRouter,
     Depends,
@@ -11,6 +10,7 @@ from fastapi import (
     Request,
 )
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from typing import Optional, List
 from ..models.database import get_db
 from ..models.entity.users import User
@@ -18,7 +18,6 @@ from ..models.entity.group import Group
 from ..auth.router import get_current_user
 from ..auth.permissions import authenticate_user
 from ..BusinessLogic.GroupLogic import GroupLogic
-from pydantic import BaseModel
 
 router = APIRouter(prefix="/groups", tags=["Group"])
 db_dependency = Depends(get_db)

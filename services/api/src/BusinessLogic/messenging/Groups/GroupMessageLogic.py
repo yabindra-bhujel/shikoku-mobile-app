@@ -1,14 +1,13 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from datetime import datetime
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy.sql import func
 from src.models.entity.group_message import GroupMessage as GroupMessageModel
 from src.models.entity.group import Group
 from src.models.entity.users import User
 from ....schemas.GroupMessageSchema import GroupMessageSchema
 from ....models.entity.user_profile import UserProfile
-from fastapi_pagination.ext.sqlalchemy import paginate
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy.sql import func
 
 class GroupMessageLogic:
 
