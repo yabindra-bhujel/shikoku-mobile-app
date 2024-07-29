@@ -29,7 +29,11 @@ from debug_toolbar.middleware import DebugToolbarMiddleware
 logger = setup_logging()
 
 app = FastAPI(debug=True)
-app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
+
+# データベース debug_toolbar の設定
+app.add_middleware(DebugToolbarMiddleware)
+
+
 
 # CORSミドルウェアの設定
 app.add_middleware(
@@ -96,8 +100,8 @@ html = """
             var input = document.getElementById("messageText");
             var messageData = {
                 message: input.value,
-                sender_id: "12",
-                group_id: "29"
+                sender_id: "1",
+                group_id: "4"
             };
             ws.send(JSON.stringify(messageData));
             input.value = '';
