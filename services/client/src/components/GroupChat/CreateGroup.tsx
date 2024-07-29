@@ -138,7 +138,11 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
           />
           <ScrollView style={styles.userListContainer}>
             {filteredUsers.map((user) => (
-              <View key={user.user_id} style={styles.userItem}>
+              <TouchableOpacity
+                key={user.user_id}
+                onPress={() => toggleUserSelection(user.user_id)}
+                style={styles.userItem}
+              >
                 <View style={styles.userInfo}>
                   <UserAvatar url={user.user_image} width={30} height={30} />
                   <Text style={styles.userName}>{user.username}</Text>
@@ -151,7 +155,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
                   checked={selectedUsers.includes(user.user_id)}
                   onPress={() => toggleUserSelection(user.user_id)}
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>

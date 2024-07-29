@@ -1,47 +1,11 @@
-import React, { useRef, useCallback, useState } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from "react-native";
-import MessageOptionsModal from "./settings/ReplyDeleteModal";
+import React, { useRef, useCallback } from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 
-interface Message {
-  id: number;
-  sender_id: string;
-  sender_fullname: string;
-  message: string;
-  created_at: string;
-  username: string;
-}
-
-interface GroupMessageListProps {
-  messages: Message[];
-  userId: string;
-}
-
-const GroupMessageList: React.FC<GroupMessageListProps> = ({ messages, userId }) => {
+const GroupMessageList = ({ messages, userId }) => {
   const flatListRef = useRef<FlatList>(null);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const handleLongPress = (message: Message) => {
-    setSelectedMessage(message);
-    setModalVisible(true);
-  };
-
-  const handleReply = () => {
-    if (selectedMessage) {
-      setModalVisible(false);
-      Alert.alert("Reply", `Reply to message: ${selectedMessage.message}`);
-    }
-  };
-
-  const handleDelete = () => {
-    if (selectedMessage) {
-      setModalVisible(false);
-      Alert.alert("Delete", `Delete message: ${selectedMessage.message}`);
-    }
-  };
 
   const renderMessageItem = useCallback(
-    ({ item }: { item: Message }) => {
+    ({ item }) => {
       const isCurrentUser = item.sender_id === userId;
 
       const messageContainerStyle = isCurrentUser
@@ -80,42 +44,30 @@ const GroupMessageList: React.FC<GroupMessageListProps> = ({ messages, userId })
       };
 
       return (
-        <TouchableOpacity
-          key={item.id}
-          style={messageContainerStyle}
-          onLongPress={() => handleLongPress(item)}
-        >
+        <View key={item.id} style={messageContainerStyle}>
           {!isCurrentUser && (
             <Text style={styles.senderText}>{item.username}</Text>
           )}
           <Text style={messageTextStyle}>{item.message}</Text>
           <Text style={styles.timestampText}>{showTime()}</Text>
-        </TouchableOpacity>
+        </View>
       );
     },
     [userId]
   );
 
-  const keyExtractor = useCallback((item: Message) => item.id.toString(), []);
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
 
   return (
     <View style={styles.container}>
       <FlatList
         inverted
         ref={flatListRef}
-        data={messages}
+        data={[...messages].reverse()}
         renderItem={renderMessageItem}
         keyExtractor={keyExtractor}
         scrollEnabled={true}
       />
-      {selectedMessage && (
-        <MessageOptionsModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          onReply={handleReply}
-          onDelete={handleDelete}
-        />
-      )}
     </View>
   );
 };

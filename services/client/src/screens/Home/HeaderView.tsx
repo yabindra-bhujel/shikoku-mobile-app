@@ -15,7 +15,7 @@ const HeaderView = () => {
 
   const theme = useColorScheme();
   const deviceWidth = Dimensions.get("window").width;
-  const { username, email } = useUser();
+  const { loggedInUserId, username, email } = useUser();
 
   const styles = StyleSheet.create({
     HeaderContainer: {
@@ -133,7 +133,7 @@ const HeaderView = () => {
         >
           <View style={styles.useComponents}>
             <View style={styles.userLeftContainer}>
-              <UserAvatar />
+              <UserAvatar userId={loggedInUserId}/>
               <View>
                 <Text
                   style={{ color: "white", fontSize: 18, fontWeight: "bold" }}

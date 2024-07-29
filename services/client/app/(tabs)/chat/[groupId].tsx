@@ -9,10 +9,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
   useColorScheme,
-  FlatList,
-  TouchableWithoutFeedback,
 } from "react-native";
 import GroupHeader from "@/src/components/GroupChat/GroupHeader";
 import { useLocalSearchParams } from "expo-router";
@@ -142,7 +139,6 @@ const ChatDetail = () => {
   }, [groupId]);
 
   useEffect(() => {
-    // Focus the text input after the component mounts
     if (textInputRef.current) {
       textInputRef.current.focus();
     }
@@ -174,7 +170,6 @@ const ChatDetail = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -214,7 +209,6 @@ const ChatDetail = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
   );
 };
 

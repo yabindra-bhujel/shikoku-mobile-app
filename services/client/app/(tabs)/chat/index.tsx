@@ -1,8 +1,11 @@
-import React from "react";
-import GroupChat from "@/src/screens/Chat/GroupChat";
+import { View, Text } from 'react-native'
+import React from 'react'
+import GroupChat from '@/src/screens/Chat/GroupChat'
 
 const Chatbot = () => {
-  return <GroupChat />;
-};
+  return (
+   <GroupChat/>
+  )
+}
 
-export default Chatbot;
+export default Chatbot

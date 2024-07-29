@@ -1,12 +1,14 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { myip } from "../config/Api";
 
 type UserImageType = {
   url?: string;
   height?: number;
   width?: number;
+  userId?: number | null;
 }
-const UserAvatar: React.FC<UserImageType> = ({url = "http://127.0.0.1:8000/static/user_profile/1.png", height = 50, width = 50}) => {
+const UserAvatar: React.FC<UserImageType> = ({userId, url = `http://${myip}/static/user_profile/${userId}.png`, height = 50, width = 50}) => {
   const styles = StyleSheet.create({
     avatar: {
       width: height,

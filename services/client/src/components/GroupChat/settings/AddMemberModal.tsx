@@ -16,6 +16,7 @@ import UserServices, { UserData } from "@/src/api/UserServices";
 import { useUser } from "@/src/hooks/UserContext";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import GroupServices from "@/src/api/GroupServices";
+import axiosInstance from "@/src/config/Api";
 
 const AddMemberModal = ({
     visible,
@@ -32,20 +33,21 @@ const AddMemberModal = ({
     const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
     const [users, setUsers] = useState<UserData[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>("");
-  
+
     useEffect(() => {
       const fetchUsers = async () => {
         try {
-          const allUsers: UserData[] = await UserServices.GetAllUser();
-          setUsers(allUsers);
+          // const allUsers: UserData[] = await UserServices.GetAllUser();
+          const get = await axiosInstance.get("/user_profile/group_create?page=1&page_size=50&size=50")
+          setUsers(get.data.items);
         } catch (error) {
           Alert.alert("Error fetching users. Please try again.");
         }
       };
-  
+
       fetchUsers();
     }, []);
-  
+
     const toggleUserSelection = (userId: number) => {
       setSelectedUsers((prevSelectedUsers) =>
         prevSelectedUsers.includes(userId)
@@ -53,22 +55,22 @@ const AddMemberModal = ({
           : [...prevSelectedUsers, userId]
       );
     };
-  
+
     const isUserInGroup = (userId: number) => {
       return groupInfo.group_members.some((member: any) => member.id === userId);
     };
-  
-    const filteredUsers = users.filter(
+
+    const filteredUsers = users?.filter(
       (user) =>
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
         user.user_id !== loggedInUserId && // Exclude logged-in user
         !isUserInGroup(user.user_id) // Exclude users already in the group
-    );
-  
+    ) || [];
+
     const clearSearch = () => {
       setSearchQuery("");
     };
-  
+
     const addMember = async () => {
       console.log(groupInfo);
       const data = {
@@ -90,7 +92,7 @@ const AddMemberModal = ({
         Alert.alert("Error adding member. Please try again.");
       }
     };
-  
+
     return (
       <Modal visible={visible} transparent={true} animationType="slide">
         <SafeAreaView style={styles.ModalView}>
@@ -130,107 +132,115 @@ const AddMemberModal = ({
               ) : null}
             </View>
             <ScrollView style={styles.userListContainer}>
-              {filteredUsers.map((user) => (
-                <View key={user.user_id} style={styles.userItem}>
-                  <View style={styles.userInfo}>
-                    <UserAvatar url={user.user_image} width={30} height={30} />
-                    <Text style={styles.userName}>{user.username}</Text>
-                  </View>
-                  <CheckBox
-                    checkedIcon="checkbox-marked"
-                    uncheckedIcon="checkbox-blank-outline"
-                    iconType="material-community"
-                    checkedColor="#0099ff"
-                    checked={selectedUsers.includes(user.user_id)}
-                    onPress={() => toggleUserSelection(user.user_id)}
-                  />
-                </View>
-              ))}
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
+                  <TouchableOpacity key={user.user_id} onPress={() => toggleUserSelection(user.user_id)} style={styles.userItem}>
+                    <View style={styles.userInfo}>
+                      <UserAvatar url={user.user_image} width={30} height={30} />
+                      <Text style={styles.userName}>{user.username}</Text>
+                    </View>
+                    <CheckBox
+                      checkedIcon="checkbox-marked"
+                      uncheckedIcon="checkbox-blank-outline"
+                      iconType="material-community"
+                      checkedColor="#0099ff"
+                      checked={selectedUsers.includes(user.user_id)}
+                      onPress={() => toggleUserSelection(user.user_id)}
+                    />
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.noUsersText}>No users available</Text>
+              )}
             </ScrollView>
           </View>
         </SafeAreaView>
       </Modal>
     );
   };
-  
-  export default AddMemberModal;
-  
-  const styles = StyleSheet.create({
-    ModalView: {
-      flex: 1,
-      backgroundColor: "#eee",
-    },
-    CenteredView: {
-      borderRadius: 10,
-    },
-    ModalText: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: "black",
-    },
-    headerModal: {
-      height: 50,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      backgroundColor: "#ddd",
-      alignItems: "center",
-      paddingHorizontal: 10,
-    },
-    headerLeft: {
-      flex: 1,
-    },
-    headerCenter: {
-      flex: 2,
-      alignItems: "center",
-    },
-    headerRight: {
-      flex: 1,
-      alignItems: "flex-end",
-    },
-    ModalBody: {
-      flex: 1,
-      padding: 20,
-      alignItems: "center",
-      backgroundColor: "#eee",
-    },
-    searchBar: {
-      width: "100%",
-      height: 50,
-      gap: 10,
-      backgroundColor: "#fff",
-      borderRadius: 10,
-      marginBottom: 10,
-      paddingHorizontal: 10,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 16,
-      color: "black",
-    },
-    userListContainer: {
-      flex: 1,
-      width: "100%",
-      padding: 20,
-      backgroundColor: "#fff",
-    },
-    userItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 10,
-    },
-    userInfo: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    userName: {
-      fontSize: 16,
-      fontWeight: "bold",
-      color: "black",
-      marginLeft: 10,
-    },
-  });
-  
-  
+
+export default AddMemberModal;
+
+const styles = StyleSheet.create({
+  ModalView: {
+    flex: 1,
+    backgroundColor: "#eee",
+  },
+  CenteredView: {
+    borderRadius: 10,
+  },
+  ModalText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "black",
+  },
+  headerModal: {
+    height: 50,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#ddd",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  headerCenter: {
+    flex: 2,
+    alignItems: "center",
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  ModalBody: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: "#eee",
+  },
+  searchBar: {
+    width: "100%",
+    height: 50,
+    gap: 10,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "black",
+  },
+  userListContainer: {
+    flex: 1,
+    width: "100%",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  userItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "black",
+    marginLeft: 10,
+  },
+  noUsersText: {
+    fontSize: 16,
+    color: "gray",
+    textAlign: "center",
+    marginTop: 20,
+  },
+});

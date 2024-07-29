@@ -23,9 +23,10 @@ export default function Members() {
   // Ensure group_id is a string
   const groupId = group_id || "0";
 
-  const [members, setMembers] = useState(group_members ? JSON.parse(group_members) : []);
-  const router = useRouter();
-
+  const [members, setMembers] = useState(
+    group_members ? JSON.parse(group_members) : []
+  );
+  var defaultImage = require("@/assets/images/64px-shikoku-logo.png")
   const handleRemoveMember = async (memberId: number) => {
     const numericGroupId = Number(groupId);
 
@@ -72,7 +73,10 @@ export default function Members() {
         const response = await GroupServices.getGroupById(groupId);
         setMembers(response.data.group_members);
       } catch (error) {
-        Alert.alert("Error", "Failed to fetch updated members. Please try again later.");
+        Alert.alert(
+          "Error",
+          "Failed to fetch updated members. Please try again later."
+        );
       }
     };
 
@@ -90,18 +94,28 @@ export default function Members() {
   return (
     <FlatList
       data={members}
+      scrollEnabled={true}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <View style={styles.memberItem}>
           <View style={styles.leftSide}>
-          <Image source={{
-            uri: item.profile?.profile_picture
-          }}
-          height={50}
-          width={50}
-          borderRadius={50}
-          />
-          <Text>{item.profile?.fullname || "No name available"}</Text>
+            {/* {item.profile?.profile_picture ? (
+              <Image
+                source={{
+                  uri: item.profile.profile_picture,
+                }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <Image
+                source={defaultImage}
+                style={styles.profileImage}
+              />
+            )} */}
+            <Image
+            source={require('@/assets/images/shikopon.png')}
+            style={{height: 50, width: 50}}/>
+            <Text>{item.profile?.fullname || "No name available"}</Text>
           </View>
           {logged_in_user_id === admin_id &&
             item.id !== admin_id &&
@@ -135,7 +149,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   memberItem: {
-    padding: 20,
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 8,
     gap: 15,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
@@ -156,5 +172,10 @@ const styles = StyleSheet.create({
     gap: 10,
     flexDirection: "row",
     alignItems: "center",
-  }
+  },
+  profileImage: {
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+  },
 });
