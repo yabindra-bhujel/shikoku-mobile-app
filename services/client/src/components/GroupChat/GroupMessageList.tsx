@@ -1,7 +1,7 @@
 import React, { useRef, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
 
-const GroupMessageList = ({ messages, userId }) => {
+const GroupMessageList = ({ messages, userId, fetchMoreMessages, loadingMore }) => {
   const flatListRef = useRef<FlatList>(null);
 
   const renderMessageItem = useCallback(
@@ -58,6 +58,11 @@ const GroupMessageList = ({ messages, userId }) => {
 
   const keyExtractor = useCallback((item) => item.id.toString(), []);
 
+  const renderFooter = () => {
+    if (!loadingMore) return null;
+    return <ActivityIndicator size="large" color="#00ff00" />;
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -67,6 +72,9 @@ const GroupMessageList = ({ messages, userId }) => {
         renderItem={renderMessageItem}
         keyExtractor={keyExtractor}
         scrollEnabled={true}
+        onEndReached={fetchMoreMessages}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
       />
     </View>
   );

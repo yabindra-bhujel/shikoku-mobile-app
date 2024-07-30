@@ -20,6 +20,9 @@ async def get_group_messages(group_id: int, db: Session = db_dependency,
     try:
         messages = GroupMessageLogic.getMessages(db, group_id)
 
+        # reverse the order of the messages
+        messages.items = messages.items[::-1]
+
         return messages
     
     except ValueError as e:
