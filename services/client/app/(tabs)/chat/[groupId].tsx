@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   useColorScheme,
+  FlatList,
 } from "react-native";
 import GroupHeader from "@/src/components/GroupChat/GroupHeader";
 import { useLocalSearchParams } from "expo-router";
@@ -42,6 +43,7 @@ const ChatDetail = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const textInputRef = useRef<TextInput>(null);
+  const flatListRef = useRef<FlatList<any>>(null); // Ensure FlatList ref type
 
   const [messageData, setMessageData] = useState({
     message: "",
@@ -80,8 +82,8 @@ const ChatDetail = () => {
       const newMessages = response.data.items;
 
       setMessages((prevMessages) => {
-        const allMessages = [...prevMessages, ...newMessages];
-        // 重複メッセージを除去
+        const allMessages = [...newMessages, ...prevMessages];
+        // Remove duplicate messages
         const uniqueMessages = Array.from(new Set(allMessages.map(msg => msg.id)))
           .map(id => allMessages.find(msg => msg.id === id));
         return uniqueMessages;
@@ -99,10 +101,8 @@ const ChatDetail = () => {
     }
   };
 
-  console.log(messages.length);
-
   useEffect(() => {
-    fetchMessages(1); // 初期ページを取得
+    fetchMessages(1); // Fetch initial page
   }, [groupId]);
 
   useEffect(() => {
@@ -136,8 +136,10 @@ const ChatDetail = () => {
             if (messageExists) {
               return prevMessages;
             }
-            return [message, ...prevMessages];
+            return [...prevMessages, message]; // Add new message to the end
           });
+          // Scroll to bottom on new message
+          flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
         } catch (e) {}
       };
 
@@ -163,6 +165,10 @@ const ChatDetail = () => {
       ws?.send(JSON.stringify(messageData));
       setMessageData({ ...messageData, message: "" });
       setInputValue("");
+      // Scroll to bottom after sending a message
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+      }, 100);
     }
   };
 
@@ -188,6 +194,7 @@ const ChatDetail = () => {
     }
     return (
       <GroupMessageList
+        ref={flatListRef} // Pass the ref as a prop
         messages={messages}
         userId={userId}
         fetchMoreMessages={handleLoadMore}
