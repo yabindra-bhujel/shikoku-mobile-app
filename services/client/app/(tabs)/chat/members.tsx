@@ -99,7 +99,7 @@ export default function Members() {
       renderItem={({ item }) => (
         <View style={styles.memberItem}>
           <View style={styles.leftSide}>
-            {/* {item.profile?.profile_picture ? (
+            {item.profile?.profile_picture ? (
               <Image
                 source={{
                   uri: item.profile.profile_picture,
@@ -107,15 +107,14 @@ export default function Members() {
                 style={styles.profileImage}
               />
             ) : (
-              <Image
-                source={defaultImage}
-                style={styles.profileImage}
-              />
-            )} */}
-            {/* <Image */}
-            {/* // source={require('@/assets/images/shikopon.png')}
-            // style={{height: 50, width: 50}}/>
-            // <Text>{item.profile?.fullname || "No name available"}</Text> */}
+              <View style={styles.profileImage}>
+                <Text style={styles.firstCharText}>
+                  {item.name.charAt(0).toUpperCase()}
+                </Text>
+                </View>
+             
+            )}
+            <Text>{item.profile?.fullname || "No name available"}</Text>
           </View>
           {logged_in_user_id === admin_id &&
             item.id !== admin_id &&
@@ -178,4 +177,9 @@ const styles = StyleSheet.create({
     width: 50,
     borderRadius: 50,
   },
+  firstCharText: {
+    fontSize: 18,
+    color: "black",
+  }
+  
 });

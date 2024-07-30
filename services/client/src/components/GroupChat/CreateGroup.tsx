@@ -7,9 +7,13 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  Keyboard,
+  TextInput as NativeInput,
 } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Feather } from "@expo/vector-icons";
 import UserAvatar from "../UserAvatar";
 import { CheckBox } from "react-native-elements";
 import GroupServices from "@/src/api/GroupServices";
@@ -21,7 +25,7 @@ interface CreateGroupProps {
   toggleCloseModal: () => void;
   refreshGroupList: () => void;
 }
-// ユーザー型の定義
+
 const CreateGroup: React.FC<CreateGroupProps> = ({
   toggleCloseModal,
   refreshGroupList,
@@ -43,17 +47,15 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // サーバ api pagenation と filter 実装した のでデータの形が変わる
-        const response = await axiosInstance.get('/user_profile/group_create?page=1&page_size=50&size=50');
-        
-        // レスポンスデータの検証と処理
+        const response = await axiosInstance.get(
+          "/user_profile/group_create?page=1&page_size=50&size=50"
+        );
         const data = response.data;
         if (data && Array.isArray(data.items)) {
-          setUsers(data.items); // items プロパティをセット
+          setUsers(data.items);
         } else {
           throw new Error("Invalid response format");
         }
-
       } catch (error) {
         Alert.alert("Error fetching users. Please try again.");
       } finally {
@@ -101,74 +103,103 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   const filteredUsers = users.filter(
     (user) =>
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      user.user_id !== loggedInUserId // Exclude logged-in user
+      user.user_id !== loggedInUserId
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Create Group</Text>
-          <TouchableOpacity onPress={toggleCloseModal}>
-            <Ionicons name="close-sharp" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-        <View>
-          <TextInput
-            label="Group Name"
-            mode="outlined"
-            value={groupName}
-            onChangeText={setGroupName}
-            style={styles.input}
-          />
-          <TextInput
-            label="Description"
-            mode="outlined"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            style={[styles.input, styles.description]}
-          />
-          <TextInput
-            label="Search Users"
-            mode="outlined"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            style={styles.input}
-          />
-          <ScrollView style={styles.userListContainer}>
-            {filteredUsers.map((user) => (
-              <TouchableOpacity
-                key={user.user_id}
-                onPress={() => toggleUserSelection(user.user_id)}
-                style={styles.userItem}
-              >
-                <View style={styles.userInfo}>
-                  <UserAvatar url={user.user_image} width={30} height={30} />
-                  <Text style={styles.userName}>{user.username}</Text>
-                </View>
-                <CheckBox
-                  checkedIcon="checkbox-marked"
-                  uncheckedIcon="checkbox-blank-outline"
-                  iconType="material-community"
-                  checkedColor="green"
-                  checked={selectedUsers.includes(user.user_id)}
-                  onPress={() => toggleUserSelection(user.user_id)}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Create Group</Text>
+            <TouchableOpacity onPress={toggleCloseModal}>
+              <Ionicons name="close-sharp" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TextInput
+              label="Group Name"
+              mode="outlined"
+              value={groupName}
+              onChangeText={setGroupName}
+              style={styles.input}
+              theme={{ colors: { primary: "#6200ee" } }}
+            />
+            <TextInput
+              label="Description"
+              mode="outlined"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              style={[styles.input, styles.description]}
+              theme={{ colors: { primary: "#6200ee" } }}
+            />
+            <View style={styles.searchContainer}>
+              <Ionicons
+                name="search"
+                size={20}
+                color="gray"
+                style={styles.searchIcon}
+              />
+              <NativeInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={styles.searchInput}
+                placeholder="Search Users"
+              />
+              {searchQuery ? (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <Feather name="x-circle" size={24} color="black" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+            <ScrollView style={styles.userListContainer}>
+              {loading ? (
+                <ActivityIndicator
+                  size="large"
+                  color="#6200ee"
+                  style={styles.loader}
                 />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+              ) : (
+                filteredUsers.map((user) => (
+                  <TouchableOpacity
+                    key={user.user_id}
+                    onPress={() => toggleUserSelection(user.user_id)}
+                    style={styles.userItem}
+                  >
+                    <View style={styles.userInfo}>
+                      <UserAvatar
+                        url={user.user_image}
+                        width={30}
+                        height={30}
+                      />
+                      <Text style={styles.userName}>{user.username}</Text>
+                    </View>
+                    <CheckBox
+                      checkedIcon="checkbox-marked"
+                      uncheckedIcon="checkbox-blank-outline"
+                      iconType="material-community"
+                      checkedColor="green"
+                      checked={selectedUsers.includes(user.user_id)}
+                      onPress={() => toggleUserSelection(user.user_id)}
+                    />
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </View>
+          <View>
+            <Button
+              mode="contained"
+              onPress={handleCreateGroup}
+              style={styles.createButton}
+              theme={{ colors: { primary: "#6200ee" } }}
+            >
+              Create
+            </Button>
+          </View>
         </View>
-        <View>
-          <Button
-            mode="contained"
-            onPress={handleCreateGroup}
-            style={styles.createButton}
-          >
-            Create
-          </Button>
-        </View>
-      </View>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
@@ -182,6 +213,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "white",
     borderRadius: 10,
+    height: "100%",
   },
   header: {
     flexDirection: "row",
@@ -195,12 +227,13 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 20,
+    backgroundColor: "white",
   },
   description: {
     height: 100,
   },
   userListContainer: {
-    maxHeight: 300,
+    height: "50%",
   },
   userItem: {
     flexDirection: "row",
@@ -224,6 +257,27 @@ const styles = StyleSheet.create({
   createButton: {
     marginTop: 15,
     padding: 5,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 15,
+    borderColor: "#aaa",
+    backgroundColor: "#fff",
+    width: "100%",
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 18,
+  },
+  loader: {
+    marginTop: 20,
   },
 });
 

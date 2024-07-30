@@ -19,6 +19,7 @@ const GroupMessageList = ({ messages, userId }) => {
       const showTime = () => {
         const todaytime = new Date();
         const time = new Date(item.created_at);
+        console.log(todaytime.getMonth())
         if (time.getFullYear() === todaytime.getFullYear()) {
           if (time.getDate() === todaytime.getDate()) {
             const timestamp = `${item.created_at.split("T")[1].split(":")[0]}:${
@@ -27,16 +28,16 @@ const GroupMessageList = ({ messages, userId }) => {
             return timestamp;
           } else {
             const eventDate = `${
-              new Date(item.created_at).getMonth() + 1
-            }/${new Date(item.created_at).getDate()} ${
+              item.created_at.split("-")[1]
+            }/${item.created_at.split("T")[0].split("-")[2]} ${
               item.created_at.split("T")[1].split(":")[0]
             }:${item.created_at.split("T")[1].split(":")[1]}`;
             return eventDate;
           }
         } else {
           const eventDate = `${new Date(item.created_at).getFullYear()}/${
-            new Date(item.created_at).getMonth() + 1
-          }/${new Date(item.created_at).getDate()} ${
+            item.created_at.split("-")[1]
+          }/${item.created_at.split("T")[0].split("-")[2]} ${
             item.created_at.split("T")[1].split(":")[0]
           }:${item.created_at.split("T")[1].split(":")[1]}`;
           return eventDate;

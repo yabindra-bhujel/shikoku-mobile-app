@@ -84,7 +84,7 @@ html = """
         <ul id='messages'>
         </ul>
         <script>
-            var ws = new WebSocket("ws://localhost:8000/ws/29");
+            var ws = new WebSocket("ws://localhost:8000/ws/1");
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
@@ -97,7 +97,7 @@ html = """
             var messageData = {
                 message: input.value,
                 sender_id: "12",
-                group_id: "29"
+                group_id: "1"
             };
             ws.send(JSON.stringify(messageData));
             input.value = '';

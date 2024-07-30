@@ -33,7 +33,7 @@ const StackLayout = () => {
                 <AntDesign name="left" size={24} color="black" />
               </TouchableOpacity>
             ),
-            title: ""
+            headerTitle: "グループチャット"
           }}
         />
 
