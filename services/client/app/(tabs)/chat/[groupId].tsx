@@ -10,14 +10,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   useColorScheme,
+  FlatList,
 } from "react-native";
 import GroupHeader from "@/src/components/GroupChat/GroupHeader";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
 import AuthServices from "@/src/api/AuthServices";
 import GroupMessageList from "@/src/components/GroupChat/GroupMessageList";
-import GroupMessageServices from "@/src/api/GroupMessageServices";
 import { myip } from "@/src/config/Api";
+import axiosInstance from "@/src/config/Api";
 
 interface GroupData {
   id: string;
@@ -38,6 +39,11 @@ const ChatDetail = () => {
   const [userId, setUserId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const textInputRef = useRef<TextInput>(null);
+  const flatListRef = useRef<FlatList<any>>(null); // Ensure FlatList ref type
 
   const [messageData, setMessageData] = useState({
     message: "",
@@ -45,29 +51,6 @@ const ChatDetail = () => {
     username: "",
     group_id: groupId || "",
   });
-
-  const textInputRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!groupId) return;
-
-      try {
-        setLoading(true);
-        const response = await GroupMessageServices.getGroupMessages(groupId);
-        setMessages(response.data);
-      } catch (error) {
-        Alert.alert(
-          "Error",
-          "Failed to fetch group messages from server. Please try again later."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMessages();
-  }, [groupId]);
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -90,6 +73,38 @@ const ChatDetail = () => {
     fetchGroup();
   }, [groupId]);
 
+  const fetchMessages = async (pageNum: number) => {
+    if (!groupId) return;
+
+    try {
+      setLoadingMore(true);
+      const response = await axiosInstance.get(`/group_messages/${groupId}?page=${pageNum}&size=50`);
+      const newMessages = response.data.items;
+
+      setMessages((prevMessages) => {
+        const allMessages = [...newMessages, ...prevMessages];
+        // Remove duplicate messages
+        const uniqueMessages = Array.from(new Set(allMessages.map(msg => msg.id)))
+          .map(id => allMessages.find(msg => msg.id === id));
+        return uniqueMessages;
+      });
+
+      setCurrentPage(response.data.page);
+      setTotalPages(response.data.pages);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to fetch group messages from server. Please try again later."
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages(1); // Fetch initial page
+  }, [groupId]);
+
   useEffect(() => {
     const getUser = async () => {
       const user = await AuthServices.getUserProfile();
@@ -109,26 +124,27 @@ const ChatDetail = () => {
       if (!groupId) return;
 
       const socketUrl = `ws://${myip}:8000/ws/${groupId}`;
-
       const ws = new WebSocket(socketUrl);
 
       ws.onopen = () => {};
 
       ws.onmessage = (e) => {
-        const message = JSON.parse(e.data);
-        setMessages((prevMessages) => {
-          // Ensure messages have unique ids
-          const messageExists = prevMessages.some((msg) => msg.id === message.id);
-          if (messageExists) {
-            return prevMessages;
-          }
-          return [...prevMessages, message];
-        });
+        try {
+          const message = JSON.parse(e.data);
+          setMessages((prevMessages) => {
+            const messageExists = prevMessages.some((msg) => msg.id === message.id);
+            if (messageExists) {
+              return prevMessages;
+            }
+            return [...prevMessages, message]; // Add new message to the end
+          });
+          // Scroll to bottom on new message
+          flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+        } catch (e) {}
       };
 
       setWs(ws);
     };
-
     initializeWebSocket();
 
     return () => {
@@ -148,7 +164,17 @@ const ChatDetail = () => {
     if (messageData.message.trim()) {
       ws?.send(JSON.stringify(messageData));
       setMessageData({ ...messageData, message: "" });
-      setInputValue(""); // Clear the input value
+      setInputValue("");
+      // Scroll to bottom after sending a message
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+      }, 100);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (currentPage < totalPages) {
+      fetchMessages(currentPage + 1);
     }
   };
 
@@ -166,49 +192,57 @@ const ChatDetail = () => {
         />
       );
     }
-    return <GroupMessageList messages={messages} userId={userId} />;
+    return (
+      <GroupMessageList
+        ref={flatListRef} // Pass the ref as a prop
+        messages={messages}
+        userId={userId}
+        fetchMoreMessages={handleLoadMore}
+        loadingMore={loadingMore}
+      />
+    );
   };
 
   return (
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
-      >
-        <View style={{ flex: 1 }}>
-          <View
-            style={{
-              height: 54,
-              backgroundColor: theme === "dark" ? "#333" : "#fff",
-            }}
-          />
-          {group && <GroupHeader groupData={group} />}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+    >
+      <View style={{ flex: 1 }}>
+        <View
+          style={{
+            height: 54,
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+          }}
+        />
+        {group && <GroupHeader groupData={group} />}
 
-          {renderMessages()}
+        {renderMessages()}
 
-          <View style={styles.footerContainer}>
-            <View style={styles.inputContainer}>
-              <TextInput
-                ref={textInputRef}
-                placeholder="メッセージを入力..."
-                style={styles.messageInput}
-                multiline
-                autoFocus={true}
-                value={inputValue}
-                onChangeText={(text) => {
-                  setInputValue(text);
-                  setMessageData({ ...messageData, message: text });
-                }}
-              />
-              {inputValue.trim() !== "" && (
-                <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                  <Text style={styles.sendButtonText}>送信</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+        <View style={styles.footerContainer}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              ref={textInputRef}
+              placeholder="メッセージを入力..."
+              style={styles.messageInput}
+              multiline
+              autoFocus={true}
+              value={inputValue}
+              onChangeText={(text) => {
+                setInputValue(text);
+                setMessageData({ ...messageData, message: text });
+              }}
+            />
+            {inputValue.trim() !== "" && (
+              <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                <Text style={styles.sendButtonText}>送信</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

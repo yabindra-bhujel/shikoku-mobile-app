@@ -1,77 +1,82 @@
-import React, { useRef, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import React, { useRef, useCallback, useImperativeHandle, forwardRef } from "react";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, FlatListProps } from "react-native";
 
-const GroupMessageList = ({ messages, userId }) => {
-  const flatListRef = useRef<FlatList>(null);
+interface GroupMessageListProps extends Omit<FlatListProps<any>, 'data' | 'renderItem'> {
+  messages: any[];
+  userId: string;
+  fetchMoreMessages: () => void;
+  loadingMore: boolean;
+}
 
-  const renderMessageItem = useCallback(
-    ({ item }) => {
-      const isCurrentUser = item.sender_id === userId;
+const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
+  ({ messages, userId, fetchMoreMessages, loadingMore, ...restProps }, ref) => {
+    const flatListRef = useRef<FlatList<any>>(null);
 
-      const messageContainerStyle = isCurrentUser
-        ? [styles.messageContainer, styles.currentUserMessage]
-        : [styles.messageContainer, styles.otherUserMessage];
+    const renderMessageItem = useCallback(
+      ({ item }) => {
+        const isCurrentUser = item.sender_id === userId;
 
-      const messageTextStyle = isCurrentUser
-        ? [styles.messageText, styles.currentUserMessageText]
-        : [styles.messageText, styles.otherUserMessageText];
+        const messageContainerStyle = isCurrentUser
+          ? [styles.messageContainer, styles.currentUserMessage]
+          : [styles.messageContainer, styles.otherUserMessage];
 
-      const showTime = () => {
-        const todaytime = new Date();
-        const time = new Date(item.created_at);
-        console.log(todaytime.getMonth())
-        if (time.getFullYear() === todaytime.getFullYear()) {
-          if (time.getDate() === todaytime.getDate()) {
-            const timestamp = `${item.created_at.split("T")[1].split(":")[0]}:${
-              item.created_at.split("T")[1].split(":")[1]
-            }`;
-            return timestamp;
+        const messageTextStyle = isCurrentUser
+          ? [styles.messageText, styles.currentUserMessageText]
+          : [styles.messageText, styles.otherUserMessageText];
+
+        const showTime = () => {
+          const todaytime = new Date();
+          const time = new Date(item.created_at);
+          const timeString = item.created_at.split("T")[1].split(":");
+
+          if (time.getFullYear() === todaytime.getFullYear()) {
+            if (time.getDate() === todaytime.getDate()) {
+              return `${timeString[0]}:${timeString[1]}`;
+            } else {
+              return `${time.getMonth() + 1}/${time.getDate()} ${timeString[0]}:${timeString[1]}`;
+            }
           } else {
-            const eventDate = `${
-              item.created_at.split("-")[1]
-            }/${item.created_at.split("T")[0].split("-")[2]} ${
-              item.created_at.split("T")[1].split(":")[0]
-            }:${item.created_at.split("T")[1].split(":")[1]}`;
-            return eventDate;
+            return `${time.getFullYear()}/${time.getMonth() + 1}/${time.getDate()} ${timeString[0]}:${timeString[1]}`;
           }
-        } else {
-          const eventDate = `${new Date(item.created_at).getFullYear()}/${
-            item.created_at.split("-")[1]
-          }/${item.created_at.split("T")[0].split("-")[2]} ${
-            item.created_at.split("T")[1].split(":")[0]
-          }:${item.created_at.split("T")[1].split(":")[1]}`;
-          return eventDate;
-        }
-      };
+        };
 
-      return (
-        <View key={item.id} style={messageContainerStyle}>
-          {!isCurrentUser && (
-            <Text style={styles.senderText}>{item.username}</Text>
-          )}
-          <Text style={messageTextStyle}>{item.message}</Text>
-          <Text style={styles.timestampText}>{showTime()}</Text>
-        </View>
-      );
-    },
-    [userId]
-  );
+        return (
+          <View style={messageContainerStyle}>
+            {!isCurrentUser && (
+              <Text style={styles.senderText}>{item.username}</Text>
+            )}
+            <Text style={messageTextStyle}>{item.message}</Text>
+            <Text style={styles.timestampText}>{showTime()}</Text>
+          </View>
+        );
+      },
+      [userId]
+    );
 
-  const keyExtractor = useCallback((item) => item.id.toString(), []);
+    const keyExtractor = useCallback((item) => item.id.toString(), []);
 
-  return (
-    <View style={styles.container}>
-      <FlatList
-        inverted
-        ref={flatListRef}
-        data={[...messages].reverse()}
-        renderItem={renderMessageItem}
-        keyExtractor={keyExtractor}
-        scrollEnabled={true}
-      />
-    </View>
-  );
-};
+    const renderFooter = () => {
+      if (!loadingMore) return null;
+      return <ActivityIndicator size="large" color="#00ff00" />;
+    };
+
+    return (
+      <View style={styles.container}>
+        <FlatList
+          ref={flatListRef}
+          data={[...messages].reverse()}
+          renderItem={renderMessageItem}
+          keyExtractor={keyExtractor}
+          onEndReached={fetchMoreMessages}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={renderFooter}
+          inverted // This inverts the direction of the FlatList
+          {...restProps}
+        />
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

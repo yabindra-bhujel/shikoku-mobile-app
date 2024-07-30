@@ -29,7 +29,11 @@ from debug_toolbar.middleware import DebugToolbarMiddleware
 logger = setup_logging()
 
 app = FastAPI(debug=True)
-app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
+
+# データベース debug_toolbar の設定
+app.add_middleware(DebugToolbarMiddleware)
+
+
 
 # CORSミドルウェアの設定
 app.add_middleware(

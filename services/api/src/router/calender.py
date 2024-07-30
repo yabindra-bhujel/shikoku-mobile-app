@@ -1,11 +1,11 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from ..models.database import get_db
+from typing import List
 from fastapi.security import OAuth2PasswordBearer
+from ..models.database import get_db
 from ..schemas.calender import *
 from ..auth.router import get_current_user
-from typing import List
 from ..models.entity.users import User
 from ..BusinessLogic.CalenderLogic import CalenderLogic
 
