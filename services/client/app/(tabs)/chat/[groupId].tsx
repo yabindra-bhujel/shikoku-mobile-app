@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Text,
   View,
@@ -15,10 +15,11 @@ import {
 import GroupHeader from "@/src/components/GroupChat/GroupHeader";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
-import AuthServices from "@/src/api/AuthServices";
 import GroupMessageList from "@/src/components/GroupChat/GroupMessageList";
 import { myip } from "@/src/config/Api";
 import axiosInstance from "@/src/config/Api";
+import { useUser } from "@/src/hooks/UserContext";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface GroupData {
   id: string;
@@ -34,58 +35,62 @@ const ChatDetail = () => {
   const theme = useColorScheme();
   const [group, setGroup] = useState<GroupData | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [messages, setMessages] = useState<any>([]);
-  const [userId, setUserId] = useState<string>("");
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const textInputRef = useRef<TextInput>(null);
-  const flatListRef = useRef<FlatList<any>>(null); // Ensure FlatList ref type
+  const flatListRef = useRef<FlatList<any>>(null);
+  const { loggedInUserId, fullname } = useUser();
 
   const [messageData, setMessageData] = useState({
     message: "",
-    sender_id: "",
+    sender_id: 0,
     username: "",
     group_id: groupId || "",
   });
 
-  useEffect(() => {
-    const fetchGroup = async () => {
-      if (!groupId) return;
+  const fetchGroup = async () => {
+    if (!groupId) return;
 
-      try {
-        setLoading(true);
-        const response = await GroupServices.getGroupById(groupId);
-        setGroup(response.data);
-      } catch (error) {
-        Alert.alert(
-          "Error",
-          "Failed to fetch group data from server. Please try again later."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      setLoading(true);
+      const response = await GroupServices.getGroupById(groupId);
+      setGroup(response.data);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to fetch group data from server. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchGroup();
-  }, [groupId]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroup();
+    }, [groupId])
+  );
 
   const fetchMessages = async (pageNum: number) => {
     if (!groupId) return;
 
     try {
       setLoadingMore(true);
-      const response = await axiosInstance.get(`/group_messages/${groupId}?page=${pageNum}&size=50`);
+      const response = await axiosInstance.get(
+        `/group_messages/${groupId}?page=${pageNum}&size=50`
+      );
       const newMessages = response.data.items;
 
       setMessages((prevMessages) => {
         const allMessages = [...newMessages, ...prevMessages];
         // Remove duplicate messages
-        const uniqueMessages = Array.from(new Set(allMessages.map(msg => msg.id)))
-          .map(id => allMessages.find(msg => msg.id === id));
+        const uniqueMessages = Array.from(
+          new Set(allMessages.map((msg) => msg.id))
+        ).map((id) => allMessages.find((msg) => msg.id === id));
         return uniqueMessages;
       });
 
@@ -106,18 +111,14 @@ const ChatDetail = () => {
   }, [groupId]);
 
   useEffect(() => {
-    const getUser = async () => {
-      const user = await AuthServices.getUserProfile();
-      setUser(user.data);
-      setUserId(user.data.user_id);
+    if (typeof loggedInUserId === 'number') {
       setMessageData((prevData) => ({
         ...prevData,
-        sender_id: user.data.user_id,
-        username: `${user.data.first_name} ${user.data.last_name}`,
+        sender_id: loggedInUserId,
+        username: fullname ?? "", // Ensure username is a string
       }));
-    };
-    getUser();
-  }, []);
+    }
+  }, [loggedInUserId, fullname]);
 
   useEffect(() => {
     const initializeWebSocket = () => {
@@ -132,7 +133,9 @@ const ChatDetail = () => {
         try {
           const message = JSON.parse(e.data);
           setMessages((prevMessages) => {
-            const messageExists = prevMessages.some((msg) => msg.id === message.id);
+            const messageExists = prevMessages.some(
+              (msg) => msg.id === message.id
+            );
             if (messageExists) {
               return prevMessages;
             }
@@ -196,7 +199,7 @@ const ChatDetail = () => {
       <GroupMessageList
         ref={flatListRef} // Pass the ref as a prop
         messages={messages}
-        userId={userId}
+        userId={loggedInUserId}
         fetchMoreMessages={handleLoadMore}
         loadingMore={loadingMore}
       />

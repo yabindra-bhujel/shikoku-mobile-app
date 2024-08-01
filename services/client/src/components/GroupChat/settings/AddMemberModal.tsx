@@ -41,7 +41,7 @@ const AddMemberModal = ({
           const get = await axiosInstance.get("/user_profile/group_create?page=1&page_size=50&size=50")
           setUsers(get.data.items);
         } catch (error) {
-          Alert.alert("Error fetching users. Please try again.");
+          Alert.alert("データ取得際に問題が発生しました。");
         }
       };
 
@@ -86,10 +86,10 @@ const AddMemberModal = ({
           onMemberAdded(newMembers);
           onClose();
         } else {
-          Alert.alert("Error adding member. Please try again.");
+          Alert.alert("メンバー追加エラー。 もう一度試してください.");
         }
       } catch (error) {
-        Alert.alert("Error adding member. Please try again.");
+        Alert.alert("メンバー追加エラー。 もう一度試してください.");
       }
     };
 
@@ -102,12 +102,12 @@ const AddMemberModal = ({
                 <Text>閉じる</Text>
               </TouchableOpacity>
               <View style={styles.headerCenter}>
-                <Text style={styles.ModalText}>Add Member</Text>
+                <Text style={styles.ModalText}>メンバーの追加</Text>
               </View>
               <View style={styles.headerRight}>
                 {selectedUsers.length > 0 ? (
                   <TouchableOpacity onPress={addMember}>
-                    <Text>Done</Text>
+                    <Text>追加する</Text>
                   </TouchableOpacity>
                 ) : null}
               </View>
@@ -118,7 +118,7 @@ const AddMemberModal = ({
               <MaterialIcons name="search" size={24} color="#444" />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search"
+                placeholder="ユーザー検索"
                 onChangeText={(text) => setSearchQuery(text)}
                 value={searchQuery}
               />
@@ -150,7 +150,7 @@ const AddMemberModal = ({
                   </TouchableOpacity>
                 ))
               ) : (
-                <Text style={styles.noUsersText}>No users available</Text>
+                <Text style={styles.noUsersText}>追加可能なユーザーが存在しません。</Text>
               )}
             </ScrollView>
           </View>

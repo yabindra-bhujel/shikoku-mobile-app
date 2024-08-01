@@ -71,7 +71,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       Alert.alert("Please fill the group name");
       return;
     }
-    if (!selectedUsers.length) {
+    if (selectedUsers.length < 2) {
       Alert.alert("Please select at least one user");
       return;
     }
@@ -81,6 +81,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       group_type: "private",
       member_list: selectedUsers,
     };
+    console.log(data);
     try {
       const res = await GroupServices.createGroup(data);
       if (res) {
@@ -98,6 +99,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
         ? prevSelectedUsers.filter((id) => id !== userId)
         : [...prevSelectedUsers, userId]
     );
+    console.log(selectedUsers)
   };
 
   const filteredUsers = users.filter(
@@ -111,14 +113,14 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.title}>Create Group</Text>
+            <Text style={styles.title}>グループの作成</Text>
             <TouchableOpacity onPress={toggleCloseModal}>
               <Ionicons name="close-sharp" size={24} color="black" />
             </TouchableOpacity>
           </View>
           <View>
             <TextInput
-              label="Group Name"
+              label="グループ名"
               mode="outlined"
               value={groupName}
               onChangeText={setGroupName}
@@ -126,7 +128,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
               theme={{ colors: { primary: "#6200ee" } }}
             />
             <TextInput
-              label="Description"
+              label="グループの説明"
               mode="outlined"
               value={description}
               onChangeText={setDescription}
@@ -137,7 +139,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
             <View style={styles.searchContainer}>
               <Ionicons
                 name="search"
-                size={20}
+                size={22}
                 color="gray"
                 style={styles.searchIcon}
               />
@@ -145,11 +147,11 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 style={styles.searchInput}
-                placeholder="Search Users"
+                placeholder="ユーザー検索"
               />
               {searchQuery ? (
                 <TouchableOpacity onPress={() => setSearchQuery("")}>
-                  <Feather name="x-circle" size={24} color="black" />
+                  <Feather name="x-circle" size={22} color="black" />
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -195,7 +197,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
               style={styles.createButton}
               theme={{ colors: { primary: "#6200ee" } }}
             >
-              Create
+              作成
             </Button>
           </View>
         </View>
@@ -255,14 +257,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   createButton: {
-    marginTop: 15,
     padding: 5,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
     borderRadius: 15,
     borderColor: "#aaa",
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 16,
   },
   loader: {
     marginTop: 20,

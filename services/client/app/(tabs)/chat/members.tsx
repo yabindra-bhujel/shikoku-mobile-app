@@ -10,8 +10,11 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
+import AddMemberModal from "@/src/components/GroupChat/settings/AddMemberModal"; // Adjust the import path as necessary
+import CustomHeader from "@/src/components/GroupChat/settings/MemberCustomHeader";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Members() {
+export default function MembersScreen() {
   const { group_members, admin_id, logged_in_user_id, group_id } =
     useLocalSearchParams<{
       group_members: string;
@@ -20,13 +23,16 @@ export default function Members() {
       group_id: string;
     }>();
 
-  // Ensure group_id is a string
   const groupId = group_id || "0";
-
   const [members, setMembers] = useState(
     group_members ? JSON.parse(group_members) : []
   );
-  var defaultImage = require("@/assets/images/64px-shikoku-logo.png")
+  const [modalVisible, setModalVisible] = useState(false);
+  const [groupInfo, setGroupInfo] = useState({
+    id: Number(groupId),
+    group_members: members,
+  });
+
   const handleRemoveMember = async (memberId: number) => {
     const numericGroupId = Number(groupId);
 
@@ -52,8 +58,13 @@ export default function Members() {
                 memberId
               );
               Alert.alert("Success", "Member removed successfully.");
-              // Update the local state to remove the member from the list
               setMembers(members.filter((member) => member.id !== memberId));
+              setGroupInfo((prevInfo) => ({
+                ...prevInfo,
+                group_members: prevInfo.group_members.filter(
+                  (member) => member.id !== memberId
+                ),
+              }));
             } catch (error) {
               Alert.alert(
                 "Error",
@@ -72,6 +83,10 @@ export default function Members() {
       try {
         const response = await GroupServices.getGroupById(groupId);
         setMembers(response.data.group_members);
+        setGroupInfo((prevInfo) => ({
+          ...prevInfo,
+          group_members: response.data.group_members,
+        }));
       } catch (error) {
         Alert.alert(
           "Error",
@@ -83,6 +98,23 @@ export default function Members() {
     updateMembers();
   }, [groupId]);
 
+  const handleAddMember = () => {
+    setModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+  };
+
+  const handleMemberAdded = (newMembers) => {
+    setMembers((prevMembers) => [...prevMembers, ...newMembers]);
+    setGroupInfo((prevInfo) => ({
+      ...prevInfo,
+      group_members: [...prevInfo.group_members, ...newMembers],
+    }));
+    setModalVisible(false);
+  };
+
   if (members.length === 0) {
     return (
       <View style={styles.errorContainer}>
@@ -92,44 +124,54 @@ export default function Members() {
   }
 
   return (
-    <FlatList
-      data={members}
-      scrollEnabled={true}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <View style={styles.memberItem}>
-          <View style={styles.leftSide}>
-            {item.profile?.profile_picture ? (
-              <Image
-                source={{
-                  uri: item.profile.profile_picture,
-                }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <View style={styles.profileImage}>
-                <Text style={styles.firstCharText}>
-                  {item.name.charAt(0).toUpperCase()}
-                </Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <CustomHeader onAddMember={handleAddMember} />
+      <FlatList
+        data={members}
+        scrollEnabled={true}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.memberItem}>
+            <View style={styles.leftSide}>
+              {item.profile?.profile_picture ? (
+                <Image
+                  source={{
+                    uri: item.profile.profile_picture,
+                  }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <View style={styles.profileImage}>
+                  <Text style={styles.firstCharText}>
+                    {item.name.charAt(0).toUpperCase()}
+                  </Text>
                 </View>
-             
-            )}
-            <Text>{item.profile?.fullname || "No name available"}</Text>
+              )}
+              <Text>{item.profile?.fullname || "有効な名前が見つかりませんでした"}</Text>
+            </View>
+            {logged_in_user_id === admin_id &&
+              item.id !== admin_id &&
+              item.id !== Number(logged_in_user_id) && (
+                <TouchableOpacity
+                  onPress={() => handleRemoveMember(item.id)}
+                  style={styles.removeButton}
+                >
+                  <Text style={styles.removeButtonText}>削除</Text>
+                </TouchableOpacity>
+              )}
           </View>
-          {logged_in_user_id === admin_id &&
-            item.id !== admin_id &&
-            item.id !== Number(logged_in_user_id) && (
-              <TouchableOpacity
-                onPress={() => handleRemoveMember(item.id)}
-                style={styles.removeButton}
-              >
-                <Text style={styles.removeButtonText}>Remove</Text>
-              </TouchableOpacity>
-            )}
-        </View>
+        )}
+        style={styles.container}
+      />
+      {modalVisible && (
+        <AddMemberModal
+          visible={modalVisible}
+          onClose={handleModalClose}
+          groupInfo={groupInfo}
+          onMemberAdded={handleMemberAdded}
+        />
       )}
-      style={styles.container}
-    />
+    </SafeAreaView>
   );
 }
 
@@ -176,10 +218,12 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "lightgray", // Added background color for default profile image
   },
   firstCharText: {
     fontSize: 18,
     color: "black",
-  }
-  
+  },
 });

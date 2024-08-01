@@ -6,9 +6,8 @@ type UserImageType = {
   url?: string;
   height?: number;
   width?: number;
-  userId?: number | null;
 }
-const UserAvatar: React.FC<UserImageType> = ({userId, url = `http://${myip}/static/user_profile/${userId}.png`, height = 50, width = 50}) => {
+const UserAvatar: React.FC<UserImageType> = ({ url = "https://randomuser.me/api/portraits/men/75.jpg", height = 50, width = 50}) => {
   const styles = StyleSheet.create({
     avatar: {
       width: height,

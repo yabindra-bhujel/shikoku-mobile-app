@@ -10,14 +10,20 @@ const StackLayout = () => {
         name="index"
         options={{
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{
-              alignItems: "center",gap: 10, flexDirection: "row", justifyContent: "center"
-            }}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                alignItems: "center",
+                gap: 10,
+                flexDirection: "row",
+                justifyContent: "center",
+              }}
+            >
               <AntDesign name="left" size={24} color="black" />
-              <Text style={{ fontSize: 20,  fontWeight: "bold"}}>戻る</Text>
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>戻る</Text>
             </TouchableOpacity>
           ),
-          title: ""
+          title: "",
         }}
       />
 
@@ -46,16 +52,8 @@ const StackLayout = () => {
       <Stack.Screen
         name="members"
         options={{
-          title: "メンバーリスト",
-          headerBackTitle: "戻る",
-          headerRight: () => {
-            return (
-              <TouchableOpacity onPress={() => alert("右ボタン押下")}>
-                <AntDesign name="plus" size={24} color="black" />
-              </TouchableOpacity>)
-          }
+          headerShown: false,
         }}
-
       />
     </Stack>
   );

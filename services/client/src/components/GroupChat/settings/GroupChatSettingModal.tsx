@@ -25,17 +25,19 @@ import {
   Ionicons,
 } from "@expo/vector-icons";
 import AddMemberModal from "./AddMemberModal";
+import * as ImagePicker from "expo-image-picker";
 
 export default function SettingModal() {
-  const { groupId = "0", groupImage = "" } = useLocalSearchParams<{
+  const { groupId = "0" } = useLocalSearchParams<{
     groupId?: string;
-    groupImage?: string;
   }>();
   const [groupInfo, setGroupInfo] = useState<GroupData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [showNameChange, setShowNameChange] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [groupImage, setGroupImage] = useState<string[] | undefined>();
+
 
   const { loggedInUserId } = useUser();
 
@@ -64,6 +66,45 @@ export default function SettingModal() {
       fetchGroupInfo();
     }, [])
   );
+  useEffect(() => {
+    if (groupInfo?.group_image) {
+      setGroupImage([groupInfo?.group_image]);
+    }
+  }, [groupInfo?.group_image]);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const selectedImages = [result.assets[0].uri];
+      const index = 0;
+
+      const formData: any = new FormData();
+      const uriParts = selectedImages[0].split(".");
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append("icon", {
+        uri: selectedImages[0],
+        name: `image${index}.${fileType}`,
+        type: `image/${fileType}`,
+      });
+
+      try {
+        await GroupServices.changeGroupImage(groupId, formData);
+        setGroupImage(selectedImages);
+      } catch (err) {
+        Alert.alert(
+          "Error",
+          "Failed to update group image. Please try again later."
+        );
+      }
+    }
+  };
 
   const handleRefreshGroupDetail = () => {
     fetchGroupInfo();
@@ -179,8 +220,8 @@ export default function SettingModal() {
           <View style={styles.headerContainer}>
             {groupImage ? (
               <Image
-                source={{ uri: groupImage }}
-                style={{ height: 50, width: 50, borderRadius: 50 }}
+                source={{ uri: groupImage[groupImage.length - 1] }}
+                style={{ height: 150, width: 150, borderRadius: 50 }}
               />
             ) : (
               <Text
@@ -193,17 +234,23 @@ export default function SettingModal() {
                 {groupInfo?.name?.charAt(0).toUpperCase()}
               </Text>
             )}
-            <Text>Image</Text>
             <Text style={styles.groupName}>{groupInfo.name}</Text>
             <TouchableOpacity onPress={handleShowNameChange}>
               <PaperText style={styles.changeName}>名前と説明の変更</PaperText>
             </TouchableOpacity>
+            <View style={styles.rowgap10}>
             <TouchableOpacity
               style={styles.addMember}
               onPress={handleShowAddMember}
             >
               <Ionicons name="person-add" size={24} color="black" />
             </TouchableOpacity>
+            <TouchableOpacity
+            style={styles.addMember}
+            onPress={pickImage}>
+            <Entypo name="image" size={24} color="black" />
+            </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.groupInfo}>
             <View style={styles.rowgap10}>

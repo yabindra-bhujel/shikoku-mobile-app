@@ -5,15 +5,17 @@ import AuthServices from '@/src/api/AuthServices';
 interface UserContextProps {
   loggedInUserId: number | null;
   username: string | null;
+  fullname: string | null;
   email: string | null;
-  role: string | null;
+  image: any;
 }
 
 const UserContext = createContext<UserContextProps>({
   loggedInUserId: null,
   username: null,
+  fullname: null,
   email: null,
-  role: null,
+  image: null,
 });
 
 export const useUser = () => useContext(UserContext);
@@ -25,23 +27,25 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [loggedInUserId, setLoggedInUserId] = useState<number | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [fullname, setFullname] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const [image, setImage] = useState<any>(null);
 
   useEffect(() => {
     const getCurrentUser = async () => {
       const user = await AuthServices.getCurrentUser();
       setLoggedInUserId(user.data.id);
       setUsername(user.data.username);
+      setFullname(user.data.fullname);
       setEmail(user.data.email);
-      setRole(user.data.role);
+      setImage(user.data.image);
     };
 
     getCurrentUser();
   }, []);
 
   return (
-    <UserContext.Provider value={{ loggedInUserId, username, email, role }}>
+    <UserContext.Provider value={{ loggedInUserId, username, fullname, email, image }}>
       {children}
     </UserContext.Provider>
   );

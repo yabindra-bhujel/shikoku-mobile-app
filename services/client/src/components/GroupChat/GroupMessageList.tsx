@@ -1,11 +1,28 @@
 import GroupServices from "@/src/api/GroupServices";
-import React, { useRef, useCallback, forwardRef, useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, FlatListProps, TouchableNativeFeedback, Alert, TouchableOpacity } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
+import React, {
+  useRef,
+  useCallback,
+  forwardRef,
+  useState,
+  useEffect,
+} from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  FlatListProps,
+  TouchableNativeFeedback,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
 
-interface GroupMessageListProps extends Omit<FlatListProps<any>, "data" | "renderItem"> {
+interface GroupMessageListProps
+  extends Omit<FlatListProps<any>, "data" | "renderItem"> {
   messages: any[];
-  userId: string;
+  userId: number | null;
   fetchMoreMessages: () => void;
   loadingMore: boolean;
 }
@@ -19,7 +36,9 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
 
     useEffect(() => {
       // Filter out deleted messages
-      const filteredMessages = messages.filter(msg => !deletedMessageIds.includes(msg.id));
+      const filteredMessages = messages.filter(
+        (msg) => !deletedMessageIds.includes(msg.id)
+      );
       setMessageList(filteredMessages);
     }, [messages, deletedMessageIds]);
 
@@ -27,8 +46,10 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
       const newid = parseInt(id);
       try {
         await GroupServices.deleteMessageById(newid);
-        setDeletedMessageIds(prevIds => [...prevIds, id]);
-        setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== id));
+        setDeletedMessageIds((prevIds) => [...prevIds, id]);
+        setMessageList((prevMessages) =>
+          prevMessages.filter((msg) => msg.id !== id)
+        );
         Alert.alert("メッセージが削除されました。");
       } catch (error) {
         Alert.alert("メッセージの削除に失敗しました。");
@@ -47,19 +68,21 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
           ? [styles.messageText, styles.currentUserMessageText]
           : [styles.messageText, styles.otherUserMessageText];
 
-        const showTime = () => { 
+        const showTime = () => {
           const todaytime = new Date();
-          const time = new Date(item.created_at);
+          const time = item.created_at.split("T")[0].split("-");
           const timeString = item.created_at.split("T")[1].split(":");
 
-          if (time.getFullYear() === todaytime.getFullYear()) {
-            if (time.getDate() === todaytime.getDate()) {
+          if (parseInt(time[0]) === todaytime.getFullYear()) {
+            if (parseInt(time[2]) === todaytime.getDate()) {
               return `${timeString[0]}:${timeString[1]}`;
             } else {
-              return `${time.getMonth() + 1}/${time.getDate()} ${timeString[0]}:${timeString[1]}`;
+              return `${time[1]}/${parseInt(time[2])} ${timeString[0]}:${
+                timeString[1]
+              }`;
             }
           } else {
-            return `${time.getFullYear()}/${time.getMonth() + 1}/${time.getDate()} ${timeString[0]}:${timeString[1]}`;
+            return `${time[0]}/${time[1]}/${time[2]} ${timeString[0]}:${timeString[1]}`;
           }
         };
 
@@ -133,7 +156,10 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
           {...restProps}
         />
         {showScrollToBottom && (
-          <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
+          <TouchableOpacity
+            style={styles.scrollToBottomButton}
+            onPress={scrollToBottom}
+          >
             <FontAwesome name="arrow-down" size={24} color="white" />
           </TouchableOpacity>
         )}
@@ -194,10 +220,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   scrollToBottomButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     left: "50%",
-    backgroundColor: '#30D158',
+    backgroundColor: "#30D158",
     borderRadius: 50,
     padding: 10,
     elevation: 5,

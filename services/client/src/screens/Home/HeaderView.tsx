@@ -15,7 +15,7 @@ const HeaderView = () => {
 
   const theme = useColorScheme();
   const deviceWidth = Dimensions.get("window").width;
-  const { loggedInUserId, username, email } = useUser();
+  const { image, fullname, email } = useUser();
 
   const styles = StyleSheet.create({
     HeaderContainer: {
@@ -133,12 +133,12 @@ const HeaderView = () => {
         >
           <View style={styles.useComponents}>
             <View style={styles.userLeftContainer}>
-              <UserAvatar userId={loggedInUserId}/>
+              <UserAvatar url={image}/>
               <View>
                 <Text
-                  style={{ color: "white", fontSize: 18, fontWeight: "bold" }}
+                  style={{ color: "white", fontSize: 16, fontWeight: "bold" }}
                 >
-                  {username?.toLocaleUpperCase()}
+                  {fullname?.toLocaleUpperCase()}
                 </Text>
                 <Text style={{ color: "white", fontSize: 14 }}>
                   {email}
