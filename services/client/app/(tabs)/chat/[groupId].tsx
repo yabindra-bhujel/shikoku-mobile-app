@@ -267,8 +267,8 @@ const styles = StyleSheet.create({
   },
   messageInput: {
     flex: 1,
-    fontSize: 16,
-    paddingVertical: 10,
+    fontSize: 15,
+    paddingVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 25,
     marginRight: 8,

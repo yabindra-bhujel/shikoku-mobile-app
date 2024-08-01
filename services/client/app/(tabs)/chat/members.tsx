@@ -8,7 +8,7 @@ import {
   Alert,
   Image,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
 
 export default function Members() {

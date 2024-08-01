@@ -1,7 +1,9 @@
-import React, { useRef, useCallback, useImperativeHandle, forwardRef } from "react";
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, FlatListProps } from "react-native";
+import GroupServices from "@/src/api/GroupServices";
+import React, { useRef, useCallback, forwardRef, useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, FlatListProps, TouchableNativeFeedback, Alert, TouchableOpacity } from "react-native";
+import { FontAwesome } from '@expo/vector-icons';
 
-interface GroupMessageListProps extends Omit<FlatListProps<any>, 'data' | 'renderItem'> {
+interface GroupMessageListProps extends Omit<FlatListProps<any>, "data" | "renderItem"> {
   messages: any[];
   userId: string;
   fetchMoreMessages: () => void;
@@ -11,6 +13,27 @@ interface GroupMessageListProps extends Omit<FlatListProps<any>, 'data' | 'rende
 const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
   ({ messages, userId, fetchMoreMessages, loadingMore, ...restProps }, ref) => {
     const flatListRef = useRef<FlatList<any>>(null);
+    const [messageList, setMessageList] = useState(messages);
+    const [deletedMessageIds, setDeletedMessageIds] = useState<string[]>([]);
+    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+
+    useEffect(() => {
+      // Filter out deleted messages
+      const filteredMessages = messages.filter(msg => !deletedMessageIds.includes(msg.id));
+      setMessageList(filteredMessages);
+    }, [messages, deletedMessageIds]);
+
+    const handleDelete = async (id: string) => {
+      const newid = parseInt(id);
+      try {
+        await GroupServices.deleteMessageById(newid);
+        setDeletedMessageIds(prevIds => [...prevIds, id]);
+        setMessageList(prevMessages => prevMessages.filter(msg => msg.id !== id));
+        Alert.alert("メッセージが削除されました。");
+      } catch (error) {
+        Alert.alert("メッセージの削除に失敗しました。");
+      }
+    };
 
     const renderMessageItem = useCallback(
       ({ item }) => {
@@ -24,7 +47,7 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
           ? [styles.messageText, styles.currentUserMessageText]
           : [styles.messageText, styles.otherUserMessageText];
 
-        const showTime = () => {
+        const showTime = () => { 
           const todaytime = new Date();
           const time = new Date(item.created_at);
           const timeString = item.created_at.split("T")[1].split(":");
@@ -40,17 +63,39 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
           }
         };
 
+        const confirmDelete = () => {
+          if (isCurrentUser) {
+            Alert.alert(
+              "メッセージの削除",
+              `${item.message} \nこのメッセージを完全に削除しますか?`,
+              [
+                {
+                  text: "キャンセル",
+                  style: "cancel",
+                },
+                {
+                  text: "オーケー",
+                  onPress: () => handleDelete(item.id),
+                  style: "destructive",
+                },
+              ]
+            );
+          }
+        };
+
         return (
-          <View style={messageContainerStyle}>
-            {!isCurrentUser && (
-              <Text style={styles.senderText}>{item.username}</Text>
-            )}
-            <Text style={messageTextStyle}>{item.message}</Text>
-            <Text style={styles.timestampText}>{showTime()}</Text>
-          </View>
+          <TouchableNativeFeedback onLongPress={confirmDelete}>
+            <View style={messageContainerStyle}>
+              {!isCurrentUser && (
+                <Text style={styles.senderText}>{item.username}</Text>
+              )}
+              <Text style={messageTextStyle}>{item.message}</Text>
+              <Text style={styles.timestampText}>{showTime()}</Text>
+            </View>
+          </TouchableNativeFeedback>
         );
       },
-      [userId]
+      [userId, deletedMessageIds]
     );
 
     const keyExtractor = useCallback((item) => item.id.toString(), []);
@@ -60,19 +105,38 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
       return <ActivityIndicator size="large" color="#00ff00" />;
     };
 
+    const handleScroll = (event: any) => {
+      const offsetY = event.nativeEvent.contentOffset.y;
+      if (offsetY > 1000) {
+        setShowScrollToBottom(true);
+      } else {
+        setShowScrollToBottom(false);
+      }
+    };
+
+    const scrollToBottom = () => {
+      flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+    };
+
     return (
       <View style={styles.container}>
         <FlatList
           ref={flatListRef}
-          data={[...messages].reverse()}
+          data={[...messageList].reverse()}
           renderItem={renderMessageItem}
           keyExtractor={keyExtractor}
           onEndReached={fetchMoreMessages}
           onEndReachedThreshold={0.5}
           ListFooterComponent={renderFooter}
-          inverted // This inverts the direction of the FlatList
+          inverted
+          onScroll={handleScroll}
           {...restProps}
         />
+        {showScrollToBottom && (
+          <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
+            <FontAwesome name="arrow-down" size={24} color="white" />
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
@@ -128,6 +192,15 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     color: "#999",
     marginTop: 2,
+  },
+  scrollToBottomButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: "50%",
+    backgroundColor: '#30D158',
+    borderRadius: 50,
+    padding: 10,
+    elevation: 5,
   },
 });
 

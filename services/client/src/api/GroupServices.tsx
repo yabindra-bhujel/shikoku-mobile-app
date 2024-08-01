@@ -111,6 +111,14 @@ const GroupServices = {
       throw error;
     }
   },
+  async deleteMessageById(id: number) {
+    try {
+      const result = await axiosInstance.delete(`/group_messages/${id}`);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default GroupServices;
