@@ -1,33 +1,16 @@
-# logging_config.py
-import json
 import logging
-import os
+from logging.handlers import RotatingFileHandler
 
-LOG_DIRECTORY = os.path.join(os.path.dirname(__file__), "var", "log")
-if not os.path.exists(LOG_DIRECTORY):
-    os.makedirs(LOG_DIRECTORY)
-
-class JSONFormatter(logging.Formatter):
-    def format(self, record):
-        log_record = {
-            'timestamp': self.formatTime(record),
-            'level': record.levelname,
-            'message': record.getMessage(),
-            'logger': record.name
-        }
-        return json.dumps(log_record)
-
-def setup_logging():
-    log_file = os.path.join(LOG_DIRECTORY, "app.log")
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(JSONFormatter())
-
-    logger = logging.getLogger()
+def setup_logging(log_path: str = "dev.log") -> logging.Logger:
+    logger = logging.getLogger("uvicorn")
     logger.setLevel(logging.INFO)
-    logger.addHandler(file_handler)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    logger.addHandler(console_handler)
+    # ログのフォーマット
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # ログファイルの設定
+    file_handler = RotatingFileHandler(log_path, maxBytes=10485760, backupCount=3)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
 
     return logger

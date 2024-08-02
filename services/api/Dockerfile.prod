@@ -1,24 +1,39 @@
-# Use the official slim Python image for version 3.10 or greater
-FROM python:3.10-slim-buster
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends gcc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.11-slim-bookworm as prod
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Set the working directory
-WORKDIR /srv/app
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends gcc
+
+RUN mkdir -p temp/workers
+RUN chmod 755 temp/workers
 
 
-# Copy the requirements file to the working directory
-COPY ./requirements.txt /app/requirements.txt
 
-# Install Python dependencies
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+# copy dependencies
+COPY poetry.lock pyproject.toml /app/
+# Install dependencies
+RUN pip install poetry
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-dev
 
-    
+# Copy project
+
+COPY ./bin /app/bin
+
+RUN chmod 755 /app/bin/*
+
+COPY . /app/
+
+ENV PORT 8000
+EXPOSE 8000
+
+
+ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "config/gunicorn_conf.py", "main:app"]
+
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+# Set the working directory
+cd /app
+
+# apply migrations
+alembic upgrade head
+
+# Start the application server
+exec gunicorn -k uvicorn.workers.UvicornWorker -c gunicorn_conf.py main:app

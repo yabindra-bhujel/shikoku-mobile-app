@@ -1,0 +1,39 @@
+#!/bin/bash -eu
+
+DATABASE_USER='postgres'
+DATABASE_PASSWORD='root'
+DATABASE_HOST='localhost'
+DATABASE_PORT='5433'
+DATABASE_NAME='school_db'
+
+BACKUP_DIR=$(pwd)/backup
+KEEP_DAYS=30
+TMP_DUMP_FILE="backup_$(date +%Y%m%d%H%M%S).sql"
+SOURCE_DUMP_FILE="mock_data/data.sql"
+
+mkdir -p "$BACKUP_DIR"
+
+echo "backup started at " `date`
+
+# Perform the database dump
+bin/db_dump $@
+
+# Copy the dump file to the backup directory with a timestamp
+cp "$SOURCE_DUMP_FILE" "$BACKUP_DIR/$TMP_DUMP_FILE"
+
+# Create symlink
+if [ -e "$BACKUP_DIR/current.sql" ]; then
+  rm "$BACKUP_DIR/current.sql"
+fi
+cd "$BACKUP_DIR"
+ln -sf "$TMP_DUMP_FILE" current.sql
+
+# Backup rotation
+if [ $? -eq 0 -a -e "$TMP_DUMP_FILE" ]; then
+  echo "backup succeeded $TMP_DUMP_FILE"
+  # Rotate old backups
+  find "$BACKUP_DIR" -type f -mtime +$KEEP_DAYS -name 'backup_*.sql' -exec rm {} \;
+fi
+
+echo "backup finished at " `date`
+exit 0

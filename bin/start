@@ -3,18 +3,46 @@
 # スクリプトの実行中にエラーが発生した場合、即座に停止する
 set -e 
 
-VENV_DIR="services/api/venv"
+VENV_DIR="services/api/.venv"
 CONTAINER_NAME="postgres_db"
 DATABASE_NAME="school_db"
 NETWORK_NAME="school_app"
+CONTAINER_PORT=5432
 
 START_IOS_APP=false
 START_ANDROID=false
 API_PORT=8000
 APP_PORT=8081
+BASE_DIR=$(dirname ${0})
+
+cd "$(dirname ${0})/.."
+. bin/load_env
+
+# 環境変数を読み込んで.envファイルを生成
+eval "echo \"$(cat services/api/env.template)\"" > services/api/.env
+
+# Dockerネットワークを作成
+echo "Creating Docker network '$NETWORK_NAME' if not exists..."
+docker network ls | grep -wq $NETWORK_NAME || docker network create $NETWORK_NAME
+
+# 既存のコンテナがある場合はそれを再利用する
+if docker ps -a --format '{{.Names}}' | grep -wq $CONTAINER_NAME; then
+    echo "Container '$CONTAINER_NAME' already exists. Starting the container..."
+    docker start $CONTAINER_NAME || true
+else
+    echo "Starting PostgreSQL database container..."
+    docker-compose -f docker-compose.db.yml up -d
+fi
+
+# データベースが存在しない場合は作成
+echo "Creating the database '$DATABASE_NAME'..."
+docker exec $CONTAINER_NAME psql -U postgres -lqt | cut -d \| -f 1 | grep -qw $DATABASE_NAME
+if [ $? -eq 1 ]; then
+    docker exec $CONTAINER_NAME psql -U postgres -c "CREATE DATABASE $DATABASE_NAME;"
+    echo "Database '$DATABASE_NAME' created!"
+fi
 
 # オプションの確認
-
 while getopts "ia" opt; do
     case ${opt} in
         # オプションが i の場合
@@ -40,7 +68,7 @@ else
     # 仮想環境が存在しない場合は新規作成
     echo "Creating a new virtual environment..."
     cd services/api/
-    python3 -m venv venv
+    poetry install
     echo "Virtual environment created!"
     cd ../../
 fi
@@ -48,27 +76,7 @@ fi
 cd services/api || exit 1
 
 # 仮想環境を有効化
-source venv/bin/activate
-
-# Pythonの依存パッケージをインストール
-echo "Installing Python dependencies..."
-pip install -r requirements.txt
-
-# Dockerネットワークを作成
-echo "Creating Docker network '$NETWORK_NAME' if not exists..."
-docker network ls | grep -wq $NETWORK_NAME || docker network create $NETWORK_NAME
-
-# PostgreSQLデータベースコンテナを起動
-echo "Starting PostgreSQL database container..."
-docker-compose up -d
-
-# データベースが存在しない場合は作成
-echo "Creating the database '$DATABASE_NAME'..."
-docker exec $CONTAINER_NAME psql -U postgres -lqt | cut -d \| -f 1 | grep -qw $DATABASE_NAME
-if [ $? -eq 1 ]; then
-    docker exec $CONTAINER_NAME psql -U postgres -c "CREATE DATABASE $DATABASE_NAME;"
-    echo "Database '$DATABASE_NAME' created!"
-fi
+source $(poetry env info --path)/bin/activate
 
 # 指定したポートを使用しているプロセスを停止する関数
 function kill_process_using_port {
@@ -96,39 +104,26 @@ kill_process_using_port "$APP_PORT"
 # アプリケーションサーバーを起動
 echo "Starting the application server..."
 
-# モバイルアプリの起動
-# シミュレータが起動していること
-
 # migrate
 echo "Migrating the database..."
 alembic upgrade head
 
-# client に移動する
-cd ..
-cd client || exit 1
-
-
-# パッケージをインストール
-
-# シミュレータ　を動いている状態
+# シミュレータが動いている状態
 if [ "$START_IOS_APP" = true ]; then
-    cd ../api
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 
     cd ../client
-    npm install
     echo "Starting the iOS simulator..."
+    npm install
     npm run ios 
    
 elif [ "$START_ANDROID" = true ]; then
-    cd ../api
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 
     cd ../client
-    npm install
     echo "Starting the Android emulator..."
+    npm install
     npm run android
 else
-    cd ../api
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 fi

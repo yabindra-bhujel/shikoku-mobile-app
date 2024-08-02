@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+
+# 環境設定ファイルのコピー
+cp services/api/env.template services/api/.env
+
+# Dockerネットワークを作成
+docker network ls | grep -wq school_app || docker network create school_app
+
+# PostgreSQLデータベースコンテナを起動
+if docker ps -a --format '{{.Names}}' | grep -wq postgres_db; then
+    docker start postgres_db || true
+else
+    docker-compose -f docker-compose.db.yml up -d
+fi
+
+# データベースの存在を確認し、なければ作成
+docker exec postgres_db psql -U postgres -lqt | cut -d \| -f 1 | grep -qw school_db
+if [ $? -eq 1 ]; then
+    docker exec postgres_db psql -U postgres -c "CREATE DATABASE school_db;"
+fi
+
+# メインのDocker Composeファイルを使ってサービスを起動
+docker-compose up -d
+
+# デプロイ用のスクリプトを実行
+# api のコンテナに入って、deploy スクリプトを実行
+docker-compose exec api bin/deploy
+

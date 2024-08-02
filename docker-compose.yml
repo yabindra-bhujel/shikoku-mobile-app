@@ -1,0 +1,43 @@
+services:
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    volumes:
+      - static_volume:/app/static
+      - ./services/api:/srv/app
+    environment:
+      TZ: Asia/Tokyo
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      EMAIL_IMAP_USERNAME: ${EMAIL_IMAP_USERNAME}
+      EMAIL_IMAP_PASSWORD: ${EMAIL_IMAP_PASSWORD}
+      EMAIL_IMAP_PORT: ${EMAIL_IMAP_PORT}
+      EMAIL_IMAP_SSL: ${EMAIL_IMAP_SSL}
+      EMAIL_IMAP_HOST: ${EMAIL_IMAP_HOST}
+      DEBUG: ${DEBUG}
+      WORKERS_PER_CORE: ${WORKERS_PER_CORE}
+      MAX_WORKERS: ${MAX_WORKERS}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      BIND: ${BIND}
+      LOG_LEVEL: ${LOG_LEVEL}
+      GRACEFUL_TIMEOUT: ${GRACEFUL_TIMEOUT}
+      KEEP_ALIVE: ${KEEP_ALIVE}
+      TIMEOUT: ${TIMEOUT}
+    networks:
+      - school_app
+    ports:
+      - "8000:8080" # ホストのポート8000をコンテナのポート8080にマッピング
+
+volumes:
+  db_data:
+  static_volume:
+
+networks:
+  school_app:

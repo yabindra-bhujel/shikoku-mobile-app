@@ -17,19 +17,25 @@ from src.models.database import get_db
 from src.BusinessLogic.messenging.Groups.GroupMessageLogic import GroupMessageLogic
 from src.BusinessLogic.messenging.Groups.ConnectionManager import ConnectionManager
 from config.logging_config import setup_logging
-from config.middlewares import LogRequestsMiddleware
 from config.exception.exception import ExceptionHandlerMiddleware
 from fastapi_pagination import add_pagination
-from fastapi_pagination import add_pagination, Page, LimitOffsetPage
+from fastapi_pagination import add_pagination
+from dotenv import load_dotenv
+from config.logging_middleware import LoggingMiddleware
+load_dotenv()
 
 # 開発環境でのみ使用するため
-from debug_toolbar.middleware import DebugToolbarMiddleware
+DEBUG = os.getenv("DEBUG", "False") == "True"
+log_path = "var/log/dev.log" if DEBUG else "var/log/prod.log"
+logger = setup_logging(log_path)
 
-# ログの設定
-logger = setup_logging()
+app = FastAPI(debug=DEBUG)
 
-app = FastAPI(debug=True)
-app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
+# 開発環境でのみ使用するため
+if DEBUG:
+    from debug_toolbar.middleware import DebugToolbarMiddleware
+    app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
+
 
 # CORSミドルウェアの設定
 app.add_middleware(
@@ -40,16 +46,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ログミドルウェアの設定
-app.add_middleware(LogRequestsMiddleware, logger=logger)
+app.add_middleware(LoggingMiddleware, logger=logger)
 
-
-# ...
 
 # ページネーションの設定
 add_pagination(app)
-
-# ...
 
 # 例外ミドルウェアの設定
 app.add_exception_handler(Exception, ExceptionHandlerMiddleware)
