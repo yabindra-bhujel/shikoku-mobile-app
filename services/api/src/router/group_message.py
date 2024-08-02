@@ -32,8 +32,7 @@ async def get_group_messages(group_id: int, db: Session = db_dependency,
 @router.delete("/{message_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_group_message(message_id: int, db: Session = db_dependency, user: User = Depends(get_current_user)):
     try:
-        user_id = user.get('id')
-        GroupMessageLogic.deleteMessage(db, message_id, user_id)
+        GroupMessageLogic.deleteMessage(db, message_id, user.id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return None

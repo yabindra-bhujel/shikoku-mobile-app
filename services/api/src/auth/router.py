@@ -187,7 +187,7 @@ def password_reset_confirm(token: str, db: Session = Depends(get_db)):
 
 
 @router.get("/get_current_user", status_code=status.HTTP_200_OK)
-async def get_current_user(request: Request, db: db_dependency, user: User = Depends(get_current_user)):
+async def current_user(request: Request, db: db_dependency, user: User = Depends(get_current_user)):
     user_info = {
         "id":user.id,
         "username": user.username,
