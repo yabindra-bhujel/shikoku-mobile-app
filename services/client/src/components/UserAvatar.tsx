@@ -1,5 +1,6 @@
 import { Image, StyleSheet, View } from "react-native";
 import React from "react";
+import { myip } from "../config/Api";
 
 type UserImageType = {
   url?: string;

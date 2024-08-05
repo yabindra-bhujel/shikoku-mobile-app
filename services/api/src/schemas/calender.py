@@ -1,6 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime
-from enum import Enum
 
 class CalendarOutput(BaseModel):
     id: int

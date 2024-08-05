@@ -4,7 +4,7 @@ from ..database import Base
 import enum
 from sqlalchemy.orm import relationship
 from .notification import user_notifications
-
+from .group import group_members_association
 
 class UserRole(enum.Enum):
     ADMIN = 'admin'
@@ -12,6 +12,17 @@ class UserRole(enum.Enum):
     STUDENT = 'student'
     TEACHER = 'teacher'
     USER = 'user'
+
+class Department(enum.Enum):
+    JAPANESE_LITERATURE = 'literature'
+    CALLIGRAPHY_AND_CULTURE = 'culture'
+    INTERNATIONAL_CULTURE = 'international'
+    BUSINESS_INFORMATION = 'business'
+    MEDIA_INFORMATION = 'media'
+    HUMAN_LIFE_SCIENCES = 'human_life'
+    HEALTH_NUTRITION = 'health_nutrition'
+    CHILD_STUDIES = 'child_studies'
+    NURSING = 'nursing'
 
 class User(Base):
     __tablename__ = 'users'
@@ -24,6 +35,12 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     role = Column(String, default=UserRole.USER.value)
 
+    # 大学の情報
+    department = Column(String, default=Department.JAPANESE_LITERATURE.value)
+    is_student = Column(Boolean, default=True)
+    is_international_student = Column(Boolean, default=False)
+    
+
     # Relationships
     calendars = relationship("Calendar", back_populates="user")
     user_profile = relationship("UserProfile", uselist=False, back_populates="user", cascade="all, delete-orphan")
@@ -34,6 +51,10 @@ class User(Base):
     likes = relationship('Likes', back_populates='user', cascade='all, delete-orphan')
 
     notifications = relationship('Notification',secondary=user_notifications,back_populates='users')
+    # Relationships for groups
+    admin_groups = relationship("Group", back_populates="admin")
+    member_groups = relationship("Group", secondary=group_members_association, back_populates="group_members")
+    group_messages = relationship("GroupMessage", back_populates="sender")
 
 
     def __repr__(self):

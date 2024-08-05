@@ -1,13 +1,16 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks,  File, UploadFile, Form
 from sqlalchemy.orm import Session
-from ..models.database import get_db
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
-from .logic import AuthLogic
-from .schema import *
 from datetime import timedelta
 import logging
+import csv
+from io import StringIO
+from .logic import AuthLogic
+from .schema import *
+from ..models.database import get_db
+from ..models.entity.user_profile import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -181,9 +184,45 @@ def password_reset_confirm(token: str, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
-    return {"message": "Password reset link verified"}
 
 
-@router.get("/get_current_user", response_model=User, status_code=status.HTTP_200_OK)
-async def get_current_user(user: User = Depends(get_current_user)):
-    return user
+@router.get("/get_current_user", status_code=status.HTTP_200_OK)
+async def current_user(request: Request, db: db_dependency, user: User = Depends(get_current_user)):
+    user_info = {
+        "id":user.id,
+        "username": user.username,
+        "email": user.email,
+        "image": None,
+        "fullname": None,
+
+    }
+    user_profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
+    if not user_profile:
+        user_profile = UserProfile(user_id=user.id)
+
+    if user_profile.profile_picture:
+        user_info["image"] = str(request.url_for('static', path=user_profile.profile_picture))
+    
+    if user_profile.first_name and user_profile.last_name:
+        user_info["fullname"] = f"{user_profile.first_name} {user_profile.last_name}"
+
+    return user_info
+
+
+# TODO:: background taskに変更したい
+@router.post("/create_user_from_csv", status_code=status.HTTP_201_CREATED)
+async def create_user_from_csv(db: db_dependency, background_tasks: BackgroundTasks, file: UploadFile = File(...), user: User = Depends(get_current_user)):
+    try:
+        # ファイルを読み込む
+        contents = await file.read()
+
+        csv_reader = csv.DictReader(StringIO(contents.decode("utf-8")))
+
+        for row in csv_reader:
+            auth_logic.create_user_from_file(db, row)
+
+        return {"message": "Users created successfully"}
+    
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

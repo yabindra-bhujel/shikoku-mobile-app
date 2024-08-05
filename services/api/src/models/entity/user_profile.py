@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from ..database import Base
 from sqlalchemy.sql import func
@@ -8,13 +8,14 @@ class UserProfile(Base):
     # データベースのテーブル名の定義
     __tablename__ = 'user_profile'
 
+    # 一般情報
     id = Column(Integer, primary_key=True, nullable=False)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
-    profile_picture = Column(String, nullable=True)
+    profile_picture = Column(String, default='default_image/shikopon.png')
     bio = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.now())
-    
+
     # usersテーブルのidを外部キーとして設定
     user_id = Column(Integer, ForeignKey('users.id'), unique=True)
     user = relationship('User', back_populates='user_profile')

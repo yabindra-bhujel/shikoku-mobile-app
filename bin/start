@@ -95,8 +95,6 @@ kill_process_using_port "$APP_PORT"
 
 # アプリケーションサーバーを起動
 echo "Starting the application server..."
-# uvicorn main:app --reload &
-# fastapi dev main.py &
 
 # モバイルアプリの起動
 # シミュレータが起動していること
@@ -115,21 +113,22 @@ cd client || exit 1
 # シミュレータ　を動いている状態
 if [ "$START_IOS_APP" = true ]; then
     cd ../api
-    # uvicorn main:app --reload  &
-    uvicorn main:app --reload &
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+
     cd ../client
     npm install
     echo "Starting the iOS simulator..."
     npm run ios 
    
 elif [ "$START_ANDROID" = true ]; then
-    # cd ../api
-    uvicorn main:app --reload  &
+    cd ../api
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+
     cd ../client
     npm install
     echo "Starting the Android emulator..."
-    npm run androidC
+    npm run android
 else
     cd ../api
-    uvicorn main:app --reload &
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 fi

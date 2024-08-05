@@ -1,10 +1,10 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import ChatScreen from '@/src/screens/Chat/ChatScreen'
+import GroupChat from '@/src/screens/Chat/GroupChat'
 
 const Chatbot = () => {
   return (
-   <ChatScreen/>
+   <GroupChat/>
   )
 }
 

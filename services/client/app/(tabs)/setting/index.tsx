@@ -1,5 +1,4 @@
 import { StyleSheet, View, useColorScheme } from 'react-native'
-import { StyledText } from '@/app/modal';
 
 
 const Setting = () => {
@@ -23,7 +22,6 @@ const Setting = () => {
 
   return (
     <View style={styles.container}>
-      <StyledText>Setting Screen</StyledText>
     </View>
   )
 }

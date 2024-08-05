@@ -1,162 +1,119 @@
-from fastapi import FastAPI,Depends, WebSocket, WebSocketDisconnect, HTTPException
-from src.settings.auth import AuthSettings
-from src.auth import router as auth_router
-from src.auth.permissions import authenticate_user
+import os
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+from fastapi_pagination import add_pagination
+from src.auth import router as auth_router
 from src.router.calender import router as calender_router
 from src.router.user_profile import router as user_profile_router
-import logging
-from src.message.ConnectionManager import ConnectionManager
-from src.message.PersonalMessage import PersonalMessage
-import os
-from fastapi.staticfiles import StaticFiles
 from src.router.posts import router as post_router
 from src.router.comments import router as comment_router
 from src.router.likes import router as like_router
-import logging
-from src.message.ConnectionManager import ConnectionManager
-from src.message.PersonalMessage import PersonalMessage
+from src.router.group import router as group_router
+from src.router.group_message import router as group_message_router
+from config.logging_config import setup_logging
+from config.middlewares import LogRequestsMiddleware
+from config.exception.exception import ExceptionHandlerMiddleware
+from src.websocketRouter.group_messge_router import router as websocket_group_message_router
+
+# 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
 from src.services.NotificationService.NotificationConnectionManager import NotificationConnectionManager
 
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-auth_settings = AuthSettings()
-
-
-secret_key = auth_settings.SECRET_KEY
-algorithm = auth_settings.ALGORITHM
-
+# ログの設定
+logger = setup_logging()
 
 app = FastAPI(debug=True)
-app.add_middleware(DebugToolbarMiddleware, panels=["debug_toolbar.panels.timer.TimerPanel"])
 
+# データベース debug_toolbar の設定
+app.add_middleware(DebugToolbarMiddleware)
+
+
+
+# CORSミドルウェアの設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/access_token")
+# ログミドルウェアの設定
+app.add_middleware(LogRequestsMiddleware, logger=logger)
 
+
+# ...
+
+# ページネーションの設定
+add_pagination(app)
+
+# ...
+
+# 例外ミドルウェアの設定
+app.add_exception_handler(Exception, ExceptionHandlerMiddleware)
+
+# 静的ファイルのディレクトリを登録
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
-
-
+# apiのrouterを登録
 app.include_router(auth_router.router)
 app.include_router(calender_router)
 app.include_router(user_profile_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(like_router)
+app.include_router(group_router)
+app.include_router(group_message_router)
+app.include_router(websocket_group_message_router)
+
+
+#  これは テスト用の HTML です
+html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>WebSocket Chat</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script>
+            var ws = new WebSocket("ws://localhost:8000/ws/1");
+            ws.onmessage = function(event) {
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(event.data)
+                message.appendChild(content)
+                messages.appendChild(message)
+            };
+        function sendMessage(event) {
+            var input = document.getElementById("messageText");
+            var messageData = {
+                message: input.value,
+                sender_id: "12",
+                group_id: "1"
+            };
+            ws.send(JSON.stringify(messageData));
+            input.value = '';
+            event.preventDefault();
+        }
+        </script>
+    </body>
+</html>
+"""
 
 @app.get("/")
-async def root(user = Depends(authenticate_user)):
-    return {"message": "Hello World"}
-
-manager = ConnectionManager(logger=logger)
-personal_message = PersonalMessage(app=app, connection_manager=manager)
+async def get():
+    return HTMLResponse(html)
 
 
-
-
-@app.websocket("/ws")
-async def websocket_connection(websocket: WebSocket):
-    try:
-        # auth_header = websocket.headers.get("Authorization")
-        # if not auth_header:
-        #     await websocket.close()
-        #     return
-
-        # token = auth_header.split("Bearer ")[1]
-        # try:
-        #     user = get_user(token=token)
-        #     if user is None:
-        #         await websocket.close()
-        #         return
-        # except JWTError as e:
-        #     await websocket.close()
-        #     return
-        user = manager.logined_user(websocket=websocket)
-        if user is None:
-            await websocket.close()
-            return
-        manager.print_active_connections()
-
-        if user:
-            await manager.connect(websocket=websocket, username=user)
-
-    except HTTPException as e:
-        await websocket.close()
-    except Exception as e:
-        await websocket.close()
-
-@app.websocket("/ws/send_message")
-async def send_message(websocket: WebSocket):
-    try:
-        # auth_header = websocket.headers.get("Authorization")
-        # if not auth_header:
-        #     await websocket.close()
-        #     return
-
-        # token = auth_header.split("Bearer ")[1]
-        # try:
-        #     user = get_user(token=token)
-        #     if user is None:
-        #         await websocket.close()
-        #         return
-        # except JWTError as e:
-        #     await websocket.close()
-        #     return
-        user = manager.logined_user(websocket=websocket)
-        if user is None:
-            await websocket.close()
-            return
-
-        if user:
-            manager.get_user_from_socket(username=user)
-            # await websocket.accept()
-            data = await websocket.receive_text()
-            print(data)
-
-            # send message
-            await websocket.send_text(data)
-
-            
-    except WebSocketDisconnect:
-        await manager.disconnect(websocket)
-    except Exception as e:
-        print(e)
-
-
-
-notification_manager = NotificationConnectionManager()
-@app.websocket("/ws/notification/user_id")
-async def notification(websocket: WebSocket, user_id: str):
-    try:
-        await notification_manager.connect(websocket=websocket, username=user_id)
-
-    except WebSocketDisconnect:
-        await notification_manager.disconnect(websocket, username=user_id)
-    
-    except Exception as e:
-        print(e)
-        await websocket.close()
-
-
-@app.websocket("/ws/send_notification")
-async def send_notification(websocket: WebSocket):
-    try:
-        await notification_manager.send_notification(username="user_id", data={"message": "Hello World"})
-    except WebSocketDisconnect:
-        await notification_manager.disconnect(websocket)
-    except Exception as e:
-        print(e)
-        await websocket.close()
-
-        
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

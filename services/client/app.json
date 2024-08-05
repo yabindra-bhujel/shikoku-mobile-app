@@ -20,7 +20,22 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLaoutMode": "pan"
+      "permissions": ["INTERNET"],
+      "useNextNotificationsApi": true,
+      "config": {
+        "intentFilters": [
+          {
+            "action": "VIEW",
+            "data": [
+              {
+                "scheme": "http",
+                "host": "128.172.0.1"
+              }
+            ],
+            "category": ["BROWSABLE", "DEFAULT"]
+          }
+        ]
+      }
     },
     "web": {
       "bundler": "metro",

@@ -10,6 +10,10 @@ interface ButtonData {
   title: string;
 }
 
+// webscoket connection
+
+// 
+
 const SimpleScreen = () => {
   const theme = useColorScheme();
 
@@ -28,6 +32,7 @@ const SimpleScreen = () => {
     { route: "/setting", icon: <AntDesign name="setting" size={45} color="#CA3C25" />, title: "Settings" },
     { route: "/login", icon: <AntDesign name="logout" size={45} color="#CA3C25"  onPress={handleLogout}/>, title: "Logout" },
     { route: "/profile", icon: <AntDesign name="user" size={45} color="#CA3C25"/>, title: "Profile" },
+
   ];
 
   // Function to group buttons into pairs
