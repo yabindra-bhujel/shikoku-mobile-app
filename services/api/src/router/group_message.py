@@ -7,13 +7,9 @@ from ..models.entity.users import User
 from ..BusinessLogic.messenging.Groups.GroupMessageLogic import GroupMessageLogic
 from ..schemas.GroupMessageSchema import GroupMessageSchema
 
-
 router = APIRouter(prefix="/group_messages", tags=["Group Message"])
-
-# データベースセッションの依存関係を定義
 db_dependency = Depends(get_db)
 
-# メッセージのfetch
 @router.get("/{group_id}", response_model=Page[GroupMessageSchema])
 async def get_group_messages(group_id: int, db: Session = db_dependency, 
                              user: User = Depends(get_current_user), params: Params = Depends()):

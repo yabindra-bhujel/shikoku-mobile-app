@@ -18,17 +18,10 @@ from ..models.entity.group import Group
 from ..auth.router import get_current_user
 from ..auth.permissions import authenticate_user
 from ..BusinessLogic.GroupLogic import GroupLogic
+from ..schemas.group import CreateGroupRequest
 
 router = APIRouter(prefix="/groups", tags=["Group"])
 db_dependency = Depends(get_db)
-
-
-class CreateGroupRequest(BaseModel):
-    name: str
-    description: Optional[str] = None
-    group_type: Optional[str] = None
-    member_list: Optional[List[int]] = None
-
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_group(

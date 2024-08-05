@@ -3,10 +3,10 @@ from typing import List, Dict
 import json
 
 class ConnectionManager:
-    def __init__(self, logger):
+    def __init__(self):
         # グループ ID と接続のリストを追跡するための辞書
         self.active_connections: Dict[int, List[WebSocket]] = {}
-        self.logger = logger
+        # self.logger = logger
     
     # ソケットをグループに接続
     async def connect(self, websocket: WebSocket, group_id: int):

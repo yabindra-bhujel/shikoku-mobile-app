@@ -1,10 +1,9 @@
-import json
 import os
-from fastapi import FastAPI, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from sqlalchemy.orm import Session
+from fastapi_pagination import add_pagination
 from src.auth import router as auth_router
 from src.router.calender import router as calender_router
 from src.router.user_profile import router as user_profile_router
@@ -13,14 +12,10 @@ from src.router.comments import router as comment_router
 from src.router.likes import router as like_router
 from src.router.group import router as group_router
 from src.router.group_message import router as group_message_router
-from src.models.database import get_db
-from src.BusinessLogic.messenging.Groups.GroupMessageLogic import GroupMessageLogic
-from src.BusinessLogic.messenging.Groups.ConnectionManager import ConnectionManager
 from config.logging_config import setup_logging
 from config.middlewares import LogRequestsMiddleware
 from config.exception.exception import ExceptionHandlerMiddleware
-from fastapi_pagination import add_pagination
-from fastapi_pagination import add_pagination, Page, LimitOffsetPage
+from src.websocketRouter.group_messge_router import router as websocket_group_message_router
 
 # 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
@@ -70,6 +65,7 @@ app.include_router(comment_router)
 app.include_router(like_router)
 app.include_router(group_router)
 app.include_router(group_message_router)
+app.include_router(websocket_group_message_router)
 
 
 #  これは テスト用の HTML です
@@ -115,35 +111,7 @@ html = """
 @app.get("/")
 async def get():
     return HTMLResponse(html)
-# ここまで
 
-# WebSocket のエンドポイント
-manager = ConnectionManager(logger=logger)
-
-@app.websocket("/ws/{group_id}")
-async def websocket_endpoint(websocket: WebSocket, group_id: int, db: Session = Depends(get_db)):
-    await manager.connect(websocket, group_id)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            message_data = json.loads(data)
-
-            # データベースの保存されて メセッジを返す 信頼性を高めるため
-            database_message = GroupMessageLogic.saveMessage(db, message_data)
-
-            # 送信されたデータに id と created_at を追加
-            message_data["created_at"] = database_message.created_at.isoformat()
-            message_data["id"] = database_message.id
-
-            # メッセージを送信
-            await manager.broadcast(message_data, group_id)
-
-    except WebSocketDisconnect:
-        # 何かしらの理由で websocket が切断された場合
-        manager.disconnect(websocket, group_id)
-    finally:
-        # websocket が切断された場合
-        manager.disconnect(websocket, group_id)
 
 if __name__ == "__main__":
     import uvicorn
