@@ -26,4 +26,3 @@ docker-compose up -d
 # デプロイ用のスクリプトを実行
 # api のコンテナに入って、deploy スクリプトを実行
 docker-compose exec api bin/deploy
-

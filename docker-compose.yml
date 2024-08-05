@@ -7,6 +7,8 @@ services:
     volumes:
       - static_volume:/app/static
       - ./services/api:/srv/app
+      - ./var/log/api:/app/var/log
+
     environment:
       TZ: Asia/Tokyo
       DATABASE_NAME: ${DATABASE_NAME}
@@ -33,7 +35,7 @@ services:
     networks:
       - school_app
     ports:
-      - "8000:8080" # ホストのポート8000をコンテナのポート8080にマッピング
+      - "8000:8000"
 
 volumes:
   db_data:
