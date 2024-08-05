@@ -1,12 +1,10 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from ..models.entity.calender import Calendar
 from datetime import datetime
 from typing import List
 from ..models.entity.users import User
 from ..schemas.calender import *
-
-
+from ..models.entity.calender import Calendar
 class CalenderLogic:
 
     @staticmethod

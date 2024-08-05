@@ -1,7 +1,8 @@
-from ..schemas.comment import CommentInput
-from ..models.entity.comments import Comment, CommentReply
+
 from datetime import datetime
 from sqlalchemy.orm import Session
+from ..schemas.comment import CommentInput
+from ..models.entity.comments import Comment, CommentReply
 
 class CommentLogic:
 

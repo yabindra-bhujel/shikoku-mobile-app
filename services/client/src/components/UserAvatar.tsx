@@ -1,18 +1,17 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { myip } from "../config/Api";
 
 type UserImageType = {
   url?: string;
   height?: number;
   width?: number;
 }
-const UserAvatar = (
-  props
-: UserImageType) => {
+const UserAvatar: React.FC<UserImageType> = ({ url = "https://randomuser.me/api/portraits/men/75.jpg", height = 50, width = 50}) => {
   const styles = StyleSheet.create({
     avatar: {
-      width: props.width = 50,
-      height: props.height = 50,
+      width: height,
+      height: width,
       borderRadius: 25,
       marginRight: 10,
     },
@@ -21,7 +20,8 @@ const UserAvatar = (
     <View>
       <Image
         source={{
-          uri: props.url = 'https://randomuser.me/api/portraits/men/75.jpg'
+          uri: url
+          // https://randomuser.me/api/portraits/men/75.jpg
         }}
         style={styles.avatar}
       />

@@ -1,11 +1,13 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from datetime import datetime
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlalchemy.sql import func
 from src.models.entity.group_message import GroupMessage as GroupMessageModel
 from src.models.entity.group import Group
 from src.models.entity.users import User
 from ....schemas.GroupMessageSchema import GroupMessageSchema
-from typing import List
+from ....models.entity.user_profile import UserProfile
 
 class GroupMessageLogic:
 
@@ -47,14 +49,26 @@ class GroupMessageLogic:
         
     # グループIDを指定してメッセージを取得
     @staticmethod
-    def getMessages(db: Session, group_id: int) -> List[GroupMessageSchema]:
+    def getMessages(db: Session, group_id: int) -> GroupMessageSchema:
         try:
-            messages = (
-                db.query(GroupMessageModel)
+            query = (db.query(
+                    GroupMessageModel.id,
+                    GroupMessageModel.group_id,
+                    GroupMessageModel.sender_id,
+                    GroupMessageModel.message,
+                    GroupMessageModel.created_at,
+                    # last name と first name を結合して username として取得
+                    func.concat(UserProfile.first_name, ' ', UserProfile.last_name).label('username'))
+                .join(UserProfile, GroupMessageModel.sender_id == UserProfile.user_id)
                 .filter(GroupMessageModel.group_id == group_id)
-                .all()
-            )
+                .order_by(GroupMessageModel.created_at.desc())
+                )
+            
+            # ページネーションは 自動で行われる
+            messages = paginate(db, query)
+
             return messages
+
         except SQLAlchemyError as e:
             db.rollback()
             raise e

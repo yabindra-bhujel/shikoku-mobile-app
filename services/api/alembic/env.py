@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
-from src.models.database import Base , DATABASE_URL
+from src.models.database import Base , DATABASE_URL_FOR_MIGRATION as  DATABASE_URL
 from src.models.entity.users import User
 from src.models.entity.calender import Calendar
 from src.models.entity.messages import Message
@@ -13,7 +13,6 @@ from src.models.entity.comments import Comment, CommentReply
 from src.models.entity.likes import Likes
 from src.models.entity.group import Group, group_members_association
 from src.models.entity.group_message import GroupMessage
-
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1,258 +1,285 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import axiosInstance from '@/src/config/Api';
-import UserAvatar from '../UserAvatar';
-import { CheckBox } from 'react-native-elements';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  TouchableWithoutFeedback,
+  Keyboard,
+  TextInput as NativeInput,
+} from "react-native";
+import { TextInput, Button, Text } from "react-native-paper";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Feather } from "@expo/vector-icons";
+import UserAvatar from "../UserAvatar";
+import { CheckBox } from "react-native-elements";
+import GroupServices from "@/src/api/GroupServices";
+import UserServices, { UserData } from "@/src/api/UserServices";
+import { useUser } from "@/src/hooks/UserContext";
+import axiosInstance from "@/src/config/Api";
 
-interface UserData {
-    user_image?: string;
-    name: string;
-    id: number;
+interface CreateGroupProps {
+  toggleCloseModal: () => void;
+  refreshGroupList: () => void;
 }
 
-const users: UserData[] = [
-    {
-        user_image: "https://randomuser.me/api/portraits/men/1.jpg",
-        name: "John Doe",
-        id: 1
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/women/1.jpg",
-        name: "Jane Smith",
-        id: 2
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/men/2.jpg",
-        name: "Alice Johnson",
-        id: 3
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/men/3.jpg",
-        name: "Bob Brown",
-        id: 4
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/men/4.jpg",
-        name: "Charlie Davis",
-        id: 5
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/women/2.jpg",
-        name: "Diana Evans",
-        id: 6
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/men/5.jpg",
-        name: "Evan Frank",
-        id: 7
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/women/3.jpg",
-        name: "Fiona Green",
-        id: 8
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/men/6.jpg",
-        name: "George Harris",
-        id: 9
-    },
-    {
-        user_image: "https://randomuser.me/api/portraits/women/4.jpg",
-        name: "Hannah Isaac",
-        id: 10
+const CreateGroup: React.FC<CreateGroupProps> = ({
+  toggleCloseModal,
+  refreshGroupList,
+}) => {
+  const { loggedInUserId } = useUser();
+  const [groupName, setGroupName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (loggedInUserId !== null) {
+      setSelectedUsers([loggedInUserId]);
     }
-];
+  }, [loggedInUserId]);
 
-const CreateGroup = ({ toggleCloseModal }) => {
-    const [groupName, setGroupName] = useState<string>('');
-    const [description, setDescription] = useState<string>('');
-    const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set());
-    const [searchText, setSearchText] = useState<string>('');
-
-    const handleCreateGroup = async () => {
-        try {
-            if (!groupName || !description) {
-                Alert.alert('Please fill all the fields');
-                return;
-            }
-            await axiosInstance.post('/groups', {
-                name: groupName,
-                description: description,
-                members: Array.from(selectedUsers)  // Pass selected user IDs
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            toggleCloseModal();
-        } catch (error) {
-            Alert.alert('Something went wrong. Please try again.');
-        }
-    };
-
-    const handleCloseModal = () => {
-        toggleCloseModal();
-    };
-
-    const toggleUserSelection = (userId: number) => {
-        setSelectedUsers(prevSelectedUsers => {
-            const updatedSelection = new Set(prevSelectedUsers);
-            if (updatedSelection.has(userId)) {
-                updatedSelection.delete(userId);
-            } else {
-                updatedSelection.add(userId);
-            }
-            return updatedSelection;
-        });
-    };
-
-    const filterUsers = (users: UserData[], searchText: string) => {
-        if (!searchText) return users;
-        return users.filter(user => user.name.toLowerCase().includes(searchText.toLowerCase()));
-    };
-
-    const sortedUsers = [
-        ...Array.from(selectedUsers).map(id => users.find(user => user.id === id)),
-        ...filterUsers(users, searchText).filter(user => !selectedUsers.has(user.id))
-    ].filter(Boolean) as UserData[];
-
-    const UserAvatarAndUsername = () => {
-        return (
-            <View style={styles.userListContainer}>
-                <TextInput
-                    label="Search User"
-                    mode="outlined"
-                    value={searchText}
-                    onChangeText={setSearchText}
-                    style={styles.searchInput}
-                />
-                <ScrollView style={styles.userScrollView}>
-                    {sortedUsers.map(user => (
-                        <View key={user.id} style={styles.userItem}>
-                            <View style={styles.userInfo}>
-                                <UserAvatar
-                                    url={user.user_image}
-                                    width={30}
-                                    height={30}
-                                />
-                                <Text style={styles.userName}>
-                                    {user.name}
-                                </Text>
-                            </View>
-                            <CheckBox
-                                checkedIcon='dot-circle-o'
-                                uncheckedIcon='circle-o'
-                                checkedColor='green'
-                                checked={selectedUsers.has(user.id)}
-                                onPress={() => toggleUserSelection(user.id)}
-                            />
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axiosInstance.get(
+          "/user_profile/group_create?page=1&page_size=50&size=50"
         );
+        const data = response.data;
+        if (data && Array.isArray(data.items)) {
+          setUsers(data.items);
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (error) {
+        Alert.alert("Error fetching users. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <ScrollView contentContainerStyle={styles.scrollView}>
-                <View style={styles.container}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Create Group</Text>
-                        <TouchableOpacity onPress={handleCloseModal}>
-                            <Ionicons name="close-sharp" size={24} color="black" />
-                        </TouchableOpacity>
-                    </View>
+    fetchUsers();
+  }, []);
 
-                    <TextInput
-                        label="Group Name"
-                        mode="outlined"
-                        value={groupName}
-                        onChangeText={setGroupName}
-                        style={styles.input}
-                    />
-                    <TextInput
-                        label="Description"
-                        mode="outlined"
-                        value={description}
-                        onChangeText={setDescription}
-                        multiline
-                        style={[styles.input, styles.description]}
-                    />
-                    <UserAvatarAndUsername />
-                    <Button mode="contained" onPress={handleCreateGroup} style={styles.createButton}>
-                        Create
-                    </Button>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+  const handleCreateGroup = async () => {
+    if (!groupName) {
+      Alert.alert("Please fill the group name");
+      return;
+    }
+    if (selectedUsers.length < 2) {
+      Alert.alert("Please select at least one user");
+      return;
+    }
+    const data = {
+      name: groupName,
+      description,
+      group_type: "private",
+      member_list: selectedUsers,
+    };
+    console.log(data);
+    try {
+      const res = await GroupServices.createGroup(data);
+      if (res) {
+        refreshGroupList();
+        toggleCloseModal();
+      }
+    } catch (error) {
+      Alert.alert("Something went wrong. Please try again.");
+    }
+  };
+
+  const toggleUserSelection = (userId: number) => {
+    setSelectedUsers((prevSelectedUsers) =>
+      prevSelectedUsers.includes(userId)
+        ? prevSelectedUsers.filter((id) => id !== userId)
+        : [...prevSelectedUsers, userId]
     );
+    console.log(selectedUsers)
+  };
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      user.user_id !== loggedInUserId
+  );
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>グループの作成</Text>
+            <TouchableOpacity onPress={toggleCloseModal}>
+              <Ionicons name="close-sharp" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TextInput
+              label="グループ名"
+              mode="outlined"
+              value={groupName}
+              onChangeText={setGroupName}
+              style={styles.input}
+              theme={{ colors: { primary: "#6200ee" } }}
+            />
+            <TextInput
+              label="グループの説明"
+              mode="outlined"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              style={[styles.input, styles.description]}
+              theme={{ colors: { primary: "#6200ee" } }}
+            />
+            <View style={styles.searchContainer}>
+              <Ionicons
+                name="search"
+                size={22}
+                color="gray"
+                style={styles.searchIcon}
+              />
+              <NativeInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={styles.searchInput}
+                placeholder="ユーザー検索"
+              />
+              {searchQuery ? (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <Feather name="x-circle" size={22} color="black" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+            <ScrollView style={styles.userListContainer}>
+              {loading ? (
+                <ActivityIndicator
+                  size="large"
+                  color="#6200ee"
+                  style={styles.loader}
+                />
+              ) : (
+                filteredUsers.map((user) => (
+                  <TouchableOpacity
+                    key={user.user_id}
+                    onPress={() => toggleUserSelection(user.user_id)}
+                    style={styles.userItem}
+                  >
+                    <View style={styles.userInfo}>
+                      <UserAvatar
+                        url={user.user_image}
+                        width={30}
+                        height={30}
+                      />
+                      <Text style={styles.userName}>{user.username}</Text>
+                    </View>
+                    <CheckBox
+                      checkedIcon="checkbox-marked"
+                      uncheckedIcon="checkbox-blank-outline"
+                      iconType="material-community"
+                      checkedColor="green"
+                      checked={selectedUsers.includes(user.user_id)}
+                      onPress={() => toggleUserSelection(user.user_id)}
+                    />
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </View>
+          <View>
+            <Button
+              mode="contained"
+              onPress={handleCreateGroup}
+              style={styles.createButton}
+              theme={{ colors: { primary: "#6200ee" } }}
+            >
+              作成
+            </Button>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    scrollView: {
-        flexGrow: 1,
-    },
-    container: {
-        padding: 20,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    title: {
-        fontSize: 24,
-    },
-    input: {
-        marginBottom: 20,
-    },
-    description: {
-        height: 100,
-    },
-    createButton: {
-        marginTop: 10,
-    },
-    userListContainer: {
-        flex: 1,
-    },
-    searchInput: {
-        marginBottom: 10,
-        fontSize: 16,
-        backgroundColor: 'white',
-    },
-    userScrollView: {
-        maxHeight: 150,
-    },
-    userItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    userInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    userName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: 'black',
-        marginLeft: 10,
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  container: {
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    height: "100%",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  input: {
+    marginBottom: 20,
+    backgroundColor: "white",
+  },
+  description: {
+    height: 100,
+  },
+  userListContainer: {
+    height: "50%",
+  },
+  userItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "black",
+    marginLeft: 10,
+  },
+  footer: {
+    justifyContent: "center",
+  },
+  createButton: {
+    padding: 5,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 15,
+    borderColor: "#aaa",
+    backgroundColor: "#fff",
+    width: "100%",
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  loader: {
+    marginTop: 20,
+  },
 });
 
 export default CreateGroup;

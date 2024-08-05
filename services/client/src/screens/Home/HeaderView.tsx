@@ -6,27 +6,16 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import UserAvatar from "@/src/components/UserAvatar";
-import AuthServices from "@/src/api/AuthServices";
-import { User } from "@/assets/interfaces/userInterface";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useUser } from "@/src/hooks/UserContext";
 
 const HeaderView = () => {
-  const [user, setUser] = useState<User | null>(null);
-
-  const devideWidth = Dimensions.get("window").width;
 
   const theme = useColorScheme();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const user = await AuthServices.getCurrentUser();
-      setUser(user.data);
-    };
-    getUser();
-  }, []);
+  const deviceWidth = Dimensions.get("window").width;
+  const { image, fullname, email } = useUser();
 
   const styles = StyleSheet.create({
     HeaderContainer: {
@@ -112,7 +101,7 @@ const HeaderView = () => {
       borderLeftColor: "transparent",
     },
     GradientChildRight: {
-      width: devideWidth - 149,
+      width: deviceWidth - 149,
       padding: 20,
       height: 108,
       justifyContent: "center",
@@ -144,15 +133,15 @@ const HeaderView = () => {
         >
           <View style={styles.useComponents}>
             <View style={styles.userLeftContainer}>
-              <UserAvatar />
+              <UserAvatar url={image}/>
               <View>
                 <Text
-                  style={{ color: "white", fontSize: 18, fontWeight: "bold" }}
+                  style={{ color: "white", fontSize: 16, fontWeight: "bold" }}
                 >
-                  {user?.username.toLocaleUpperCase()}
+                  {fullname?.toLocaleUpperCase()}
                 </Text>
                 <Text style={{ color: "white", fontSize: 14 }}>
-                  {user?.email}
+                  {email}
                 </Text>
               </View>
             </View>

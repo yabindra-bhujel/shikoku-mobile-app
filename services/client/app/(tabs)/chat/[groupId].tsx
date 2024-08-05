@@ -1,249 +1,292 @@
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
-    Text,
-    View,
-    useColorScheme,
-    ScrollView,
-    Alert,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    ActivityIndicator,
+  Text,
+  View,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  useColorScheme,
+  FlatList,
 } from "react-native";
 import GroupHeader from "@/src/components/GroupChat/GroupHeader";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
-import { useEffect, useState } from "react";
-import AuthServices from "@/src/api/AuthServices";
 import GroupMessageList from "@/src/components/GroupChat/GroupMessageList";
-import GroupMessageServices from "@/src/api/GroupMessageServices";
+import { myip } from "@/src/config/Api";
+import axiosInstance from "@/src/config/Api";
+import { useUser } from "@/src/hooks/UserContext";
+import { useFocusEffect } from "@react-navigation/native";
+
+interface GroupData {
+  id: string;
+  name: string;
+  description: string;
+  group_image?: string;
+  member_count?: number;
+  admin_id: number;
+}
 
 const ChatDetail = () => {
-    const theme = useColorScheme();
-    const { groupId } = useLocalSearchParams<{ groupId: string }>() ?? { groupId: "" };
+  const { groupId } = useLocalSearchParams<{ groupId: string }>();
+  const theme = useColorScheme();
+  const [group, setGroup] = useState<GroupData | null>(null);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const textInputRef = useRef<TextInput>(null);
+  const flatListRef = useRef<FlatList<any>>(null);
+  const { loggedInUserId, fullname } = useUser();
 
-    const [group, setGroup] = useState<any>([]);
-    const [ws, setWs] = useState<WebSocket | null>(null);
-    const [user, setUser] = useState<any>(null);
-    const [messages, setMessages] = useState<any>([]);
-    const [userId, setUserId] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
+  const [messageData, setMessageData] = useState({
+    message: "",
+    sender_id: 0,
+    username: "",
+    group_id: groupId || "",
+  });
 
-    const [messageData, setMessageData] = useState({
-        message: "",
-        sender_id: "",
-        sender_fullname: "",
-        group_id: groupId || "",
-    });
+  const fetchGroup = async () => {
+    if (!groupId) return;
 
-    useEffect(() => {
-        const fetchMessages = async () => {
-            if (!groupId) return;
+    try {
+      setLoading(true);
+      const response = await GroupServices.getGroupById(groupId);
+      setGroup(response.data);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to fetch group data from server. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            try {
-                setLoading(true);
-                const response = await GroupMessageServices.getGroupMessages(groupId);
-                sendMessage();
-                setMessages(response.data);
-            } catch (error) {
-                Alert.alert("Error", "Failed to fetch group messages from server. Please try again later.");
-            } finally {
-                setLoading(false);
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroup();
+    }, [groupId])
+  );
+
+  const fetchMessages = async (pageNum: number) => {
+    if (!groupId) return;
+
+    try {
+      setLoadingMore(true);
+      const response = await axiosInstance.get(
+        `/group_messages/${groupId}?page=${pageNum}&size=50`
+      );
+      const newMessages = response.data.items;
+
+      setMessages((prevMessages) => {
+        const allMessages = [...newMessages, ...prevMessages];
+        // Remove duplicate messages
+        const uniqueMessages = Array.from(
+          new Set(allMessages.map((msg) => msg.id))
+        ).map((id) => allMessages.find((msg) => msg.id === id));
+        return uniqueMessages;
+      });
+
+      setCurrentPage(response.data.page);
+      setTotalPages(response.data.pages);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to fetch group messages from server. Please try again later."
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages(1); // Fetch initial page
+  }, [groupId]);
+
+  useEffect(() => {
+    if (typeof loggedInUserId === 'number') {
+      setMessageData((prevData) => ({
+        ...prevData,
+        sender_id: loggedInUserId,
+        username: fullname ?? "", // Ensure username is a string
+      }));
+    }
+  }, [loggedInUserId, fullname]);
+
+  useEffect(() => {
+    const initializeWebSocket = () => {
+      if (!groupId) return;
+
+      const socketUrl = `ws://${myip}:8000/ws/${groupId}`;
+      const ws = new WebSocket(socketUrl);
+
+      ws.onopen = () => {};
+
+      ws.onmessage = (e) => {
+        try {
+          const message = JSON.parse(e.data);
+          setMessages((prevMessages) => {
+            const messageExists = prevMessages.some(
+              (msg) => msg.id === message.id
+            );
+            if (messageExists) {
+              return prevMessages;
             }
-        };
+            return [...prevMessages, message]; // Add new message to the end
+          });
+          // Scroll to bottom on new message
+          flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+        } catch (e) {}
+      };
 
-        fetchMessages();
-    }, [groupId]);
-
-    // グループ情報の取得
-    useEffect(() => {
-        const fetchGroup = async () => {
-            if (!groupId) return;
-
-            try {
-                setLoading(true);
-                const response = await GroupServices.getGroup(groupId);
-                setGroup(response.data);
-            } catch (error) {
-                Alert.alert("Error", "Failed to fetch group data from server. Please try again later.");
-            }
-            finally {
-                setLoading(false);
-            }
-        };
-
-        fetchGroup();
-    }, [groupId]);
-
-    // ユーザー情報を取得
-    useEffect(() => {
-        const getUser = async () => {
-            const user = await AuthServices.getUserProfile();
-            setUser(user.data);
-            setUserId(user.data.user_id);
-            setMessageData((prevData) => ({
-                ...prevData,
-                sender_id: user.data.user_id,
-                sender_fullname: `${user.data.first_name} ${user.data.last_name}`,
-            }));
-        };
-        getUser();
-    }, []);
-
-
-
-    // WebSocketの初期化
-    useEffect(() => {
-        const initializeWebSocket = () => {
-            if (!groupId) return;
-
-            const socketUrl = `ws://localhost:8000/ws/${groupId}`;
-
-            const ws = new WebSocket(socketUrl);
-
-            ws.onopen = () => {
-                // 初期メッセージを送信しない
-            };
-
-
-            ws.onmessage = (e) => {
-                const message = JSON.parse(e.data);
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        ...message,
-                    },
-                ]);
-            };
-
-
-            setWs(ws);
-        };
-
-        initializeWebSocket();
-
-        return () => {
-            if (ws) {
-                ws.close();
-            }
-        };
-    }, [groupId]);
-
-    // メッセージ送信
-    const sendMessage = () => {
-        if (messageData.message.trim()) {
-            ws?.send(JSON.stringify(messageData));
-            setMessageData({ ...messageData, message: "" });
-        }
+      setWs(ws);
     };
+    initializeWebSocket();
 
-    // メッセージの履歴は なんか変ので メセッジの表示を変更　するかな
-
-    const renderMessages = () => {
-        if (loading) {
-            return <ActivityIndicator style={{
-                // make in the center
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-
-
-
-            }} size="large" color="#00ff00" />;
-        }
-        return <GroupMessageList messages={messages} userId={userId} />;
+    return () => {
+      if (ws) {
+        ws.close();
+      }
     };
+  }, [groupId]);
 
+  useEffect(() => {
+    if (textInputRef.current) {
+      textInputRef.current.focus();
+    }
+  }, []);
+
+  const sendMessage = () => {
+    if (messageData.message.trim()) {
+      ws?.send(JSON.stringify(messageData));
+      setMessageData({ ...messageData, message: "" });
+      setInputValue("");
+      // Scroll to bottom after sending a message
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+      }, 100);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (currentPage < totalPages) {
+      fetchMessages(currentPage + 1);
+    }
+  };
+
+  const renderMessages = () => {
+    if (loading) {
+      return (
+        <ActivityIndicator
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          size="large"
+          color="#00ff00"
+        />
+      );
+    }
     return (
-        <View style={{ flex: 1 }}>
-            {/* ヘッダー */}
-            <View style={{ height: 54, backgroundColor: theme === "dark" ? "#333" : "#fff" }} />
-            <GroupHeader groupData={group} />
-
-            {/* メッセージリスト */}
-            <ScrollView>
-
-                {renderMessages()}
-            </ScrollView>
-
-
-
-            {/* フッター */}
-            <View style={styles.footerContainer}>
-                <TextInput
-                    placeholder="メッセージを入力..."
-                    style={styles.messageInput}
-                    multiline
-                    value={messageData.message}
-                    onChangeText={(text) => setMessageData({ ...messageData, message: text })}
-                />
-                <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                    <Text style={styles.sendButtonText}>送信</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+      <GroupMessageList
+        ref={flatListRef} // Pass the ref as a prop
+        messages={messages}
+        userId={loggedInUserId}
+        fetchMoreMessages={handleLoadMore}
+        loadingMore={loadingMore}
+      />
     );
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
+    >
+      <View style={{ flex: 1 }}>
+        <View
+          style={{
+            height: 54,
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+          }}
+        />
+        {group && <GroupHeader groupData={group} />}
+
+        {renderMessages()}
+
+        <View style={styles.footerContainer}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              ref={textInputRef}
+              placeholder="メッセージを入力..."
+              style={styles.messageInput}
+              multiline
+              autoFocus={true}
+              value={inputValue}
+              onChangeText={(text) => {
+                setInputValue(text);
+                setMessageData({ ...messageData, message: text });
+              }}
+            />
+            {inputValue.trim() !== "" && (
+              <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+                <Text style={styles.sendButtonText}>送信</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
-    footerContainer: {
-        minHeight: 90,
-        maxHeight: 120,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderTopWidth: 1,
-        borderTopColor: "lightgray",
-    },
-    messageInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: "lightgray",
-        borderRadius: 15,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        marginRight: 8,
-        fontSize: 16,
-    },
-    sendButton: {
-        backgroundColor: "#007BFF",
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 10,
-    },
-    sendButtonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    messageContainer: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    },
-    messageMeta: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 4,
-    },
-    senderName: {
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    timestamp: {
-        color: '#666',
-        fontSize: 12,
-    },
-    messageContent: {
-        backgroundColor: '#f0f0f0',
-        padding: 12,
-        borderRadius: 10,
-    },
-    messageText: {
-        fontSize: 14,
-    },
+  footerContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: "lightgray",
+    backgroundColor: "#fff",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "lightgray",
+    borderRadius: 25,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "space-between",
+  },
+  messageInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 25,
+    marginRight: 8,
+  },
+  sendButton: {
+    backgroundColor: "#007BFF",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  sendButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 export default ChatDetail;

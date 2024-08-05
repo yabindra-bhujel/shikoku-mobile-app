@@ -7,3 +7,4 @@ class GroupMessageSchema(BaseModel):
     sender_id: int
     message: str
     created_at: datetime
+    username: str = None

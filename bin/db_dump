@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+
+echo "Dumping database..."
+
+ docker exec -t postgres_db pg_dump -U postgres -p 5432 -F p --clean school_db > mock_data/data.sql
+
+echo "Database save to mock_data/data.sql"
+echo "Database dumped successfully"

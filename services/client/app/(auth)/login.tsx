@@ -33,7 +33,10 @@ const Login = () => {
     }
 
     try {
+      console.log("Attempting to login with", { username, password });
       const response = await AuthServices.login(username, password);
+
+      console.log("Login response:", response);
 
       if (response.status === 200) {
         const refreshToken = response.data.refresh_token;
@@ -50,6 +53,7 @@ const Login = () => {
       }
 
     } catch (error) {
+      console.error("Login error:", error);
       Alert.alert("Error", "Invalid username or password");
     }
   };
@@ -58,7 +62,7 @@ const Login = () => {
     container: {
       flex: 1,
       height: "100%",
-      backgroundColor: theme === "dark" ? "#333": "white",
+      backgroundColor: theme === "dark" ? "#333" : "white",
     },
     headerLogo: {
       marginTop: 105,
@@ -75,18 +79,18 @@ const Login = () => {
       fontSize: 13,
       textDecorationLine: "underline",
       fontWeight: "bold",
-      color: theme === "dark" ? "white": "black",
+      color: theme === "dark" ? "white" : "black",
     },
     text2: {
       fontSize: 40,
       fontWeight: "bold",
-      color: theme === "dark" ? "white": "black",
+      color: theme === "dark" ? "white" : "black",
     },
     welback: {
       fontSize: 30,
       marginTop: 34,
       marginBottom: 57,
-      color: theme === "dark" ? "white": "black",
+      color: theme === "dark" ? "white" : "black",
       textAlign: "center",
     },
     forgetfield: {
@@ -96,7 +100,7 @@ const Login = () => {
       marginVertical: 10,
     },
     inputContainer: {
-      backgroundColor: theme === "dark" ? "black": "#FCF5F5",
+      backgroundColor: theme === "dark" ? "black" : "#FCF5F5",
       flexDirection: "row",
       borderRadius: 10,
       borderWidth: 1,
@@ -112,7 +116,7 @@ const Login = () => {
     },
     forgetText: {
       fontSize: 13,
-      color: theme === "dark" ? "white": "#F84A4A",
+      color: theme === "dark" ? "white" : "#F84A4A",
     },
     button: {
       alignItems: "center",
@@ -121,15 +125,15 @@ const Login = () => {
       marginVertical: 20,
       marginHorizontal: 36,
       borderRadius: 5,
-      backgroundColor: theme === "dark" ? "purple": "#4785FC",
+      backgroundColor: theme === "dark" ? "purple" : "#4785FC",
     },
     buttonText: {
-      color: theme === "dark" ? "white": "#FCF5F5",
+      color: theme === "dark" ? "white" : "#FCF5F5",
       fontSize: 20,
       fontWeight: "bold",
     },
     privacyText: {
-      color: theme === "dark" ? "white": "#4785FC",
+      color: theme === "dark" ? "white" : "#4785FC",
       textAlign: "center",
       fontSize: 13,
       marginTop: 50,

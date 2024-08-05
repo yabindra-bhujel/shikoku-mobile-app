@@ -1,40 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
   useColorScheme,
   Modal,
+  Alert,
   TextInput,
 } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 import UserIconAndUsername from "@/src/components/GroupChat/UserIconAndUsername";
 import CreateGroup from "@/src/components/GroupChat/CreateGroup";
+import GroupServices from "@/src/api/GroupServices";
+import { useFocusEffect } from "@react-navigation/native";
+
+export interface Group {
+  id: number;
+  name: string;
+  description: string;
+  group_image?: string;
+}
 
 const GroupChat = () => {
   const theme = useColorScheme();
-  const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
+  const [search, setSearch] = useState<string>("");
 
-  const goBack = () => {
-    router.back();
+  const fetchGroups = async () => {
+    try {
+      const response = await GroupServices.getGroups();
+      setGroups(response.data.groups);
+      setFilteredGroups(response.data.groups);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to fetch groups data from server. Please try again later."
+      );
+    }
   };
 
-  const toggleOpneModal = () => {
-    setIsModalVisible(true);
-  }
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroups();
+    }, [])
+  );
+  const handleRefreshGroup = () => {
+    fetchGroups();
+  };
 
-  const toggleCloseModal = () => {
-    setIsModalVisible(false);
-  }
+  const toggleOpenCloseModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
 
-  // const toggleModal = () => {
-  //   setIsModalVisible(!isModalVisible);
-  //   console.log(isModalVisible);
-  // };
+  const handleSearch = (query: string) => {
+    setSearch(query);
+    if (query) {
+      const filtered = groups.filter((group) =>
+        group.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredGroups(filtered);
+    } else {
+      setFilteredGroups(groups);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearch("");
+    setFilteredGroups(groups);
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -61,104 +97,72 @@ const GroupChat = () => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.5)", 
-
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
-   
+    headerSearchBarContainer: {
+      backgroundColor: "#fff",
+      width: "100%",
+      alignItems: "center",
+      padding: 10,
+    },
+    headerSearchBar: {
+      flexDirection: "row",
+      backgroundColor: "#eee",
+      padding: 10,
+      width: "98%",
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    headerSearchBarLeft: {
+      flexDirection: "row",
+      flex: 1,
+      gap: 10,
+    },
+    headerSearchBarInput: {
+      flex: 1,
+      fontSize: 16,
+      color: "black",
+    },
+    deleteIcon: {
+      marginLeft: 10,
+    },
   });
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          height: 54,
-          backgroundColor: theme === "dark" ? "#333" : "#fff",
-        }}
-      />
-      <View style={styles.communityHomeHeader}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity onPress={goBack} style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons
-              name="chevron-back-sharp"
-              size={24}
-              color={theme === "dark" ? "#fff" : "#000"}
+      <View style={styles.headerSearchBarContainer}>
+        <View style={styles.headerSearchBar}>
+          <View style={styles.headerSearchBarLeft}>
+            <AntDesign name="search1" size={24} color="black" />
+            <TextInput
+              placeholder="Search"
+              value={search}
+              onChangeText={handleSearch}
+              style={styles.headerSearchBarInput}
             />
-          </TouchableOpacity>
-        </View>
-        <View>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "bold",
-              color: theme === "dark" ? "#fff" : "#000",
-            }}
-          >
-            Group Chat
-          </Text>
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
-          <AntDesign
-            name="search1"
-            size={24}
-            color={theme === "dark" ? "#fff" : "#000"}
-            style={{ marginRight: 10, fontWeight: "bold" }}
-          />
-          <TouchableOpacity>
-            <AntDesign
-              name="setting"
-              size={24}
-              color={theme === "dark" ? "#fff" : "#000"}
-              style={{ marginRight: 10, fontWeight: "bold" }}
-            />
-          </TouchableOpacity>
+          </View>
+          {search.length > 0 && (
+            <TouchableOpacity onPress={clearSearch} style={styles.deleteIcon}>
+              <Feather name="delete" size={24} color="black" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
       {/* User list */}
-      <UserIconAndUsername />
+      <UserIconAndUsername groups={filteredGroups} />
 
       {/* Add button */}
-      <TouchableOpacity style={styles.addButton} onPress={toggleOpneModal}>
+      <TouchableOpacity style={styles.addButton} onPress={toggleOpenCloseModal}>
         <AntDesign name="plus" size={30} color="#fff" />
       </TouchableOpacity>
 
       {/* Modal for Add Form */}
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={toggleCloseModal}
-      >
-        <CreateGroup toggleCloseModal={toggleCloseModal} />
-        {/* <View style={styles.modalContainer}>
-          <View style={{
-            backgroundColor: "#fff",
-            padding: 20,
-            borderRadius: 10,
-            width: "80%",
-
-          
-          }}>
-            <TouchableOpacity   onPress={toggleCloseModal}>
-              <AntDesign name="close" size={24} color="black"/>
-            </TouchableOpacity>
-            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-              Add Group Chat
-            </Text>
-          </View>
-
-            <View style={{ marginBottom: 10 }}>
-              <TextInput
-                style={{
-                  borderWidth: 1,
-                  borderColor: "lightgray",
-                  padding: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Group Name"
-              />
-            </View>
-        </View> */}
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+        <CreateGroup
+          toggleCloseModal={toggleOpenCloseModal}
+          refreshGroupList={handleRefreshGroup}
+        />
       </Modal>
     </View>
   );
