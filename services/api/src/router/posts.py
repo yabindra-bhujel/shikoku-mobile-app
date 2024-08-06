@@ -23,28 +23,24 @@ def get_timestamp_filename() -> str:
     timestamp = datetime.now().timestamp()
     return f"{int(timestamp * 1000)}.jpg"
 
-class PostInput(BaseModel):
-    content: Optional[str] = None
-    image_files: Optional[List[UploadFile]] = None
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_post(
     content: Optional[str] = Form(None), 
-    images: List[UploadFile] = File(None),
+    images: List[UploadFile] = File([]),
     user: User = Depends(authenticate_user),
     db: Session = Depends(get_db)
 ):
     try:
-        # ファイルを保存するディレクトリを作成
-        files_data = {}
-        if image_files is not None:
-            files_data['image'] = image_files[0]
-        if video_files is not None:
-            files_data['video'] = video_files[0]
-        if file_files is not None:
-            files_data['file'] = file_files[0]
+        images_data = []
+        for image in images:
+            image_data = {
+                "filename": image.filename,
+                "file_object": image.file
+            }
+            images_data.append(image_data)
 
-        new_post = PostLogic.create_post(db, user.id, content, files_data)
+        new_post = PostLogic.create_post(db, user.id, content, images_data)
 
         return new_post
 
@@ -58,7 +54,7 @@ async def create_post(
 async def get_posts(request: Request, db: Session = Depends(get_db), user: User = Depends(authenticate_user)):
 
     try:
-        posts = PostLogic.get_post(db)
+        posts = PostLogic.get_post(db, request, user)
         return posts
     except Exception as e:
         print(e)

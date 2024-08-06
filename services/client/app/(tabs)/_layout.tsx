@@ -47,10 +47,17 @@ const TabLayout = () => {
         <Stack.Screen
           name="community"
           options={{
-            title: "Profile",
-            headerBackTitle: "Back",
+            headerShown: false,
           }}
         />
+
+      <Stack.Screen
+          name="school_event"
+          options={{
+            headerShown: false,
+          }}
+        />
+        
       </Stack>
     </UserProvider>
   );

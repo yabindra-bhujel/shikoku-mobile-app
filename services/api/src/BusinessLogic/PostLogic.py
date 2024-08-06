@@ -50,17 +50,15 @@ class PostLogic:
                 new_post.content = content
 
             timestamp = datetime.now().timestamp()
-            file_path = os.path.join("static", "user_profile", f"{new_post.id}_{int(timestamp * 1000)}.png")
-
-            
+            file_path = os.path.join("static", "post", f"{new_post.id}_{int(timestamp * 1000)}.png")
 
             if image_data:
                 for image_info in image_data:
                     with open(file_path, "wb") as file:
                         shutil.copyfileobj(image_info['file_object'], file)
 
-                    image_name = f"{new_post.id}_{image_info.filename}"
-                    
+                    image_name = f"{new_post.id}_{image_info['filename']}"  # 修正: image_info['filename'] に変更
+
                     post_image = PostImage(post_id=new_post.id, url=image_name)
                     db.add(post_image)
 
