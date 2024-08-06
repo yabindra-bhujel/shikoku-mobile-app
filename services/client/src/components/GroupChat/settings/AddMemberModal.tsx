@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -8,168 +9,177 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { Text } from "react-native-paper";
 import UserAvatar from "../../UserAvatar";
 import { CheckBox } from "react-native-elements";
-import UserServices, { UserData } from "@/src/api/UserServices";
+import { UserData } from "@/src/api/UserServices";
 import { useUser } from "@/src/hooks/UserContext";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import GroupServices from "@/src/api/GroupServices";
 import axiosInstance from "@/src/config/Api";
 
 const AddMemberModal = ({
-    visible,
-    onClose,
-    groupInfo,
-    onMemberAdded,
-  }: {
-    visible: boolean;
-    onClose: () => void;
-    groupInfo: any;
-    onMemberAdded: (newMembers: any) => void;
-  }) => {
-    const { loggedInUserId } = useUser();
-    const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-    const [users, setUsers] = useState<UserData[]>([]);
-    const [searchQuery, setSearchQuery] = useState<string>("");
+  visible,
+  onClose,
+  groupInfo,
+  onMemberAdded,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  groupInfo: any;
+  onMemberAdded: (newMembers: any) => void;
+}) => {
+  const { loggedInUserId } = useUser();
+  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
-    useEffect(() => {
-      const fetchUsers = async () => {
-        try {
-          // const allUsers: UserData[] = await UserServices.GetAllUser();
-          const get = await axiosInstance.get("/user_profile/group_create?page=1&page_size=50&size=50")
-          setUsers(get.data.items);
-        } catch (error) {
-          Alert.alert("データ取得際に問題が発生しました。");
-        }
-      };
-
-      fetchUsers();
-    }, []);
-
-    const toggleUserSelection = (userId: number) => {
-      setSelectedUsers((prevSelectedUsers) =>
-        prevSelectedUsers.includes(userId)
-          ? prevSelectedUsers.filter((id) => id !== userId)
-          : [...prevSelectedUsers, userId]
-      );
-    };
-
-    const isUserInGroup = (userId: number) => {
-      return groupInfo.group_members.some((member: any) => member.id === userId);
-    };
-
-    const filteredUsers = users?.filter(
-      (user) =>
-        user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        user.user_id !== loggedInUserId && // Exclude logged-in user
-        !isUserInGroup(user.user_id) // Exclude users already in the group
-    ) || [];
-
-    const clearSearch = () => {
-      setSearchQuery("");
-    };
-
-    const addMember = async () => {
-      console.log(groupInfo);
-      const data = {
-        user_list: selectedUsers,
-      };
-      console.log(data);
+  useEffect(() => {
+    const fetchUsers = async () => {
       try {
-        const response = await GroupServices.addMember(groupInfo.id, data);
-        if (response.status === 200) {
-          Alert.alert("Member added successfully!");
-          setSelectedUsers([]);
-          const newMembers = [...groupInfo.group_members, ...selectedUsers.map(user_id => ({ id: user_id }))];
-          onMemberAdded(newMembers);
-          onClose();
-        } else {
-          Alert.alert("メンバー追加エラー。 もう一度試してください.");
-        }
+        const response = await axiosInstance.get(
+          "/user_profile/group_create?page=1&page_size=50&size=50"
+        );
+        setUsers(response.data.items);
       } catch (error) {
-        Alert.alert("メンバー追加エラー。 もう一度試してください.");
+        Alert.alert("Error", "Failed to fetch user data.");
       }
     };
 
-    return (
-      <Modal visible={visible} transparent={true} animationType="slide">
-        <SafeAreaView style={styles.ModalView}>
-          <View style={styles.CenteredView}>
-            <View style={styles.headerModal}>
-              <TouchableOpacity style={styles.headerLeft} onPress={onClose}>
-                <Text>閉じる</Text>
-              </TouchableOpacity>
-              <View style={styles.headerCenter}>
-                <Text style={styles.ModalText}>メンバーの追加</Text>
-              </View>
-              <View style={styles.headerRight}>
-                {selectedUsers.length > 0 ? (
-                  <TouchableOpacity onPress={addMember}>
-                    <Text>追加する</Text>
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            </View>
-          </View>
-          <View style={styles.ModalBody}>
-            <View style={styles.searchBar}>
-              <MaterialIcons name="search" size={24} color="#444" />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="ユーザー検索"
-                onChangeText={(text) => setSearchQuery(text)}
-                value={searchQuery}
-              />
-              {searchQuery.length > 0 ? (
-                <Feather
-                  name="delete"
-                  size={24}
-                  color="#444"
-                  onPress={clearSearch}
-                />
-              ) : null}
-            </View>
-            <ScrollView style={styles.userListContainer}>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <TouchableOpacity key={user.user_id} onPress={() => toggleUserSelection(user.user_id)} style={styles.userItem}>
-                    <View style={styles.userInfo}>
-                      <UserAvatar url={user.user_image} width={30} height={30} />
-                      <Text style={styles.userName}>{user.username}</Text>
-                    </View>
-                    <CheckBox
-                      checkedIcon="checkbox-marked"
-                      uncheckedIcon="checkbox-blank-outline"
-                      iconType="material-community"
-                      checkedColor="#0099ff"
-                      checked={selectedUsers.includes(user.user_id)}
-                      onPress={() => toggleUserSelection(user.user_id)}
-                    />
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={styles.noUsersText}>追加可能なユーザーが存在しません。</Text>
-              )}
-            </ScrollView>
-          </View>
-        </SafeAreaView>
-      </Modal>
+    fetchUsers();
+  }, []);
+
+  const toggleUserSelection = (userId: number) => {
+    setSelectedUsers((prevSelectedUsers) =>
+      prevSelectedUsers.includes(userId)
+        ? prevSelectedUsers.filter((id) => id !== userId)
+        : [...prevSelectedUsers, userId]
     );
   };
+
+  const isUserInGroup = (userId: number) => {
+    return groupInfo.group_members.some((member: any) => member.id === userId);
+  };
+
+  const filteredUsers =
+    users?.filter(
+      (user) =>
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        user.user_id !== loggedInUserId &&
+        !isUserInGroup(user.user_id)
+    ) || [];
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
+
+  const addMember = async () => {
+    const data = {
+      user_list: selectedUsers,
+    };
+console.log(data);
+    try {
+      const response = await GroupServices.addMember(groupInfo.id, data);
+      if (response.status === 200) {
+        Alert.alert("Member added successfully!");
+        // setSelectedUsers([]);
+
+
+        const newMembers = [
+          ...groupInfo.group_members,
+          ...selectedUsers.map((user_id) => ({ id: user_id })),
+        ];
+        onMemberAdded(newMembers);
+        onClose();
+      } else {
+        Alert.alert("Error", "Failed to add member. Please try again.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to add member. Please try again.");
+    }
+  };
+
+  return (
+    <Modal visible={visible} transparent={true} animationType="slide">
+      <SafeAreaView style={styles.modalView}>
+        <View style={styles.centeredView}>
+          <View style={styles.headerModal}>
+            <TouchableOpacity style={styles.headerLeft} onPress={onClose}>
+              <Text>Close</Text>
+            </TouchableOpacity>
+            <View style={styles.headerCenter}>
+              <Text style={styles.modalText}>Add Members</Text>
+            </View>
+            <View style={styles.headerRight}>
+              {selectedUsers.length > 0 && (
+                <TouchableOpacity onPress={addMember}>
+                  <Text>Add</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+        <View style={styles.modalBody}>
+          <View style={styles.searchBar}>
+            <MaterialIcons name="search" size={24} color="#444" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search users"
+              onChangeText={(text) => setSearchQuery(text)}
+              value={searchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <Feather
+                name="delete"
+                size={24}
+                color="#444"
+                onPress={clearSearch}
+              />
+            )}
+          </View>
+          <ScrollView style={styles.userListContainer}>
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <TouchableOpacity
+                  key={user.user_id.toString()} // Ensure unique key
+                  onPress={() => toggleUserSelection(user.user_id)}
+                  style={styles.userItem}
+                >
+                  <View style={styles.userInfo}>
+                    <UserAvatar url={user.user_image} width={30} height={30} />
+                    <Text style={styles.userName}>{user.username}</Text>
+                  </View>
+                  <CheckBox
+                    checkedIcon="checkbox-marked"
+                    uncheckedIcon="checkbox-blank-outline"
+                    iconType="material-community"
+                    checkedColor="#0099ff"
+                    checked={selectedUsers.includes(user.user_id)}
+                    onPress={() => toggleUserSelection(user.user_id)}
+                  />
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.noUsersText}>No users available for adding.</Text>
+            )}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+};
 
 export default AddMemberModal;
 
 const styles = StyleSheet.create({
-  ModalView: {
+  modalView: {
     flex: 1,
     backgroundColor: "#eee",
   },
-  CenteredView: {
+  centeredView: {
     borderRadius: 10,
   },
-  ModalText: {
+  modalText: {
     fontSize: 20,
     fontWeight: "bold",
     color: "black",
@@ -193,7 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "flex-end",
   },
-  ModalBody: {
+  modalBody: {
     flex: 1,
     padding: 20,
     alignItems: "center",

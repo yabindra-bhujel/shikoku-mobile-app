@@ -33,6 +33,18 @@ export default function MembersScreen() {
     group_members: members,
   });
 
+  useEffect(() => {
+    const checkForDuplicateIds = () => {
+      const ids = members.map((member) => member.id);
+      const uniqueIds = new Set(ids);
+      if (uniqueIds.size !== ids.length) {
+        console.warn("Duplicate IDs found in members array");
+      }
+    };
+
+    checkForDuplicateIds();
+  }, [members]);
+
   const handleRemoveMember = async (memberId: number) => {
     const numericGroupId = Number(groupId);
 
@@ -58,7 +70,9 @@ export default function MembersScreen() {
                 memberId
               );
               Alert.alert("Success", "Member removed successfully.");
-              setMembers(members.filter((member) => member.id !== memberId));
+              setMembers((prevMembers) =>
+                prevMembers.filter((member) => member.id !== memberId)
+              );
               setGroupInfo((prevInfo) => ({
                 ...prevInfo,
                 group_members: prevInfo.group_members.filter(
@@ -106,13 +120,21 @@ export default function MembersScreen() {
     setModalVisible(false);
   };
 
-  const handleMemberAdded = (newMembers) => {
-    setMembers((prevMembers) => [...prevMembers, ...newMembers]);
-    setGroupInfo((prevInfo) => ({
-      ...prevInfo,
-      group_members: [...prevInfo.group_members, ...newMembers],
-    }));
-    setModalVisible(false);
+  const handleMemberAdded = async (newMembers) => {
+    try {
+      const response = await GroupServices.getGroupById(groupId);
+      setMembers(response.data.group_members);
+      setGroupInfo((prevInfo) => ({
+        ...prevInfo,
+        group_members: response.data.group_members,
+      }));
+      setModalVisible(false);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to fetch updated members. Please try again later."
+      );
+    }
   };
 
   if (members.length === 0) {
@@ -123,6 +145,42 @@ export default function MembersScreen() {
     );
   }
 
+  const memberItem = ({ item }) => (
+    <View style={styles.memberItem}>
+      <View style={styles.leftSide}>
+        {item.profile?.profile_picture ? (
+          <Image
+            source={{
+              uri: item.profile.profile_picture,
+            }}
+            style={styles.profileImage}
+          />
+        ) : (
+          <View style={styles.profileImage}>
+            <Text style={styles.firstCharText}>
+              {item.profile?.fullname
+                ? item.profile?.fullname.charAt(0).toUpperCase()
+                : ""}
+            </Text>
+          </View>
+        )}
+        <Text>
+          {item.profile?.fullname || "有効な名前が見つかりませんでした"}
+        </Text>
+      </View>
+      {logged_in_user_id === admin_id &&
+        item.id !== admin_id &&
+        item.id !== Number(logged_in_user_id) && (
+          <TouchableOpacity
+            onPress={() => handleRemoveMember(item.id)}
+            style={styles.removeButton}
+          >
+            <Text style={styles.removeButtonText}>削除</Text>
+          </TouchableOpacity>
+        )}
+    </View>
+  );
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CustomHeader onAddMember={handleAddMember} />
@@ -130,37 +188,7 @@ export default function MembersScreen() {
         data={members}
         scrollEnabled={true}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.memberItem}>
-            <View style={styles.leftSide}>
-              {item.profile?.profile_picture ? (
-                <Image
-                  source={{
-                    uri: item.profile.profile_picture,
-                  }}
-                  style={styles.profileImage}
-                />
-              ) : (
-                <View style={styles.profileImage}>
-                  <Text style={styles.firstCharText}>
-                    {item.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-              )}
-              <Text>{item.profile?.fullname || "有効な名前が見つかりませんでした"}</Text>
-            </View>
-            {logged_in_user_id === admin_id &&
-              item.id !== admin_id &&
-              item.id !== Number(logged_in_user_id) && (
-                <TouchableOpacity
-                  onPress={() => handleRemoveMember(item.id)}
-                  style={styles.removeButton}
-                >
-                  <Text style={styles.removeButtonText}>削除</Text>
-                </TouchableOpacity>
-              )}
-          </View>
-        )}
+        renderItem={memberItem}
         style={styles.container}
       />
       {modalVisible && (
@@ -220,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "lightgray", // Added background color for default profile image
+    backgroundColor: "lightgray",
   },
   firstCharText: {
     fontSize: 18,

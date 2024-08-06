@@ -38,7 +38,6 @@ export default function SettingModal() {
   const [showAddMember, setShowAddMember] = useState(false);
   const [groupImage, setGroupImage] = useState<string[] | undefined>();
 
-
   const { loggedInUserId } = useUser();
 
   const fetchGroupInfo = async () => {
@@ -239,17 +238,15 @@ export default function SettingModal() {
               <PaperText style={styles.changeName}>名前と説明の変更</PaperText>
             </TouchableOpacity>
             <View style={styles.rowgap10}>
-            <TouchableOpacity
-              style={styles.addMember}
-              onPress={handleShowAddMember}
-            >
-              <Ionicons name="person-add" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity
-            style={styles.addMember}
-            onPress={pickImage}>
-            <Entypo name="image" size={24} color="black" />
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.addMember}
+                onPress={handleShowAddMember}
+              >
+                <Ionicons name="person-add" size={24} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.addMember} onPress={pickImage}>
+                <Entypo name="image" size={24} color="black" />
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.groupInfo}>
