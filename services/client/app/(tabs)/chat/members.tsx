@@ -14,6 +14,20 @@ import AddMemberModal from "@/src/components/GroupChat/settings/AddMemberModal";
 import CustomHeader from "@/src/components/GroupChat/settings/MemberCustomHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+type Member = {
+  id: number;
+  profile: {
+    fullname: string;
+    profile_picture?: string;
+  };
+  added_by?: number;
+};
+
+type GroupInfo = {
+  id: number;
+  group_members: Member[];
+};
+
 export default function MembersScreen() {
   const { group_members, admin_id, logged_in_user_id, group_id } =
     useLocalSearchParams<{
@@ -24,11 +38,11 @@ export default function MembersScreen() {
     }>();
 
   const groupId = group_id || "0";
-  const [members, setMembers] = useState(
+  const [members, setMembers] = useState<Member[]>(
     group_members ? JSON.parse(group_members) : []
   );
   const [modalVisible, setModalVisible] = useState(false);
-  const [groupInfo, setGroupInfo] = useState({
+  const [groupInfo, setGroupInfo] = useState<GroupInfo>({
     id: Number(groupId),
     group_members: members,
   });
@@ -119,7 +133,7 @@ export default function MembersScreen() {
     setModalVisible(false);
   };
 
-  const handleMemberAdded = async (newMembers) => {
+  const handleMemberAdded = async (newMembers: Member[]) => {
     try {
       const response = await GroupServices.getGroupById(groupId);
       setMembers(response.data.group_members);
@@ -144,7 +158,18 @@ export default function MembersScreen() {
     );
   }
 
-  const memberItem = ({ item }) => (
+  const getMemberStatus = (member: Member) => {
+    if (member.id === Number(admin_id)) {
+      return "Group Creator";
+    }
+    if (member.added_by) {
+      const addedBy = members.find((m) => m.id === member.added_by);
+      return addedBy ? `Added by ${addedBy.profile?.fullname}` : "";
+    }
+    return "";
+  };
+
+  const memberItem = ({ item }: { item: Member }) => (
     <View style={styles.memberItem}>
       <View style={styles.leftSide}>
         {item.profile?.profile_picture ? (
@@ -163,12 +188,15 @@ export default function MembersScreen() {
             </Text>
           </View>
         )}
-        <Text>
-          {item.profile?.fullname || "有効な名前が見つかりませんでした"}
-        </Text>
+        <View>
+          <Text>
+            {item.profile?.fullname || "有効な名前が見つかりませんでした"}
+          </Text>
+          <Text style={styles.statusText}>{getMemberStatus(item)}</Text>
+        </View>
       </View>
       {logged_in_user_id === admin_id &&
-        item.id !== admin_id &&
+        item.id !== Number(admin_id) &&
         item.id !== Number(logged_in_user_id) && (
           <TouchableOpacity
             onPress={() => handleRemoveMember(item.id)}
@@ -252,5 +280,9 @@ const styles = StyleSheet.create({
   firstCharText: {
     fontSize: 18,
     color: "black",
+  },
+  statusText: {
+    fontSize: 12,
+    color: "gray",
   },
 });
