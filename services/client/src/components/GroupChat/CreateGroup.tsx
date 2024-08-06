@@ -37,6 +37,8 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
+  const [hasMoreUsers, setHasMoreUsers] = useState<boolean>(true);
 
   useEffect(() => {
     if (loggedInUserId !== null) {
@@ -45,14 +47,17 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   }, [loggedInUserId]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchUsers = async (pageNumber: number) => {
       try {
         const response = await axiosInstance.get(
-          "/user_profile/group_create?page=1&page_size=50&size=50"
+          `/user_profile/group_create?page=${pageNumber}&page_size=50&size=50`
         );
         const data = response.data;
         if (data && Array.isArray(data.items)) {
-          setUsers(data.items);
+          setUsers((prevUsers) => [...prevUsers, ...data.items]);
+          if (data.items.length < 50) {
+            setHasMoreUsers(false);
+          }
         } else {
           throw new Error("Invalid response format");
         }
@@ -63,8 +68,14 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       }
     };
 
-    fetchUsers();
-  }, []);
+    fetchUsers(page);
+  }, [page]);
+
+  const handleLoadMore = () => {
+    if (!loading && hasMoreUsers) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
 
   const handleCreateGroup = async () => {
     if (!groupName) {
@@ -155,7 +166,20 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
                 </TouchableOpacity>
               ) : null}
             </View>
-            <ScrollView style={styles.userListContainer}>
+            <ScrollView
+              style={styles.userListContainer}
+              onScroll={({ nativeEvent }) => {
+                const { layoutMeasurement, contentOffset, contentSize } =
+                  nativeEvent;
+                if (
+                  layoutMeasurement.height + contentOffset.y >=
+                  contentSize.height - 20
+                ) {
+                  handleLoadMore();
+                }
+              }}
+              scrollEventThrottle={400}
+            >
               {loading ? (
                 <ActivityIndicator
                   size="large"
@@ -187,6 +211,13 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
                     />
                   </TouchableOpacity>
                 ))
+              )}
+              {hasMoreUsers && (
+                <ActivityIndicator
+                  size="large"
+                  color="#6200ee"
+                  style={styles.loader}
+                />
               )}
             </ScrollView>
           </View>

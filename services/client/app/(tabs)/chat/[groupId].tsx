@@ -93,7 +93,6 @@ const ChatDetail = () => {
         ).map((id) => allMessages.find((msg) => msg.id === id));
         return uniqueMessages;
       });
-
       setCurrentPage(response.data.page);
       setTotalPages(response.data.pages);
     } catch (error) {
@@ -107,7 +106,7 @@ const ChatDetail = () => {
   };
 
   useEffect(() => {
-    fetchMessages(1); // Fetch initial page
+    fetchMessages(1);
   }, [groupId]);
 
   useEffect(() => {
@@ -115,7 +114,7 @@ const ChatDetail = () => {
       setMessageData((prevData) => ({
         ...prevData,
         sender_id: loggedInUserId,
-        username: fullname ?? "", // Ensure username is a string
+        username: fullname ?? "",
       }));
     }
   }, [loggedInUserId, fullname]);
@@ -139,7 +138,7 @@ const ChatDetail = () => {
             if (messageExists) {
               return prevMessages;
             }
-            return [...prevMessages, message]; // Add new message to the end
+            return [...prevMessages, message];
           });
           // Scroll to bottom on new message
           flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
@@ -197,7 +196,7 @@ const ChatDetail = () => {
     }
     return (
       <GroupMessageList
-        ref={flatListRef} // Pass the ref as a prop
+        ref={flatListRef}
         messages={messages}
         userId={loggedInUserId}
         fetchMoreMessages={handleLoadMore}

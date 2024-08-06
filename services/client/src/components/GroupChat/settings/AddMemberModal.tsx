@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { Text } from "react-native-paper";
 import UserAvatar from "../../UserAvatar";
@@ -33,21 +34,40 @@ const AddMemberModal = ({
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
+  const [hasMoreUsers, setHasMoreUsers] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchUsers = async (pageNumber: number) => {
       try {
         const response = await axiosInstance.get(
-          "/user_profile/group_create?page=1&page_size=50&size=50"
+          `/user_profile/group_create?page=${pageNumber}&page_size=50&size=50`
         );
-        setUsers(response.data.items);
+        const data = response.data;
+        if (data && Array.isArray(data.items)) {
+          setUsers((prevUsers) => [...prevUsers, ...data.items]);
+          if (data.items.length < 50) {
+            setHasMoreUsers(false);
+          }
+        } else {
+          throw new Error("Invalid response format");
+        }
       } catch (error) {
-        Alert.alert("Error", "Failed to fetch user data.");
+        Alert.alert("Error fetching users. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUsers();
-  }, []);
+    fetchUsers(page);
+  }, [page]);
+
+  const handleLoadMore = () => {
+    if (!loading && hasMoreUsers) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
 
   const toggleUserSelection = (userId: number) => {
     setSelectedUsers((prevSelectedUsers) =>
@@ -77,14 +97,11 @@ const AddMemberModal = ({
     const data = {
       user_list: selectedUsers,
     };
-console.log(data);
+    console.log(data);
     try {
       const response = await GroupServices.addMember(groupInfo.id, data);
       if (response.status === 200) {
         Alert.alert("Member added successfully!");
-        // setSelectedUsers([]);
-
-
         const newMembers = [
           ...groupInfo.group_members,
           ...selectedUsers.map((user_id) => ({ id: user_id })),
@@ -137,7 +154,20 @@ console.log(data);
               />
             )}
           </View>
-          <ScrollView style={styles.userListContainer}>
+          <ScrollView
+            style={styles.userListContainer}
+            onScroll={({ nativeEvent }) => {
+              const { layoutMeasurement, contentOffset, contentSize } =
+                nativeEvent;
+              if (
+                layoutMeasurement.height + contentOffset.y >=
+                contentSize.height - 20
+              ) {
+                handleLoadMore();
+              }
+            }}
+            scrollEventThrottle={400}
+          >
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
                 <TouchableOpacity
@@ -161,6 +191,9 @@ console.log(data);
               ))
             ) : (
               <Text style={styles.noUsersText}>No users available for adding.</Text>
+            )}
+            {loading && (
+              <ActivityIndicator size="large" color="#6200ee" style={styles.loader} />
             )}
           </ScrollView>
         </View>
@@ -251,6 +284,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "gray",
     textAlign: "center",
+    marginTop: 20,
+  },
+  loader: {
     marginTop: 20,
   },
 });

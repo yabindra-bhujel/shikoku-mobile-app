@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
-import AddMemberModal from "@/src/components/GroupChat/settings/AddMemberModal"; // Adjust the import path as necessary
+import AddMemberModal from "@/src/components/GroupChat/settings/AddMemberModal";
 import CustomHeader from "@/src/components/GroupChat/settings/MemberCustomHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -41,7 +41,6 @@ export default function MembersScreen() {
         console.warn("Duplicate IDs found in members array");
       }
     };
-
     checkForDuplicateIds();
   }, [members]);
 
