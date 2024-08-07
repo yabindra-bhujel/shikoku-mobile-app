@@ -51,7 +51,13 @@ const TabLayout = () => {
             headerBackTitle: "Back",
           }}
         />
-      </Stack>
+        <Stack.Screen
+          name="event"
+          options={{
+            headerShown: false,
+          }}
+        />
+        </Stack>
     </UserProvider>
   );
 };

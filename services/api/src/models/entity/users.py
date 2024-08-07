@@ -56,6 +56,9 @@ class User(Base):
     member_groups = relationship("Group", secondary=group_members_association, back_populates="group_members")
     group_messages = relationship("GroupMessage", back_populates="sender")
 
+    # Relationships for school events
+    school_events = relationship('SchoolEvent', back_populates='creator', cascade='all, delete-orphan')
+
 
     def __repr__(self):
         return f'User: {self.username}'
