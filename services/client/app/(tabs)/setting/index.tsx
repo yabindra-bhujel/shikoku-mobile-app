@@ -5,61 +5,71 @@ import {
   TouchableOpacity,
   Switch,
   useColorScheme,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React from "react";
+import axiosInstance from "@/src/config/Api";
+import debounce from "lodash/debounce";
+
+interface Settings {
+  user_id: number;
+  is_profile_searchable: boolean;
+  is_message_notification_enabled: boolean;
+  is_post_notification_enabled: boolean;
+  is_survey_notification_enabled: boolean;
+  is_two_factor_authentication_enabled: boolean;
+}
 
 const Setting = () => {
   const router = useRouter();
   const theme = useColorScheme();
+  const [loading, setLoading] = React.useState(false);
+  const [settings, setSettings] = React.useState<Settings | null>(null);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/settings');
+      setSettings(response.data);
+      setLoading(false);
+    } catch (error) {
+      Alert.alert('Error', "An error occurred while fetching settings. Please try again later.");
+      setLoading(false);
+    }
+  };
+
+  const updateSettings = async (updatedSettings: Settings) => {
+    try {
+      await axiosInstance.put('/settings', updatedSettings);
+    } catch (error) {
+      Alert.alert('Error', "An error occurred while updating settings. Please try again later.");
+    }
+  };
+
+  // delays for 500 milliseconds before updating settings
+  const debouncedUpdateSettings = React.useCallback(
+    debounce((updatedSettings: Settings) => {
+      updateSettings(updatedSettings);
+    }, 500),
+    []
+  );
+
+  React.useEffect(() => {
+    fetchSettings();
+  }, []);
 
   const goBack = () => {
     router.back();
   };
 
-  const navigateToSection = (section) => {
-    // Placeholder for navigation logic
-    console.log(`Navigating to ${section}`);
-  };
-
-  const [messageNotifications, setMessageNotifications] = React.useState(true);
-  const [postNotifications, setPostNotifications] = React.useState(true);
-  const [surveyNotifications, setSurveyNotifications] = React.useState(true);
-  const [featureAuth, setFeatureAuth] = React.useState(true);
-  const [profileSearchable, setProfileSearchable] = React.useState(true);
-  const [twoFactorAuth, setTwoFactorAuth] = React.useState(true);
-  const [passwordChangeRequired, setPasswordChangeRequired] = React.useState(false);
-  const [autoLock, setAutoLock] = React.useState(true);
-
-  const toggleSwitch = (type) => {
-    switch (type) {
-      case 'message':
-        setMessageNotifications(previousState => !previousState);
-        break;
-      case 'post':
-        setPostNotifications(previousState => !previousState);
-        break;
-      case 'survey':
-        setSurveyNotifications(previousState => !previousState);
-        break;
-      case 'featureAuth':
-        setFeatureAuth(previousState => !previousState);
-        break;
-      case 'profileSearchable':
-        setProfileSearchable(previousState => !previousState);
-        break;
-      case 'twoFactorAuth':
-        setTwoFactorAuth(previousState => !previousState);
-        break;
-      case 'passwordChangeRequired':
-        setPasswordChangeRequired(previousState => !previousState);
-        break;
-      case 'autoLock':
-        setAutoLock(previousState => !previousState);
-        break;
-      default:
-        break;
+  const toggleSwitch = (type: keyof Settings) => {
+    if (settings) {
+      const updatedSettings = { ...settings, [type]: !settings[type] };
+      setSettings(updatedSettings);
+      debouncedUpdateSettings(updatedSettings);
     }
   };
 
@@ -85,9 +95,18 @@ const Setting = () => {
       color: theme === 'dark' ? '#fff' : '#000',
     },
     section: {
+      marginTop: 20,
       backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff',
-      borderBottomWidth: 1,
-      borderBottomColor: theme === 'dark' ? '#444' : '#ddd',
+      borderRadius: 10,
+      marginHorizontal: 10,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.22,
+      shadowRadius: 2.22,
+      elevation: 3,
     },
     sectionTitle: {
       fontSize: 18,
@@ -111,8 +130,20 @@ const Setting = () => {
     switch: {
       marginLeft: 10,
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });
 
+  if (loading || !settings) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <View>
@@ -137,17 +168,14 @@ const Setting = () => {
       {/* Profile */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Profile</Text>
-        <TouchableOpacity style={styles.item} onPress={() => navigateToSection('Profile')}>
-          <Ionicons name="person-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Edit Profile</Text>
-        </TouchableOpacity>
+        
         <View style={styles.item}>
           <Ionicons name="people-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
           <Text style={styles.itemText}>Profile Searchable</Text>
           <Switch
             style={styles.switch}
-            value={profileSearchable}
-            onValueChange={() => toggleSwitch('profileSearchable')}
+            value={settings.is_profile_searchable}
+            onValueChange={() => toggleSwitch('is_profile_searchable')}
           />
         </View>
       </View>
@@ -160,8 +188,8 @@ const Setting = () => {
           <Text style={styles.itemText}>Message Notifications</Text>
           <Switch
             style={styles.switch}
-            value={messageNotifications}
-            onValueChange={() => toggleSwitch('message')}
+            value={settings.is_message_notification_enabled}
+            onValueChange={() => toggleSwitch('is_message_notification_enabled')}
           />
         </View>
         <View style={styles.item}>
@@ -169,8 +197,8 @@ const Setting = () => {
           <Text style={styles.itemText}>Post Notifications</Text>
           <Switch
             style={styles.switch}
-            value={postNotifications}
-            onValueChange={() => toggleSwitch('post')}
+            value={settings.is_post_notification_enabled}
+            onValueChange={() => toggleSwitch('is_post_notification_enabled')}
           />
         </View>
         <View style={styles.item}>
@@ -178,8 +206,8 @@ const Setting = () => {
           <Text style={styles.itemText}>Survey Notifications</Text>
           <Switch
             style={styles.switch}
-            value={surveyNotifications}
-            onValueChange={() => toggleSwitch('survey')}
+            value={settings.is_survey_notification_enabled}
+            onValueChange={() => toggleSwitch('is_survey_notification_enabled')}
           />
         </View>
       </View>
@@ -188,39 +216,12 @@ const Setting = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Security</Text>
         <View style={styles.item}>
-          <Ionicons name="shield-checkmark-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Feature Authentication</Text>
-          <Switch
-            style={styles.switch}
-            value={featureAuth}
-            onValueChange={() => toggleSwitch('featureAuth')}
-          />
-        </View>
-        <View style={styles.item}>
-          <Ionicons name="lock-open-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Password Change Required</Text>
-          <Switch
-            style={styles.switch}
-            value={passwordChangeRequired}
-            onValueChange={() => toggleSwitch('passwordChangeRequired')}
-          />
-        </View>
-        <View style={styles.item}>
           <Ionicons name="lock-closed-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
           <Text style={styles.itemText}>Two-Factor Authentication</Text>
           <Switch
             style={styles.switch}
-            value={twoFactorAuth}
-            onValueChange={() => toggleSwitch('twoFactorAuth')}
-          />
-        </View>
-        <View style={styles.item}>
-          <Ionicons name="timer-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Auto Lock</Text>
-          <Switch
-            style={styles.switch}
-            value={autoLock}
-            onValueChange={() => toggleSwitch('autoLock')}
+            value={settings.is_two_factor_authentication_enabled}
+            onValueChange={() => toggleSwitch('is_two_factor_authentication_enabled')}
           />
         </View>
       </View>

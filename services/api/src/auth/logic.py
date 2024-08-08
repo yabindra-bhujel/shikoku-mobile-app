@@ -7,6 +7,7 @@ from ..models.entity.user_profile import UserProfile
 from sqlalchemy.exc import IntegrityError
 from fastapi import BackgroundTasks, HTTPException
 from ..settings.email import EmailSettings
+from ..models.entity.application_settings import ApplicationSetting
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -53,10 +54,15 @@ class AuthLogic:
                 db.commit()
                 db.refresh(user)
 
-
             except IntegrityError as e:
                 print("IntegrityError", e)
                 return None
+            
+            # ユーザ設定のmodelを作成
+            user_settings = ApplicationSetting(user_id=user.id)
+            db.add(user_settings)
+            db.commit()
+            db.refresh(user_settings)
             
             user_profile = UserProfile(user_id=user.id)
             db.add(user_profile)
@@ -100,6 +106,13 @@ class AuthLogic:
 
             except IntegrityError as e:
                 raise HTTPException(status_code=500, detail="Internal Server Error")
+            
+
+            # ユーザー設定のmodelを作成
+            user_settings = ApplicationSetting(user_id=user.id)
+            db.add(user_settings)
+            db.commit()
+            db.refresh(user_settings)
             
             user_profile = UserProfile(user_id=user.id, first_name=first_name, last_name=last_name)
             db.add(user_profile)

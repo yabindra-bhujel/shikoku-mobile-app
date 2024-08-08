@@ -39,7 +39,6 @@ class User(Base):
     department = Column(String, default=Department.JAPANESE_LITERATURE.value)
     is_student = Column(Boolean, default=True)
     is_international_student = Column(Boolean, default=False)
-    
 
     # Relationships
     calendars = relationship("Calendar", back_populates="user")
@@ -59,6 +58,8 @@ class User(Base):
     # Relationships for school events
     school_events = relationship('SchoolEvent', back_populates='creator', cascade='all, delete-orphan')
 
-
+    # Relationships for Settings
+    application_settings = relationship('ApplicationSetting', back_populates='user', uselist=False)
+    
     def __repr__(self):
         return f'User: {self.username}'
