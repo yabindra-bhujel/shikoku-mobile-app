@@ -125,7 +125,7 @@ class AuthLogic:
 
     def login_token(self, db: Session, username: str, password: str)->str:
         # ユーザーの認証　ユーザが 存在するかないか を確認
-        user = self.__authenticate_user(username, password, db)
+        user = self.authenticate_user(username, password, db)
         if user is None:
             return None
         
@@ -136,7 +136,7 @@ class AuthLogic:
         return access_token, refresh_token
     
 
-    def __authenticate_user(self, username: str, password: str, db)->users.User:
+    def authenticate_user(self, username: str, password: str, db:Session)->users.User:
         # ユーザーが存在するかどうかを確認
         user = db.query(users.User).filter(users.User.username == username).first()
         

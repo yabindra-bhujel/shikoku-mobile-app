@@ -10,6 +10,7 @@ from ..auth.router import get_current_user
 from ..schemas.user_profile import *
 from ..filters.UserFilter import UserFilter
 from ..BusinessLogic.UserProfileLogic import UserProfileLogic
+from ..models.entity.application_settings import ApplicationSetting
 
 # ユーザ プロファイル api の ルータ
 router = APIRouter(prefix="/user_profile", tags=["User"])
@@ -83,6 +84,8 @@ async def get_users(
             func.concat(UserProfile.first_name, ' ', UserProfile.last_name).label('username'),
             UserProfile.profile_picture.label('user_image'))
             .join(UserProfile, User.id == UserProfile.user_id)
+            .join(ApplicationSetting, User.id == ApplicationSetting.user_id)
+            .filter(ApplicationSetting.is_profile_searchable == True)
             .order_by(User.id.desc())
         )
 

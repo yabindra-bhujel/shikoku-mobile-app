@@ -60,6 +60,9 @@ class User(Base):
 
     # Relationships for Settings
     application_settings = relationship('ApplicationSetting', back_populates='user', uselist=False)
+
+    # Relationships for OTP
+    otp = relationship('UserOtp', back_populates='user', uselist=False)
     
     def __repr__(self):
         return f'User: {self.username}'

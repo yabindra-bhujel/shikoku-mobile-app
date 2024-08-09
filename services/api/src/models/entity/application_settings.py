@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, ForeignKey, String
 from sqlalchemy.orm import relationship
 from ..database import Base
 
@@ -18,6 +18,9 @@ class ApplicationSetting(Base):
 
     # authentication settings
     is_two_factor_authentication_enabled = Column(Boolean, default=False)
+
+    # 言語 設定 ja と en のみ
+    language = Column(String, default='ja')
 
     user = relationship('User', back_populates='application_settings')
 

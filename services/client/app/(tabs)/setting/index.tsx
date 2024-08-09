@@ -3,10 +3,11 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Switch,
+  ScrollView,
   useColorScheme,
   Alert,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
@@ -21,6 +22,7 @@ interface Settings {
   is_post_notification_enabled: boolean;
   is_survey_notification_enabled: boolean;
   is_two_factor_authentication_enabled: boolean;
+  language: string;
 }
 
 const Setting = () => {
@@ -49,7 +51,15 @@ const Setting = () => {
     }
   };
 
-  // delays for 500 milliseconds before updating settings
+  const updateLanguage = async () => {
+    try {
+      const response = await axiosInstance.put('/settings/language');
+      setSettings(response.data);
+    } catch (error) {
+      Alert.alert('Error', "An error occurred while updating the language. Please try again later.");
+    }
+  };
+
   const debouncedUpdateSettings = React.useCallback(
     debounce((updatedSettings: Settings) => {
       updateSettings(updatedSettings);
@@ -127,9 +137,6 @@ const Setting = () => {
       marginLeft: 10,
       flex: 1,
     },
-    switch: {
-      marginLeft: 10,
-    },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
@@ -144,6 +151,7 @@ const Setting = () => {
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <View>
@@ -165,66 +173,75 @@ const Setting = () => {
         </View>
       </View>
 
-      {/* Profile */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Profile</Text>
-        
-        <View style={styles.item}>
-          <Ionicons name="people-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Profile Searchable</Text>
-          <Switch
-            style={styles.switch}
-            value={settings.is_profile_searchable}
-            onValueChange={() => toggleSwitch('is_profile_searchable')}
-          />
+      <ScrollView>
+        {/* Profile */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Profile</Text>
+          <View style={styles.item}>
+            <Ionicons name="people-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
+            <Text style={styles.itemText}>Profile Searchable</Text>
+            <Switch
+              value={settings.is_profile_searchable}
+              onValueChange={() => toggleSwitch('is_profile_searchable')}
+            />
+          </View>
         </View>
-      </View>
 
-      {/* Notifications */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notifications</Text>
-        <View style={styles.item}>
-          <Ionicons name="chatbubble-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Message Notifications</Text>
-          <Switch
-            style={styles.switch}
-            value={settings.is_message_notification_enabled}
-            onValueChange={() => toggleSwitch('is_message_notification_enabled')}
-          />
+        {/* Notifications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          <View style={styles.item}>
+            <Ionicons name="chatbubble-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
+            <Text style={styles.itemText}>Message Notifications</Text>
+            <Switch
+              value={settings.is_message_notification_enabled}
+              onValueChange={() => toggleSwitch('is_message_notification_enabled')}
+            />
+          </View>
+          <View style={styles.item}>
+            <Ionicons name="paper-plane-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
+            <Text style={styles.itemText}>Post Notifications</Text>
+            <Switch
+              value={settings.is_post_notification_enabled}
+              onValueChange={() => toggleSwitch('is_post_notification_enabled')}
+            />
+          </View>
+          <View style={styles.item}>
+            <Ionicons name="megaphone-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
+            <Text style={styles.itemText}>Survey Notifications</Text>
+            <Switch
+              value={settings.is_survey_notification_enabled}
+              onValueChange={() => toggleSwitch('is_survey_notification_enabled')}
+            />
+          </View>
         </View>
-        <View style={styles.item}>
-          <Ionicons name="paper-plane-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Post Notifications</Text>
-          <Switch
-            style={styles.switch}
-            value={settings.is_post_notification_enabled}
-            onValueChange={() => toggleSwitch('is_post_notification_enabled')}
-          />
-        </View>
-        <View style={styles.item}>
-          <Ionicons name="megaphone-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Survey Notifications</Text>
-          <Switch
-            style={styles.switch}
-            value={settings.is_survey_notification_enabled}
-            onValueChange={() => toggleSwitch('is_survey_notification_enabled')}
-          />
-        </View>
-      </View>
 
-      {/* Security */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Security</Text>
-        <View style={styles.item}>
-          <Ionicons name="lock-closed-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-          <Text style={styles.itemText}>Two-Factor Authentication</Text>
-          <Switch
-            style={styles.switch}
-            value={settings.is_two_factor_authentication_enabled}
-            onValueChange={() => toggleSwitch('is_two_factor_authentication_enabled')}
-          />
+        {/* Security */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Security</Text>
+          <View style={styles.item}>
+            <Ionicons name="lock-closed-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
+            <Text style={styles.itemText}>Two-Factor Authentication</Text>
+            <Switch
+              value={settings.is_two_factor_authentication_enabled}
+              onValueChange={() => toggleSwitch('is_two_factor_authentication_enabled')}
+            />
+          </View>
         </View>
-      </View>
+
+        {/* 言語設定 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Languages</Text>
+          <View style={styles.item}>
+            <Ionicons name="language-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
+            <Text style={styles.itemText}>Language</Text>
+
+            <TouchableOpacity onPress={updateLanguage}>
+              <Text style={styles.itemText}>{settings.language === 'en' ? 'English' : '日本語'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
