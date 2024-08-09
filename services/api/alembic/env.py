@@ -14,7 +14,9 @@ from src.models.entity.likes import Likes
 from src.models.entity.notification import Notification, user_notifications
 from src.models.entity.group import Group, group_members_association
 from src.models.entity.group_message import GroupMessage
-
+from src.models.entity.school_event import SchoolEvent
+from src.models.entity.application_settings import ApplicationSetting
+from src.models.entity.user_otp import UserOtp
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

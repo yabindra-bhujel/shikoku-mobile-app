@@ -11,6 +11,7 @@ from .logic import AuthLogic
 from .schema import *
 from ..models.database import get_db
 from ..models.entity.user_profile import UserProfile
+from ..BusinessLogic.settings.AuthSettingLogic import AuthSettingLogic
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 # ロジックのインスタンス化
 auth_logic = AuthLogic()
+auth_setting_logic = AuthSettingLogic()
 
 # ユーザー作成
 @router.post("/create_user", status_code=status.HTTP_201_CREATED,
@@ -42,8 +44,19 @@ async def create_user(db: db_dependency, credentials: Credentials):
 
 # ログイン
 @router.post("/access_token", status_code=status.HTTP_200_OK)
-async def login_for_access_token(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
+async def login_for_access_token(response: Response, background_tasks: BackgroundTasks, form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)], db: db_dependency):
     try:
+
+        user = auth_logic.authenticate_user(form_data.username, form_data.password, db)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+        
+        need_two_factor_auth = auth_setting_logic.have_two_factor_auth(db, user)
+        if need_two_factor_auth:
+            otp = auth_setting_logic.generate_otp(db, user)
+            auth_setting_logic.send_otp(user, otp, background_tasks)
+            return {"message": "OTP sent to your email", "expires_at": otp.expires_at}
+        
         access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
 
         # アクセストークンとリフレッシュトークンがない場合
@@ -226,3 +239,28 @@ async def create_user_from_csv(db: db_dependency, background_tasks: BackgroundTa
     except Exception as e:
         print(e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+
+@router.post("/otp_verification", status_code=status.HTTP_200_OK)
+def otp_verification(response: Response, db: db_dependency, otp: str, username: str, password: str):
+    try:
+        # OTP 検証
+        verified = auth_setting_logic.verify_otp(db, otp)
+        print(verified)
+
+        if not verified:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")
+        
+        # OTP 検証成功 access_token と refresh_token を生成
+        access_token, refresh_token = auth_logic.login_token(db, username, password)
+        # アクセストークンをクッキーにセット
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="refresh_token", value=refresh_token)
+
+        # リフレッシュトークンをresponse で返す
+        return {"message": "Login successful", "refresh_token": refresh_token}
+    
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")

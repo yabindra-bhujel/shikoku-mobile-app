@@ -57,8 +57,19 @@ const TabLayout = () => {
             headerShown: false,
           }}
         />
-        
-      </Stack>
+        <Stack.Screen
+          name="event"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="setting"
+          options={{
+            headerShown: false,
+          }}
+        />
+        </Stack>
     </UserProvider>
   );
 };

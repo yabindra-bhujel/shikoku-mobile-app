@@ -7,6 +7,7 @@ from ..models.entity.user_profile import UserProfile
 from sqlalchemy.exc import IntegrityError
 from fastapi import BackgroundTasks, HTTPException
 from ..settings.email import EmailSettings
+from ..models.entity.application_settings import ApplicationSetting
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -53,10 +54,15 @@ class AuthLogic:
                 db.commit()
                 db.refresh(user)
 
-
             except IntegrityError as e:
                 print("IntegrityError", e)
                 return None
+            
+            # ユーザ設定のmodelを作成
+            user_settings = ApplicationSetting(user_id=user.id)
+            db.add(user_settings)
+            db.commit()
+            db.refresh(user_settings)
             
             user_profile = UserProfile(user_id=user.id)
             db.add(user_profile)
@@ -101,6 +107,13 @@ class AuthLogic:
             except IntegrityError as e:
                 raise HTTPException(status_code=500, detail="Internal Server Error")
             
+
+            # ユーザー設定のmodelを作成
+            user_settings = ApplicationSetting(user_id=user.id)
+            db.add(user_settings)
+            db.commit()
+            db.refresh(user_settings)
+            
             user_profile = UserProfile(user_id=user.id, first_name=first_name, last_name=last_name)
             db.add(user_profile)
             db.commit()
@@ -112,7 +125,7 @@ class AuthLogic:
 
     def login_token(self, db: Session, username: str, password: str)->str:
         # ユーザーの認証　ユーザが 存在するかないか を確認
-        user = self.__authenticate_user(username, password, db)
+        user = self.authenticate_user(username, password, db)
         if user is None:
             return None
         
@@ -123,7 +136,7 @@ class AuthLogic:
         return access_token, refresh_token
     
 
-    def __authenticate_user(self, username: str, password: str, db)->users.User:
+    def authenticate_user(self, username: str, password: str, db:Session)->users.User:
         # ユーザーが存在するかどうかを確認
         user = db.query(users.User).filter(users.User.username == username).first()
         
