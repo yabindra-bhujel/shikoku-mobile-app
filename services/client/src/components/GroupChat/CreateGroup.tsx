@@ -17,7 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import UserAvatar from "../UserAvatar";
 import { CheckBox } from "react-native-elements";
 import GroupServices from "@/src/api/GroupServices";
-import UserServices, { UserData } from "@/src/api/UserServices";
+import { UserData } from "@/src/api/UserServices";
 import { useUser } from "@/src/hooks/UserContext";
 import axiosInstance from "@/src/config/Api";
 

@@ -30,7 +30,7 @@ const SimpleScreen = () => {
     { route: "/chatbot", icon: <FontAwesome5 name="robot" size={45} color="green" />, title: "ChatBot" },
     { route: "/event", icon: <FontAwesome5 name="school" size={45} color="purple" />, title: "School Events" },
     { route: "/chat", icon: <FontAwesome name="wechat" size={45} color="#00A5CF" />, title: "Chat" },
-    { route: "/frequen", icon: <FontAwesome5 name="question" size={45} color="red" />, title: "A&Q" },
+    // { route: "/frequen", icon: <FontAwesome5 name="question" size={45} color="red" />, title: "A&Q" },
     { route: "/setting", icon: <AntDesign name="setting" size={45} color="#CA3C25" />, title: "Settings" },
     { route: "/login", icon: <AntDesign name="logout" size={45} color="#CA3C25"  onPress={handleLogout}/>, title: "Logout" },
     { route: "/profile", icon: <AntDesign name="user" size={45} color="#CA3C25"/>, title: "Profile" },

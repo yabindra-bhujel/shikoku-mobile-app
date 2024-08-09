@@ -40,8 +40,7 @@ const TabLayout = () => {
         <Stack.Screen
           name="profile"
           options={{
-            title: "Profile",
-            headerBackTitle: "Back",
+            headerShown: false,
           }}
         />
         <Stack.Screen
