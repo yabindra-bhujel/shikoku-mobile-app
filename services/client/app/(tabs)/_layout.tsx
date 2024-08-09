@@ -50,13 +50,6 @@ const TabLayout = () => {
             headerShown: false,
           }}
         />
-
-      <Stack.Screen
-          name="school_event"
-          options={{
-            headerShown: false,
-          }}
-        />
         <Stack.Screen
           name="event"
           options={{
