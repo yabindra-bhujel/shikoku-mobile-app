@@ -39,3 +39,9 @@ class UserSocket(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     token: str = None
+
+class Otp(BaseModel):
+    password: str
+    username: str
+    otp: str
+    

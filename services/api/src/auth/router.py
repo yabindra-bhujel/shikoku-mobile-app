@@ -55,6 +55,7 @@ async def login_for_access_token(response: Response, background_tasks: Backgroun
         if need_two_factor_auth:
             otp = auth_setting_logic.generate_otp(db, user)
             auth_setting_logic.send_otp(user, otp, background_tasks)
+            response.status_code = status.HTTP_202_ACCEPTED
             return {"message": "OTP sent to your email", "expires_at": otp.expires_at}
         
         access_token, refresh_token = auth_logic.login_token(db, form_data.username, form_data.password)
@@ -241,19 +242,17 @@ async def create_user_from_csv(db: db_dependency, background_tasks: BackgroundTa
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-
 @router.post("/otp_verification", status_code=status.HTTP_200_OK)
-def otp_verification(response: Response, db: db_dependency, otp: str, username: str, password: str):
+def otp_verification(response: Response, db: db_dependency, data: Otp):
     try:
         # OTP 検証
-        verified = auth_setting_logic.verify_otp(db, otp)
-        print(verified)
+        verified = auth_setting_logic.verify_otp(db, data.otp)
 
         if not verified:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")
         
         # OTP 検証成功 access_token と refresh_token を生成
-        access_token, refresh_token = auth_logic.login_token(db, username, password)
+        access_token, refresh_token = auth_logic.login_token(db, data.username, data.password)
         # アクセストークンをクッキーにセット
         response.set_cookie(key="access_token", value=access_token, httponly=True)
         response.set_cookie(key="refresh_token", value=refresh_token)
