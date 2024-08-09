@@ -13,6 +13,11 @@ const AuthorLayout = () => {
       options={{
         headerShown: false
       }}/>
+
+      <Stack.Screen name='otp_verify'
+      options={{
+        headerShown: false
+      }}/>
       </Stack>
     </>
   )

@@ -19,6 +19,8 @@ const SimpleScreen = () => {
 
   const handleLogout = () => {
     SecureStore.deleteItemAsync("refreshToken");
+    SecureStore.deleteItemAsync("username");
+    SecureStore.deleteItemAsync("password");
     router.push("/login");
   };
 
