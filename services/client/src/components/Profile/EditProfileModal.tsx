@@ -148,19 +148,27 @@ import {
                     <Text style={styles.title}>基本の情報:</Text>
                     <View style={styles.profileContainer}>
                       <Text style={styles.label}>性:</Text>
-                      <TextInput
-                        style={styles.username}
-                        value={firstname}
-                        onChangeText={(text) => setFirstName(text)}
-                      />
+                      <View style={styles.inputContainer}>
+                        <TextInput
+                          style={styles.input}
+                          value={firstname}
+                          onChangeText={(text) => setFirstName(text)}
+                          placeholder="ここにクリックして入力する"
+                        placeholderTextColor={"gray"}
+                        />
+                      </View>
                     </View>
                     <View style={styles.profileContainer}>
                       <Text style={styles.label}>名:</Text>
-                      <TextInput
-                        style={styles.username}
-                        value={lastname}
-                        onChangeText={(text) => setLastName(text)}
-                      />
+                      <View style={styles.inputContainer}>
+                        <TextInput
+                          style={styles.input}
+                          value={lastname}
+                          onChangeText={(text) => setLastName(text)}
+                          placeholder="ここにクリックして入力する"
+                        placeholderTextColor={"gray"}
+                        />
+                      </View>
                     </View>
                     <View>
                       <Text
@@ -180,6 +188,8 @@ import {
                         numberOfLines={6}
                         maxLength={300}
                         onChangeText={(text) => setBio(text)}
+                        placeholder="ここにクリックして入力する"
+                        placeholderTextColor={"gray"}
                       />
                     </View>
   
@@ -196,7 +206,7 @@ import {
                   </ScrollView>
                 ) : (
                   <View style={styles.cerContainer}>
-                    <CertificationList visible={visible} />
+                    <CertificationList />
                   </View>
                 )}
               </View>
@@ -294,10 +304,16 @@ import {
       fontSize: 16,
       marginLeft: 20,
     },
-    username: {
+    inputContainer: {
+      flex: 1,
+      marginLeft: 10,
+    },
+    input: {
       fontSize: 20,
       color: "black",
       padding: 12,
+      textAlign: "right", 
+      borderRadius: 5, 
     },
     imageContainer: {
       width: "100%",
@@ -321,7 +337,7 @@ import {
     bioContainer: {
       height: 110,
       width: "100%",
-      padding: 20,
+      // padding: 20,
     },
     cerContainer: {
       backgroundColor: "white",

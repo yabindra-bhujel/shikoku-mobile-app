@@ -1,6 +1,5 @@
 import {
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -14,10 +13,11 @@ import Header from "../CustomizableHeader";
 import { router } from "expo-router";
 import EditProfileModal from "./EditProfileModal";
 import CertificationList from "./CertificationDisplay";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ProfileDetail = () => {
   const [userData, setUserData] = useState<UserProfile>();
-  const { fullname, email } = useUser();
+  const { email } = useUser();
   const [show, setShow] = useState(false);
 
   const handleShowHideModal = () => {
@@ -70,7 +70,7 @@ const ProfileDetail = () => {
       <View style={styles.headerContainer}>
         <UserAvatar url={userData?.update_profile} />
         <View>
-          <Text style={styles.headerText}>{fullname?.toUpperCase()}</Text>
+          <Text style={styles.headerText}>{userData?.first_name.toUpperCase()} {userData?.last_name.toUpperCase()}</Text>
           <Text style={styles.headerText}>{email}</Text>
         </View>
       </View>
