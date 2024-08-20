@@ -28,6 +28,7 @@ const GroupChat = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   const [search, setSearch] = useState<string>("");
+  const isDark = useColorScheme() === "dark";
 
   const fetchGroups = async () => {
     try {
@@ -75,6 +76,7 @@ const GroupChat = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: isDark ? "#333" : "#fff",
     },
     communityHomeHeader: {
       flexDirection: "row",
@@ -100,14 +102,14 @@ const GroupChat = () => {
       backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     headerSearchBarContainer: {
-      backgroundColor: "#fff",
+      backgroundColor: isDark ? "#333" : "#fff",
       width: "100%",
       alignItems: "center",
       padding: 10,
     },
     headerSearchBar: {
       flexDirection: "row",
-      backgroundColor: "#eee",
+      backgroundColor: isDark ? "#666" : "#eee",
       padding: 10,
       width: "98%",
       borderRadius: 10,
@@ -121,7 +123,7 @@ const GroupChat = () => {
     headerSearchBarInput: {
       flex: 1,
       fontSize: 16,
-      color: "black",
+      color: isDark ? "white" : "black",
     },
     deleteIcon: {
       marginLeft: 10,
@@ -133,9 +135,10 @@ const GroupChat = () => {
       <View style={styles.headerSearchBarContainer}>
         <View style={styles.headerSearchBar}>
           <View style={styles.headerSearchBarLeft}>
-            <AntDesign name="search1" size={24} color="black" />
+            <AntDesign name="search1" size={24} color={"gray"} />
             <TextInput
               placeholder="Search"
+              placeholderTextColor={"gray"}
               value={search}
               onChangeText={handleSearch}
               style={styles.headerSearchBarInput}
@@ -143,14 +146,18 @@ const GroupChat = () => {
           </View>
           {search.length > 0 && (
             <TouchableOpacity onPress={clearSearch} style={styles.deleteIcon}>
-              <Feather name="delete" size={24} color="black" />
+              <Feather
+                name="delete"
+                size={24}
+                color={isDark ? "white" : "black"}
+              />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       {/* User list */}
-      <UserIconAndUsername groups={filteredGroups} />
+      <UserIconAndUsername groups={filteredGroups} isDark={isDark} />
 
       {/* Add button */}
       <TouchableOpacity style={styles.addButton} onPress={toggleOpenCloseModal}>

@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableWithoutFeedback } from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableWithoutFeedback,
+  useColorScheme,
+} from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const CertificationList = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const isDark = useColorScheme() === "dark";
 
   const certifications = [
-    { id: '1', name: 'ITパスポート' },
-    { id: '2', name: '基本情報技術者試験（FE)' },
-    { id: '3', name: '応用情報技術者試験（AP)' },
+    { id: "1", name: "ITパスポート" },
+    { id: "2", name: "基本情報技術者試験（FE)" },
+    { id: "3", name: "応用情報技術者試験（AP)" },
   ];
 
   const toggleVisibility = () => {
@@ -18,13 +26,15 @@ const CertificationList = () => {
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={toggleVisibility}>
-        <View  style={styles.titleContainer}>
-        <Text style={styles.titleText}>Certifications</Text>
-        {isVisible ? (
+        <View style={[styles.titleContainer, {
+          backgroundColor: isDark ? "#444" : "#007BFF",
+        }]}>
+          <Text style={styles.titleText}>Certifications</Text>
+          {isVisible ? (
             <AntDesign name="upcircleo" size={24} color="#fff" />
-        ): (
+          ) : (
             <AntDesign name="downcircle" size={24} color="#fff" />
-        )}
+          )}
         </View>
       </TouchableWithoutFeedback>
       {isVisible && (
@@ -32,8 +42,12 @@ const CertificationList = () => {
           data={certifications}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.certificationItem}>
-              <Text style={styles.certificationText}>{item.name}</Text>
+            <View style={[styles.certificationItem, {
+              backgroundColor: isDark ? "#444" : "#007BFF",
+            }]}>
+              <Text style={[styles.certificationText, {
+                color: isDark ? "#fff" : "#007BFF",
+              }]}>{item.name}</Text>
             </View>
           )}
         />
@@ -49,19 +63,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   titleContainer: {
-    backgroundColor: '#007BFF',
+    // backgroundColor: '#007BFF',
     padding: 10,
     borderRadius: 5,
-    flexDirection: 'row',
-    justifyContent: "space-between"
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   titleText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   certificationItem: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     padding: 10,
     marginTop: 10,
     borderRadius: 5,

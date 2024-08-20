@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  useColorScheme,
 } from "react-native";
 import { Text } from "react-native-paper";
 import UserAvatar from "../../UserAvatar";
@@ -37,6 +38,7 @@ const AddMemberModal = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [hasMoreUsers, setHasMoreUsers] = useState<boolean>(true);
+  const isDark = useColorScheme() === "dark";
 
   useEffect(() => {
     const fetchUsers = async (pageNumber: number) => {
@@ -116,13 +118,103 @@ const AddMemberModal = ({
     }
   };
 
+  const styles = StyleSheet.create({
+    modalView: {
+      flex: 1,
+      backgroundColor: isDark ? "#222" : "#eee",
+    },
+    centeredView: {
+      borderRadius: 10,
+    },
+    modalText: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: isDark ? "white" : "black",
+    },
+    headerModal: {
+      height: 50,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      backgroundColor: isDark ? "#555" : "#ddd",
+      alignItems: "center",
+      paddingHorizontal: 10,
+    },
+    headerLeft: {
+      flex: 1,
+    },
+    headerLeftRightText: {
+      color: isDark ? "white" : "black",
+    },
+    headerCenter: {
+      flex: 2,
+      alignItems: "center",
+    },
+    headerRight: {
+      flex: 1,
+      alignItems: "flex-end",
+    },
+    modalBody: {
+      flex: 1,
+      padding: 20,
+      alignItems: "center",
+      backgroundColor: isDark ? "#222" : "#eee",
+    },
+    searchBar: {
+      width: "100%",
+      height: 50,
+      gap: 10,
+      backgroundColor: isDark ? "#666" : "#fff",
+      borderRadius: 10,
+      marginBottom: 10,
+      paddingHorizontal: 10,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 16,
+      color: isDark ? "white" : "black",
+    },
+    userListContainer: {
+      flex: 1,
+      width: "100%",
+      padding: 20,
+      backgroundColor: isDark ? "#666" : "#fff",
+    },
+    userItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    userInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    userName: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: isDark ? "white" : "black",
+      marginLeft: 10,
+    },
+    noUsersText: {
+      fontSize: 16,
+      color: isDark ? "white" : "gray",
+      textAlign: "center",
+      marginTop: 20,
+    },
+    loader: {
+      marginTop: 20,
+    },
+  });
+
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <SafeAreaView style={styles.modalView}>
         <View style={styles.centeredView}>
           <View style={styles.headerModal}>
             <TouchableOpacity style={styles.headerLeft} onPress={onClose}>
-              <Text>Close</Text>
+              <Text style={styles.headerLeftRightText}>Close</Text>
             </TouchableOpacity>
             <View style={styles.headerCenter}>
               <Text style={styles.modalText}>Add Members</Text>
@@ -130,7 +222,7 @@ const AddMemberModal = ({
             <View style={styles.headerRight}>
               {selectedUsers.length > 0 && (
                 <TouchableOpacity onPress={addMember}>
-                  <Text>Add</Text>
+                  <Text style={styles.headerLeftRightText}>Add</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -138,7 +230,11 @@ const AddMemberModal = ({
         </View>
         <View style={styles.modalBody}>
           <View style={styles.searchBar}>
-            <MaterialIcons name="search" size={24} color="#444" />
+            <MaterialIcons
+              name="search"
+              size={24}
+              color={isDark ? "gray" : "#444"}
+            />
             <TextInput
               style={styles.searchInput}
               placeholder="Search users"
@@ -149,7 +245,7 @@ const AddMemberModal = ({
               <Feather
                 name="delete"
                 size={24}
-                color="#444"
+                color={isDark ? "white" : "#444"}
                 onPress={clearSearch}
               />
             )}
@@ -190,10 +286,16 @@ const AddMemberModal = ({
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={styles.noUsersText}>No users available for adding.</Text>
+              <Text style={styles.noUsersText}>
+                No users available for adding.
+              </Text>
             )}
             {loading && (
-              <ActivityIndicator size="large" color="#6200ee" style={styles.loader} />
+              <ActivityIndicator
+                size="large"
+                color="#6200ee"
+                style={styles.loader}
+              />
             )}
           </ScrollView>
         </View>
@@ -203,90 +305,3 @@ const AddMemberModal = ({
 };
 
 export default AddMemberModal;
-
-const styles = StyleSheet.create({
-  modalView: {
-    flex: 1,
-    backgroundColor: "#eee",
-  },
-  centeredView: {
-    borderRadius: 10,
-  },
-  modalText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "black",
-  },
-  headerModal: {
-    height: 50,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#ddd",
-    alignItems: "center",
-    paddingHorizontal: 10,
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  headerCenter: {
-    flex: 2,
-    alignItems: "center",
-  },
-  headerRight: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  modalBody: {
-    flex: 1,
-    padding: 20,
-    alignItems: "center",
-    backgroundColor: "#eee",
-  },
-  searchBar: {
-    width: "100%",
-    height: 50,
-    gap: 10,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "black",
-  },
-  userListContainer: {
-    flex: 1,
-    width: "100%",
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  userItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "black",
-    marginLeft: 10,
-  },
-  noUsersText: {
-    fontSize: 16,
-    color: "gray",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  loader: {
-    marginTop: 20,
-  },
-});

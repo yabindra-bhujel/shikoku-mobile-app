@@ -1,9 +1,15 @@
 import React from "react";
 import { router, Stack } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
-import { Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, useColorScheme } from "react-native";
 
 const StackLayout = () => {
+  const isDark = useColorScheme() === "dark";
+
+  const headerBackgroundColor = isDark ? "#333" : "#fff";
+  const headerTextColor = isDark ? "#fff" : "#000";
+  const headerTintColor = isDark ? "#f5a623" : "#007AFF";
+
   return (
     <Stack>
       <Stack.Screen
@@ -19,11 +25,26 @@ const StackLayout = () => {
                 justifyContent: "center",
               }}
             >
-              <AntDesign name="left" size={24} color="black" />
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>戻る</Text>
+              <AntDesign name="left" size={24} color={headerTextColor} />
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  color: headerTextColor,
+                }}
+              >
+                戻る
+              </Text>
             </TouchableOpacity>
           ),
-          title: "",
+          headerTitle: "Group Chat",
+          headerTintColor: headerTintColor,
+          headerStyle: {
+            backgroundColor: headerBackgroundColor,
+          },
+          headerTitleStyle: {
+            color: headerTextColor,
+          },
         }}
       />
 
@@ -35,17 +56,17 @@ const StackLayout = () => {
       />
 
       <Stack.Screen
-        name="modal"
-        options={{
-          presentation: "modal",
-        }}
-      />
-
-      <Stack.Screen
         name="settings"
         options={{
           title: "グループの設定",
           headerBackTitle: "戻る",
+          headerTintColor: headerTintColor,
+          headerStyle: {
+            backgroundColor: headerBackgroundColor,
+          },
+          headerTitleStyle: {
+            color: headerTextColor,
+          },
         }}
       />
 

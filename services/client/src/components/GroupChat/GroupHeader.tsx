@@ -27,7 +27,7 @@ export interface GroupData {
   }[];
 }
 const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
-  const theme = useColorScheme();
+  const isDark = useColorScheme() === 'dark';
 
   const goBack = () => {
     router.back();
@@ -39,7 +39,7 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: theme === "dark" ? "#333" : "#fff",
+      backgroundColor: isDark ? "#333" : "#fff",
       borderBottomWidth: 1,
       borderBottomColor: "lightgray",
     },
@@ -52,14 +52,14 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
           <Ionicons
             name="chevron-back-sharp"
             size={24}
-            color={theme === "dark" ? "#fff" : "#000"}
+            color={isDark ? "#fff" : "#000"}
           />
         </TouchableOpacity>
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            backgroundColor: isDark ? "#333" : "#fff",
             gap: 20,
           }}
         >
@@ -73,8 +73,8 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
               style={{
                 fontSize: 20,
                 fontWeight: "bold",
-                color: theme === "dark" ? "#fff" : "#000",
-                backgroundColor: theme === "dark" ? "#333" : "#fff",
+                color: isDark ? "#fff" : "#000",
+                backgroundColor: isDark ? "#333" : "#fff",
               }}
             >
               {groupData?.name?.charAt(0).toUpperCase()}
@@ -86,7 +86,7 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
               style={{
                 fontSize: 18,
                 fontWeight: "bold",
-                color: theme === "dark" ? "#fff" : "#000",
+                color: isDark ? "#fff" : "#000",
               }}
             >
               {groupData.name}
@@ -94,7 +94,7 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
             <Text
               style={{
                 fontSize: 14,
-                color: theme === "dark" ? "#fff" : "#000",
+                color: isDark ? "#fff" : "#000",
               }}
             >
               メンバー数: {groupData.member_count}
@@ -111,7 +111,7 @@ const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
           }
         }}
       >
-        <AntDesign name="setting" size={24} color="black" />
+        <AntDesign name="setting" size={24} color={isDark ? "white": "black"} />
       </TouchableOpacity>
     </View>
   );

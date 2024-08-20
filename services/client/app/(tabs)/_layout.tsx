@@ -29,6 +29,10 @@ const TabLayout = () => {
           options={{
             headerTitle: "ChatBot",
             headerBackTitle: "Back",
+            headerTintColor: isDark ? "#fff" : "000",
+            headerStyle: {
+              backgroundColor: isDark ? "#333" : "#fff",
+            },
           }}
         />
         <Stack.Screen
@@ -61,7 +65,7 @@ const TabLayout = () => {
             headerShown: false,
           }}
         />
-        </Stack>
+      </Stack>
     </UserProvider>
   );
 };

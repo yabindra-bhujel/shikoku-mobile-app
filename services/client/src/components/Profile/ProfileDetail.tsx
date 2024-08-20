@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
+  useColorScheme,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ import CertificationList from "./CertificationDisplay";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ProfileDetail = () => {
+  const isDark = useColorScheme() === "dark";
   const [userData, setUserData] = useState<UserProfile>();
   const { email } = useUser();
   const [show, setShow] = useState(false);
@@ -45,7 +47,9 @@ const ProfileDetail = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container,{
+      backgroundColor: isDark ? "#333" : "#fff",
+    }]}>
       <Header
         onBackPress={() => router.back()}
         title="Profile"
@@ -70,15 +74,25 @@ const ProfileDetail = () => {
       <View style={styles.headerContainer}>
         <UserAvatar url={userData?.update_profile} />
         <View>
-          <Text style={styles.headerText}>{userData?.first_name.toUpperCase()} {userData?.last_name.toUpperCase()}</Text>
-          <Text style={styles.headerText}>{email}</Text>
+          <Text style={[styles.headerText, {
+            color: isDark ? "#fff" : "#000",
+          }]}>{userData?.first_name ? `${userData?.first_name.toUpperCase()} ${userData?.last_name.toUpperCase()}` : "No Name available"}</Text>
+          <Text style={[styles.headerText, {
+            color: isDark ? "#fff" : "#000",
+          }]}>{email}</Text>
         </View>
       </View>
-      <View style={styles.bioContainer}>
+      <View style={[styles.bioContainer,{
+        backgroundColor: isDark ? "#444" : "#7F97B2",
+      }]}>
         {userData?.bio ? (
-          <Text style={styles.bioText}>{userData?.bio}</Text>
+          <Text style={[styles.bioText, {
+            color: isDark ? "#fff" : "#000",
+          }]}>{userData?.bio}</Text>
         ) : (
-          <Text>No bio available</Text>
+          <Text style={{
+            color: isDark ? "#fff" : "#000",
+          }}>No bio available</Text>
         )}
       </View>
       <CertificationList/>
@@ -111,7 +125,7 @@ const styles = StyleSheet.create({
   },
   bioContainer: {
     padding: 20,
-    backgroundColor: "#7F97B2",
+    // backgroundColor: "#7F97B2",
     marginHorizontal: 20,
     borderRadius: 15,
   },

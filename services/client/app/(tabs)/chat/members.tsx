@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  useColorScheme,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
@@ -36,7 +37,7 @@ export default function MembersScreen() {
       logged_in_user_id: string;
       group_id: string;
     }>();
-
+  const isDark = useColorScheme() === "dark";
   const groupId = group_id || "0";
   const [members, setMembers] = useState<Member[]>(
     group_members ? JSON.parse(group_members) : []
@@ -133,6 +134,68 @@ export default function MembersScreen() {
     setModalVisible(false);
   };
 
+  const styles = StyleSheet.create({
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    errorText: {
+      fontSize: 18,
+      color: "red",
+    },
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: isDark ? "#333" : "#eee",
+    },
+    memberItem: {
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 8,
+      gap: 15,
+      backgroundColor: isDark ? "#444" : "white",
+      borderBottomWidth: 1,
+      borderBottomColor: "lightgray",
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    removeButton: {
+      backgroundColor: "red",
+      padding: 5,
+      borderRadius: 5,
+    },
+    removeButtonText: {
+      color: "white",
+    },
+    leftSide: {
+      flex: 1,
+      gap: 10,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    profileImage: {
+      height: 50,
+      width: 50,
+      borderRadius: 50,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "lightgray",
+    },
+    firstCharText: {
+      fontSize: 18,
+      color: isDark ? "white" : "black",
+    },
+    statusText: {
+      fontSize: 12,
+      color: isDark ? "white" : "gray",
+    },
+    noAvailableUserName: {
+      fontSize: 18,
+      color: isDark ? "white" : "black",
+    },
+  });
+
   const handleMemberAdded = async (newMembers: Member[]) => {
     try {
       const response = await GroupServices.getGroupById(groupId);
@@ -189,7 +252,7 @@ export default function MembersScreen() {
           </View>
         )}
         <View>
-          <Text>
+          <Text style={styles.noAvailableUserName}>
             {item.profile?.fullname || "有効な名前が見つかりませんでした"}
           </Text>
           <Text style={styles.statusText}>{getMemberStatus(item)}</Text>
@@ -209,7 +272,9 @@ export default function MembersScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: isDark ? "#333" : "#f0f0f0" }}
+    >
       <CustomHeader onAddMember={handleAddMember} />
       <FlatList
         data={members}
@@ -229,60 +294,3 @@ export default function MembersScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  memberItem: {
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 8,
-    gap: 15,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "lightgray",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  removeButton: {
-    backgroundColor: "red",
-    padding: 5,
-    borderRadius: 5,
-  },
-  removeButtonText: {
-    color: "white",
-  },
-  leftSide: {
-    flex: 1,
-    gap: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  profileImage: {
-    height: 50,
-    width: 50,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "lightgray",
-  },
-  firstCharText: {
-    fontSize: 18,
-    color: "black",
-  },
-  statusText: {
-    fontSize: 12,
-    color: "gray",
-  },
-});

@@ -32,7 +32,7 @@ interface GroupData {
 
 const ChatDetail = () => {
   const { groupId } = useLocalSearchParams<{ groupId: string }>();
-  const theme = useColorScheme();
+  const isDark = useColorScheme() === "dark";
   const [group, setGroup] = useState<GroupData | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -110,7 +110,7 @@ const ChatDetail = () => {
   }, [groupId]);
 
   useEffect(() => {
-    if (typeof loggedInUserId === 'number') {
+    if (typeof loggedInUserId === "number") {
       setMessageData((prevData) => ({
         ...prevData,
         sender_id: loggedInUserId,
@@ -205,17 +205,60 @@ const ChatDetail = () => {
     );
   };
 
+  const styles = StyleSheet.create({
+    footerContainer: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: "lightgray",
+      backgroundColor: isDark ? "#333" : "#fff",
+    },
+    inputContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: "lightgray",
+      borderRadius: 25,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      backgroundColor: isDark ? "#555" : "#f0f0f0",
+      justifyContent: "space-between",
+    },
+    messageInputText: {
+      flex: 1,
+      fontSize: 15,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderRadius: 25,
+      marginRight: 8,
+      color: isDark ? "white" : "black",
+    },
+    sendButton: {
+      backgroundColor: "#007BFF",
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 25,
+    },
+    sendButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+  });
+
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1,
+        backgroundColor: isDark ? "#333" : "#fff" 
+       }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
     >
       <View style={{ flex: 1 }}>
         <View
           style={{
-            height: 54,
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            height: 45,
+            backgroundColor: isDark ? "#333" : "#fff",
           }}
         />
         {group && <GroupHeader groupData={group} />}
@@ -227,7 +270,8 @@ const ChatDetail = () => {
             <TextInput
               ref={textInputRef}
               placeholder="メッセージを入力..."
-              style={styles.messageInput}
+              placeholderTextColor={"gray"}
+              style={styles.messageInputText}
               multiline
               autoFocus={true}
               value={inputValue}
@@ -247,45 +291,5 @@ const ChatDetail = () => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  footerContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "lightgray",
-    backgroundColor: "#fff",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "lightgray",
-    borderRadius: 25,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "space-between",
-  },
-  messageInput: {
-    flex: 1,
-    fontSize: 15,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 25,
-    marginRight: 8,
-  },
-  sendButton: {
-    backgroundColor: "#007BFF",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 25,
-  },
-  sendButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
 
 export default ChatDetail;

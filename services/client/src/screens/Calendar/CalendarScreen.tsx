@@ -14,9 +14,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import EventModal from '../../components/Calendar/EventDetailUpdateModal';
 import CalenderService from '@/src/api/CalenderService';
 import CreateModal from "@/src/components/Calendar/EventCreateModal";
-import { User } from "@/assets/interfaces/userInterface";
-import AuthServices from "@/src/api/AuthServices";
 import { CalendarClientEvent } from "@/src/components/CalendarEventTypes";
+import { useUser } from "@/src/hooks/UserContext";
 
 const CalendarScreen = () => {
   const isDark = useColorScheme() === 'dark';
@@ -27,13 +26,11 @@ const CalendarScreen = () => {
   const [events, setEvents] = useState<CalendarClientEvent[]
   >([]);
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
-  const [user, setUser] = useState<User | null>(null);
+  const { loggedInUserId } = useUser();
 
   const fetchData = async () => {
     try {
       const res = await CalenderService.getPosts();
-      const getUser = await AuthServices.getCurrentUser();
-      setUser(getUser?.data);
       const mappedData = res.data.map(event => {
         const startDate = event.start_time.split('T')[0];
         const startTime = event.start_time.split('T')[1].split('.')[0];
@@ -264,7 +261,7 @@ const CalendarScreen = () => {
       isDark={isDark}
         visible={showModal}
         onHide={handleShowModal}
-        userId={user?.id}
+        userId={loggedInUserId}
         onEventCreated={handleRefresh}
       />
       {selectedEvent && (

@@ -13,14 +13,54 @@ import { Group } from "@/src/screens/Chat/GroupChat";
 
 interface UserIconAndUsernameProps {
   groups: Group[];
+  isDark: boolean;
 }
 
 const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
   groups = [],
+  isDark,
 }) => {
   const navigationToChatDetail = (groupId: number) => {
     router.push(`chat/${groupId}`);
   };
+
+  const styles = StyleSheet.create({
+    GroupListContainer: {
+      flex: 1,
+      padding: 10,
+    },
+    groupItem: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 10,
+      borderBottomWidth: 1,
+      backgroundColor: isDark ? "#333": "#fff",
+      borderBottomColor: "lightgray",
+    },
+    groupImageContainer: {
+      height: 50,
+      width: 50,
+      borderRadius: 50,
+      backgroundColor: "lightgray",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    groupImage: {
+      height: 50,
+      width: 50,
+      borderRadius: 50,
+    },
+    groupInitial: {
+      fontSize: 20,
+      fontWeight: "bold",
+    },
+    groupName: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: isDark ? "white": "black",
+    },
+  });
 
   return (
     <ScrollView
@@ -60,42 +100,5 @@ const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  GroupListContainer: {
-    flex: 1,
-    padding: 10,
-  },
-  groupItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    backgroundColor: "#fff",
-    borderBottomColor: "lightgray",
-  },
-  groupImageContainer: {
-    height: 50,
-    width: 50,
-    borderRadius: 50,
-    backgroundColor: "lightgray",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  groupImage: {
-    height: 50,
-    width: 50,
-    borderRadius: 50,
-  },
-  groupInitial: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  groupName: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});
 
 export default UserIconAndUsername;

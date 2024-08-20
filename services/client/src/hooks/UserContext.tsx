@@ -1,6 +1,13 @@
 // UserContext.tsx
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AuthServices from '@/src/api/AuthServices';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import AuthServices from "@/src/api/AuthServices";
+import { useColorScheme } from "react-native";
 
 interface UserContextProps {
   loggedInUserId: number | null;
@@ -45,7 +52,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ loggedInUserId, username, fullname, email, image }}>
+    <UserContext.Provider
+      value={{ loggedInUserId, username, fullname, email, image }}
+    >
       {children}
     </UserContext.Provider>
   );

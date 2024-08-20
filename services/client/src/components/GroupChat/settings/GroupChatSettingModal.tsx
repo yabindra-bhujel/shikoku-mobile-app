@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   Image,
+  useColorScheme,
 } from "react-native";
 import { Text as PaperText } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -37,7 +38,7 @@ export default function SettingModal() {
   const [showNameChange, setShowNameChange] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [groupImage, setGroupImage] = useState<string[] | undefined>();
-
+  const isDark = useColorScheme() === "dark";
   const { loggedInUserId } = useUser();
 
   const fetchGroupInfo = async () => {
@@ -196,6 +197,98 @@ export default function SettingModal() {
     );
   };
 
+  const styles = StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    errorText: {
+      fontSize: 18,
+      color: "red",
+    },
+    groupInfoContainer: {
+      padding: 20,
+    },
+    headerContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    addMember: {
+      backgroundColor: "#ddd",
+      padding: 12,
+      borderRadius: 25,
+      marginTop: 10,
+    },
+    rowgap10: {
+      gap: 10,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    margin10: {
+      marginTop: 10,
+      marginBottom: 10,
+    },
+    rowBetween: {
+      marginBottom: 5,
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    groupName: {
+      fontSize: 20,
+      marginBottom: 20,
+      fontWeight: "bold",
+      color: isDark ? "white" : "#000",
+    },
+    changeName: {
+      fontSize: 16,
+      color: isDark ? "#039dfc" : "blue",
+    },
+    groupInfo: {
+      padding: 10,
+      borderRadius: 10,
+      marginTop: 60,
+      marginBottom: 5,
+      backgroundColor: isDark ? "#777" : "#fff",
+    },
+    TopLineContainer: {
+      borderTopColor: "gray",
+      borderTopWidth: 1,
+    },
+    groupDescription: {
+      fontSize: 18,
+      color: isDark ? "white" : "000",
+    },
+    descriptionTextContainer: {
+      padding: 10,
+    },
+    descriptionText: {
+      color: isDark ? "white" : "black",
+    },
+    memberList: {
+      fontSize: 18,
+      color: isDark ? "white" : "000",
+    },
+    leaveGroup: {
+      gap: 10,
+      padding: 10,
+      borderRadius: 10,
+      marginTop: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: isDark ? "#777" : "#fff",
+    },
+    leaveGroupTitle: {
+      fontSize: 18,
+      color: isDark ? "white" : "000",
+    },
+  });
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -213,7 +306,7 @@ export default function SettingModal() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? "#333" : "#eee" }}>
       <ScrollView>
         <View style={styles.groupInfoContainer}>
           <View style={styles.headerContainer}>
@@ -227,7 +320,7 @@ export default function SettingModal() {
                 style={{
                   fontSize: 20,
                   fontWeight: "bold",
-                  color: "#000",
+                  color: isDark ? "white" : "#000",
                 }}
               >
                 {groupInfo?.name?.charAt(0).toUpperCase()}
@@ -251,11 +344,17 @@ export default function SettingModal() {
           </View>
           <View style={styles.groupInfo}>
             <View style={styles.rowgap10}>
-              <Entypo name="info-with-circle" size={24} color="black" />
+              <Entypo
+                name="info-with-circle"
+                size={24}
+                color={isDark ? "white" : "black"}
+              />
               <Text style={styles.groupDescription}>グループの説明:</Text>
             </View>
             <View style={styles.descriptionTextContainer}>
-              <Text>{groupInfo.description}</Text>
+              <Text style={styles.descriptionText}>
+                {groupInfo.description}
+              </Text>
             </View>
             <View style={styles.TopLineContainer} />
             <TouchableOpacity
@@ -273,10 +372,18 @@ export default function SettingModal() {
               style={[styles.rowBetween, { marginTop: 15 }]}
             >
               <View style={styles.rowgap10}>
-                <FontAwesome6 name="people-group" size={22} color="black" />
+                <FontAwesome6
+                  name="people-group"
+                  size={22}
+                  color={isDark ? "white" : "black"}
+                />
                 <Text style={styles.memberList}>メンバーリスト</Text>
               </View>
-              <AntDesign name="right" size={24} color="black" />
+              <AntDesign
+                name="right"
+                size={24}
+                color={isDark ? "white" : "black"}
+              />
             </TouchableOpacity>
           </View>
           {groupInfo.admin_id === loggedInUserId ? (
@@ -285,13 +392,21 @@ export default function SettingModal() {
               style={[styles.leaveGroup, styles.rowBetween]}
             >
               <View style={[styles.rowgap10]}>
-                <MaterialIcons name="delete" size={24} color="black" />
+                <MaterialIcons
+                  name="delete"
+                  size={24}
+                  color={isDark ? "white" : "black"}
+                />
                 <PaperText style={[styles.leaveGroupTitle, styles.margin10]}>
                   グループの削除
                 </PaperText>
               </View>
 
-              <AntDesign name="right" size={24} color="black" />
+              <AntDesign
+                name="right"
+                size={24}
+                color={isDark ? "white" : "black"}
+              />
             </TouchableOpacity>
           ) : null}
           <View style={styles.leaveGroup}>
@@ -327,88 +442,3 @@ export default function SettingModal() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
-  },
-  groupInfoContainer: {
-    padding: 20,
-  },
-  headerContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addMember: {
-    backgroundColor: "#ddd",
-    padding: 12,
-    borderRadius: 25,
-    marginTop: 10,
-  },
-  rowgap10: {
-    gap: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  margin10: {
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  rowBetween: {
-    marginBottom: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  groupName: {
-    fontSize: 20,
-    marginBottom: 20,
-    fontWeight: "bold",
-  },
-  changeName: {
-    fontSize: 16,
-    color: "blue",
-  },
-  groupInfo: {
-    padding: 10,
-    borderRadius: 10,
-    marginTop: 60,
-    marginBottom: 5,
-    backgroundColor: "#fff",
-  },
-  TopLineContainer: {
-    borderTopColor: "gray",
-    borderTopWidth: 1,
-  },
-  groupDescription: {
-    fontSize: 18,
-  },
-  descriptionTextContainer: {
-    padding: 10,
-  },
-  memberList: {
-    fontSize: 18,
-  },
-  leaveGroup: {
-    gap: 10,
-    padding: 10,
-    borderRadius: 10,
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  leaveGroupTitle: {
-    fontSize: 18,
-  },
-});

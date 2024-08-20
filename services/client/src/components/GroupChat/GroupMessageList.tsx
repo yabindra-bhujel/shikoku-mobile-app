@@ -16,6 +16,7 @@ import {
   TouchableNativeFeedback,
   Alert,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
@@ -33,6 +34,7 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
     const [messageList, setMessageList] = useState(messages);
     const [deletedMessageIds, setDeletedMessageIds] = useState<string[]>([]);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+    const isDark = useColorScheme() === "dark";
 
     useEffect(() => {
       // Filter out deleted messages
@@ -55,6 +57,69 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
         Alert.alert("メッセージの削除に失敗しました。");
       }
     };
+
+    const styles = StyleSheet.create({
+      container: {
+        flex: 1,
+        paddingHorizontal: 10,
+        paddingTop: 10,
+        backgroundColor: isDark ? "#222" : "#fff" ,
+      },
+      messageContainer: {
+        maxWidth: "75%",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 15,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1,
+        elevation: 1,
+      },
+      currentUserMessage: {
+        alignSelf: "flex-end",
+        backgroundColor: "#30D158",
+        borderTopRightRadius: 0,
+      },
+      otherUserMessage: {
+        alignSelf: "flex-start",
+        backgroundColor: isDark ? "#333" : "#E8E8E8",
+        borderTopLeftRadius: 0,
+      },
+      senderText: {
+        fontSize: 12,
+        marginBottom: 2,
+        color: isDark ? "#ddd" : "#666",
+        fontWeight: "600",
+      },
+      messageText: {
+        fontSize: 16,
+        lineHeight: 20,
+        color: isDark ? "#fff" : "#000",
+      },
+      currentUserMessageText: {
+        color: "#FFF",
+      },
+      otherUserMessageText: {
+        color: isDark ? "#fff" : "#000",
+      },
+      timestampText: {
+        fontSize: 10,
+        alignSelf: "flex-end",
+        color: "#999",
+        marginTop: 2,
+      },
+      scrollToBottomButton: {
+        position: "absolute",
+        bottom: 20,
+        left: "50%",
+        backgroundColor: "#30D158",
+        borderRadius: 50,
+        padding: 10,
+        elevation: 5,
+      },
+    });
 
     const renderMessageItem = useCallback(
       ({ item }) => {
@@ -167,67 +232,5 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
     );
   }
 );
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 10,
-    paddingTop: 10,
-  },
-  messageContainer: {
-    maxWidth: "75%",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 15,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 1,
-  },
-  currentUserMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#30D158",
-    borderTopRightRadius: 0,
-  },
-  otherUserMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#E8E8E8",
-    borderTopLeftRadius: 0,
-  },
-  senderText: {
-    fontSize: 12,
-    marginBottom: 2,
-    color: "#666",
-    fontWeight: "600",
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 20,
-    color: "#000",
-  },
-  currentUserMessageText: {
-    color: "#FFF",
-  },
-  otherUserMessageText: {
-    color: "#000",
-  },
-  timestampText: {
-    fontSize: 10,
-    alignSelf: "flex-end",
-    color: "#999",
-    marginTop: 2,
-  },
-  scrollToBottomButton: {
-    position: "absolute",
-    bottom: 20,
-    left: "50%",
-    backgroundColor: "#30D158",
-    borderRadius: 50,
-    padding: 10,
-    elevation: 5,
-  },
-});
 
 export default React.memo(GroupMessageList);

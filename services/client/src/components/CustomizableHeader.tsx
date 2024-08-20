@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Assuming you're using Expo, or replace with your icon library
 
 interface HeaderProps {
@@ -9,15 +9,22 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, onBackPress, rightComponent }) => {
+  const isDark = useColorScheme() === "dark";
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer, {
+      backgroundColor: isDark ? "#333" : "#fff",
+    }]}>
       {onBackPress && (
         <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={24} color={
+            isDark ? "#fff" : "#333"
+          } />
         </TouchableOpacity>
       )}
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, {
+          color: isDark ? "#fff" : "#333",
+        }]}>{title}</Text>
       </View>
       <View style={styles.rightContainer}>
         {rightComponent}

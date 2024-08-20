@@ -6,15 +6,19 @@ import {
   TouchableOpacity,
   View,
   Keyboard,
+  useColorScheme,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { CheckBox } from "react-native-elements";
 import Feather from "@expo/vector-icons/Feather";
 
 const CertificationList = () => {
-  const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
+  const [selectedCertifications, setSelectedCertifications] = useState<
+    string[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const isDark = useColorScheme() === "dark";
 
   const certifications = [
     { id: "1", name: "Certification A" },
@@ -31,13 +35,13 @@ const CertificationList = () => {
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
+      "keyboardDidShow",
       () => {
         setKeyboardVisible(true); // Keyboard is visible
       }
     );
     const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
+      "keyboardDidHide",
       () => {
         setKeyboardVisible(false); // Keyboard is hidden
       }
@@ -63,6 +67,51 @@ const CertificationList = () => {
     certification.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const styles = StyleSheet.create({
+    container: {
+      height: "100%",
+      backgroundColor: isDark ? "#3e3e3e" : "#ccc",
+    },
+    searchBar: {
+      height: 50,
+      width: "70%",
+      borderRadius: 5,
+      color: isDark ? "white" : "black",
+    },
+    certificationItem: {
+      backgroundColor: isDark ? "#555" : "#f8f8f8",
+      marginTop: 8,
+      padding: 5,
+      borderRadius: 5,
+      marginHorizontal: 20,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    certificationText: {
+      fontSize: 16,
+      color: isDark ? "white" : "black",
+    },
+    searchBarContainer: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderColor: "#ddd",
+      borderWidth: 1,
+      paddingHorizontal: 10,
+      backgroundColor: isDark ? "#333" : "white",
+    },
+    cancelButton: {
+      padding: 10,
+      marginLeft: 5,
+    },
+    cancelButtonText: {
+      fontSize: 16,
+      color: "#007BFF",
+    },
+  });
+
   return (
     <View style={styles.container}>
       {/* Search Bar */}
@@ -70,6 +119,7 @@ const CertificationList = () => {
         <TextInput
           style={styles.searchBar}
           placeholder="Search Certifications"
+          placeholderTextColor={"gray"}
           value={searchQuery}
           onChangeText={(text) => setSearchQuery(text)}
         />
@@ -77,24 +127,28 @@ const CertificationList = () => {
           <Feather
             name="delete"
             size={24}
-            color="black"
+            color={isDark ? "white" : "black"}
             onPress={() => setSearchQuery("")}
           />
         ) : null}
         {isKeyboardVisible && (
-          <TouchableOpacity onPress={Keyboard.dismiss} style={styles.cancelButton}>
+          <TouchableOpacity
+            onPress={Keyboard.dismiss}
+            style={styles.cancelButton}
+          >
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         )}
       </View>
       {/* Certification List */}
-      <View style={{ height: 
-        isKeyboardVisible ? 270 : "90%" }}>
+      <View style={{ height: isKeyboardVisible ? 270 : "90%" }}>
         <FlatList
           data={filteredCertifications}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => toggleCertificationSelection(item.id)}>
+            <TouchableOpacity
+              onPress={() => toggleCertificationSelection(item.id)}
+            >
               <View style={styles.certificationItem}>
                 <Text style={styles.certificationText}>{item.name}</Text>
                 <CheckBox
@@ -115,43 +169,3 @@ const CertificationList = () => {
 };
 
 export default CertificationList;
-
-const styles = StyleSheet.create({
-  container: {
-    height: "100%",
-  },
-  searchBar: {
-    height: 50,
-    width: "70%", // Adjusted to make room for the Cancel button
-    borderRadius: 5,
-  },
-  certificationItem: {
-    backgroundColor: "#f8f8f8",
-    marginTop: 8,
-    borderRadius: 5,
-    marginHorizontal: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  certificationText: {
-    fontSize: 16,
-  },
-  searchBarContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderColor: "#ddd",
-    borderWidth: 1,
-    paddingHorizontal: 10,
-  },
-  cancelButton: {
-    padding: 10,
-    marginLeft: 5,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: "#007BFF",
-  },
-});
