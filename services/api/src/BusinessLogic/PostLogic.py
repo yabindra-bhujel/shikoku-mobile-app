@@ -6,62 +6,60 @@ from sqlalchemy import func
 from fastapi import HTTPException, status
 from typing import List
 from ..models.entity.post import Post, PostImage, PostVideo, PostFile
-from ..models.entity.comments import Comment
+from ..models.entity.comments import Comment,CommentReply
 from ..models.entity.likes import Likes
 from ..utils.post_utils import PostUtils
 from ..models.entity.user_profile import UserProfile
 from ..models.entity.users import User
+from ..schemas.posts import  *
 from fastapi import Request
-from datetime import datetime, timezone
+from datetime import datetime
 import os
 import shutil
 
 class PostLogic:
     POST_IMAGE_PATH = os.path.join("static", "post")
-
-    @staticmethod
-    def _create_save_dirs():
-        os.makedirs(PostLogic.POST_IMAGE_PATH, exist_ok=True)
-    
-    @staticmethod
-    def get_timestamp_filename() -> str:
-        # Generate a new filename with current timestamp (milliseconds)
-        timestamp = datetime.now().timestamp()
-        return f"{int(timestamp * 1000)}.jpg"
-
-    @staticmethod
-    def save_post_image(post_id: int, image: bytes) -> str:
-        PostLogic._create_save_dirs()
-        file_name = PostLogic.get_timestamp_filename()
-        image_path = os.path.join(PostLogic.POST_IMAGE_PATH, f"{post_id}_{file_name}")
-        with open(image_path, "rb") as file:
-            file.write(image)
-        return image_path
     
     @staticmethod
     def create_post(db: Session, user_id: int, content: str, image_data: List[dict]) -> Post:
         try:
+            if not content and not image_data:
+                raise HTTPException(status_code=400, detail="Content or image is required")
+            
+            # 新しい投稿を作成
             new_post = Post(user_id=user_id, is_active=True, created_at=PostUtils.get_current_time())
             db.add(new_post)
             db.commit()
             db.refresh(new_post)
 
+            # コンテンツがある場合、投稿に設定
             if content:
                 new_post.content = content
 
-            timestamp = datetime.now().timestamp()
-            file_path = os.path.join("static", "post", f"{new_post.id}_{int(timestamp * 1000)}.png")
-
+            # 画像データが提供された場合
             if image_data:
+                # 画像を保存するためのディレクトリを作成
+                PostLogic._create_save_dirs()
+                
                 for image_info in image_data:
-                    with open(file_path, "wb") as file:
-                        shutil.copyfileobj(image_info['file_object'], file)
+                    # タイムスタンプを用いて一意のファイル名を生成
+                    timestamp = datetime.now().timestamp()
+                    image_name = f"{new_post.id}_{int(timestamp * 1000)}_{image_info['filename']}"
+                    file_path = os.path.join(PostLogic.POST_IMAGE_PATH, image_name)
 
-                    image_name = f"{new_post.id}_{image_info['filename']}"  # 修正: image_info['filename'] に変更
+                    # 画像ファイルを保存
+                    try:
+                        with open(file_path, "wb") as file:
+                            shutil.copyfileobj(image_info['file_object'], file)
+                    except IOError as e:
+                        # ファイル書き込みに失敗した場合のエラーメッセージ
+                        raise HTTPException(status_code=500, detail=f"Failed to save image: {e}")
 
+                    # PostImageエンティティを作成し、投稿に関連付け
                     post_image = PostImage(post_id=new_post.id, url=image_name)
                     db.add(post_image)
 
+            # データベースに変更をコミット
             db.commit()
             db.refresh(new_post)
             return new_post
@@ -81,7 +79,8 @@ class PostLogic:
             joinedload(Post.files)
         ).order_by(desc(Post.created_at)).all()
 
-        return [PostLogic._format_post_data(db, post, request, user) for post in posts]
+        posts = [PostLogic._format_post_data(db, post, request, user) for post in posts]
+        return posts
 
     @staticmethod
     def get_post_by_id(db: Session, post_id: int, user: User, request: Request) -> dict:
@@ -100,7 +99,7 @@ class PostLogic:
         return post_data
 
     @staticmethod
-    def get_user_profile_by_user_id(db: Session, user_id: int, request: Request) -> Optional[dict]:
+    def get_user_profile_by_user_id(db: Session, user_id: int, request: Request) -> dict:
         user_profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
         if user_profile:
             user = db.query(User).filter(User.id == user_id).first()
@@ -116,6 +115,7 @@ class PostLogic:
             return poster_profile_data
         
         return None
+    
 
     @staticmethod
     def _format_post_data(db: Session, post: Post, request: Request, request_user: User) -> dict:
@@ -134,13 +134,8 @@ class PostLogic:
             "total_comments": post.total_comments,
             "total_likes": post.total_likes,
             "is_liked": is_liked,
-            "total_comments": PostLogic._get_total_comments(db, post.id),
-            "total_likes": PostLogic._get_total_likes(db, post.id),
+            "images": [str(request.url_for('static', path=os.path.join('post', image.url))) for image in post.images] if post.images else []
         }
-
-        if post.images:
-            base_url = str(request.base_url)
-            post_data["images"] = [base_url + image.url for image in post.images]
 
         return post_data    
 
@@ -159,6 +154,7 @@ class PostLogic:
             comments = db.query(Comment).filter(Comment.post_id == post_id).order_by(desc(Comment.created_at)).all()
         except Exception as e:
             raise e
+
         return [
             {
                 "id": comment.id,
@@ -170,6 +166,7 @@ class PostLogic:
             }
             for comment in comments
         ]
+
 
 
     @staticmethod
@@ -198,8 +195,10 @@ class PostLogic:
         else:
             return "今" 
   
+    @staticmethod
     def _get_reply(db: Session, comment_id: int) -> List[dict]:
-        replies = db.query(Comment).filter(Comment.parent_comment_id == comment_id).all()
+        # CommentReply モデルからリプライを取得
+        replies = db.query(CommentReply).filter(CommentReply.parent_comment_id == comment_id).all()
         return [
             {
                 "id": reply.id,
@@ -210,6 +209,7 @@ class PostLogic:
             }
             for reply in replies
         ]
+
     
     @staticmethod
     def delete_post(db: Session, post_id: int, user_id: int) -> None:
