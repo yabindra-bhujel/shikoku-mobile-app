@@ -94,7 +94,7 @@ class PostLogic:
             return None
 
         post_data = PostLogic._format_post_data(db, post,request, user)
-        post_data["comments"] = PostLogic._get_comment(db, post_id, request)
+        # post_data["comments"] = PostLogic._get_comment(db, post_id, request)
 
         return post_data
 

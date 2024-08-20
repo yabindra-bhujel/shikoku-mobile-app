@@ -25,7 +25,9 @@ const CommentList = ({ comments }) =>  {
                     fontWeight: "bold",
                     fontSize: 10,
                 }}
-              >{comment.user.first_name + " " + comment.user.last_name}</Text>
+              >
+                {comment.user.username}
+                </Text>
               <Text 
                 style={{
                   color: "gray",

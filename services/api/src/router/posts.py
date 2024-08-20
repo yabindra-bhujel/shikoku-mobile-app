@@ -36,7 +36,7 @@ async def create_post(
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.get("", status_code=status.HTTP_200_OK)
-async def get_post(request: Request, db: Session = Depends(get_db),
+async def post_list(request: Request, db: Session = Depends(get_db),
                     user: User = Depends(authenticate_user),
                     # params: Params = Depends()
                     ):
@@ -51,7 +51,7 @@ async def get_post(request: Request, db: Session = Depends(get_db),
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/{post_id}", status_code=status.HTTP_200_OK)
-async def get_posts(request: Request, post_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
+async def post_by_id(request: Request, post_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
     try:
         post = PostLogic.get_post_by_id(db, post_id, user, request)
         return post

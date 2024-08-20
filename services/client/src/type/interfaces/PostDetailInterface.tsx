@@ -1,8 +1,9 @@
 interface User {
     id: number;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
     profile_picture?: string;
+    username?: string;
 }
 
 interface Comment {
@@ -25,5 +26,8 @@ export interface PostDetailInterface {
     total_comments: number;
     total_likes: number;
     is_liked: boolean;
+}
+
+export interface CommentListInterface {
     comments: Comment[];
 }
