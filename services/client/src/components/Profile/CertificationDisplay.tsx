@@ -46,7 +46,7 @@ const CertificationList = () => {
               backgroundColor: isDark ? "#444" : "#007BFF",
             }]}>
               <Text style={[styles.certificationText, {
-                color: isDark ? "#fff" : "#007BFF",
+                color: isDark ? "#fff" : "white",
               }]}>{item.name}</Text>
             </View>
           )}

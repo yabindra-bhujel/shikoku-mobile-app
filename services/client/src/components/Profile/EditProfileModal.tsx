@@ -97,6 +97,7 @@ const EditProfileModal = ({ visible, onHide, userData, onProfileUpdate }) => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: "#555"
     },
     modalView: {
       width: "100%",
