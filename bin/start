@@ -10,12 +10,14 @@ NETWORK_NAME="school_app"
 
 START_IOS_APP=false
 START_ANDROID=false
+START_WEB=false
 API_PORT=8000
 APP_PORT=8081
 
 # オプションの確認
 
-while getopts "ia" opt; do
+while getopts "iaw" opt; do
+    echo "opt: $opt"
     case ${opt} in
         # オプションが i の場合
         i )
@@ -25,8 +27,13 @@ while getopts "ia" opt; do
         a )
             START_ANDROID=true
             ;;
+
+        # オプションが w の場合
+        w )
+            START_WEB=true
+            ;;
         \? )
-            echo "Usage: $(basename $0) [-i] [-a]"
+            echo "Usage: $(basename $0) [-i] [-a] [-w]"
             exit 1
             ;;
     esac
@@ -128,6 +135,13 @@ elif [ "$START_ANDROID" = true ]; then
     npm install
     echo "Starting the Android emulator..."
     npm run android
+elif [ "$START_WEB" = true ]; then
+    cd ../api
+    uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+
+    cd ../web-client
+    npm install
+    npm run dev
 else
     cd ../api
     uvicorn main:app --host 0.0.0.0 --port 8000 --reload &

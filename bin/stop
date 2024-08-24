@@ -5,6 +5,7 @@ CONTAINER_NAME="postgres_db"
 DATABASE_NAME="school_db"
 API_PORT=8000
 APP_PORT=8081
+WEB_PORT=3000
 
 cd api
 
@@ -15,14 +16,7 @@ sleep 2
 echo "Terminating processes using ports: $API_PORT, $APP_PORT..."
 lsof -ti :$API_PORT | xargs -r kill -9
 lsof -ti :$APP_PORT | xargs -r kill -9
+lsof -ti :$WEB_PORT | xargs -r kill -9
 
 echo "Stopping PostgreSQL database container..."
 docker-compose down
-
-cd ../client
-
-echo "Stopping mobile app simulator or emulator..."
-pkill -f "npm run ios"
-pkill -f "npm run android"
-sleep 2 
-
