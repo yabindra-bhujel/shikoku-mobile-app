@@ -9,6 +9,12 @@ const Layout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="new_event"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };
