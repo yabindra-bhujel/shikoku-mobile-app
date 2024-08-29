@@ -11,5 +11,9 @@ class AuthSettings(BaseSettings):
     @property
     def passlib_context(self) -> CryptContext:
         return CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    
+    def hash_password(self, password: str) -> str:
+        return self.passlib_context.hash(password)
 
     

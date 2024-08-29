@@ -1,45 +1,92 @@
 "use client";
 
 import AdminLayout from "./src/route/AdminLayout";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 
 const defaultImageUrl = 'https://via.placeholder.com/32';
 
 export default function Home() {
-  const [filters, setFilters] = useState({
-    studentOnly: false,
-    staffOnly: false,
-    internationalStudentOnly: false,
-    faculty: false,
+  const [filters, setFilters] = useState<{
+    is_student: boolean;
+    is_staff: boolean;
+    is_international_student: boolean;
+    is_teacher: boolean;
+    department: string;
+    [key: string]: boolean | string;
+  }>({
+    is_student: false,
+    is_staff: false,
+    is_international_student: false,
+    is_teacher: false,
     department: "",
   });
   const [user, setUser] = useState<any>([]);
 
 
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 10; // 仮の値。実際にはAPIから取得するか、状態に応じて変更する必要があります。
+  const [totalPages, setTotalPages] = useState(1);
+  const [perPage, setPerPage] = useState(30);
 
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
 
-  const fetchUsers = async () => {
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== "" && filters[key] !== false) {
+        params.append(key, filters[key].toString());
+      }
+    });
 
-    const response = await fetch("https://freetestapi.com/api/v1/users");
-    const data = await response.json();
-    setUser(data);
+    params.append("page", currentPage.toString());
+    params.append("size", perPage.toString());
 
+    return params.toString();
   }
 
+  const fetchUsers = async (page: number = 1) => {
+    try {
+      const queryParams = buildQueryParams();
+      const response = await fetch(`http://127.0.0.1:8000/admin/users?${queryParams}`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      setTotalPages(data.pages);
+      setCurrentPage(data.page);
+      const user = data.items;
+      setUser(user);
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+    }
+  }
+  
   useEffect(() => {
-    fetchUsers();
-  }, []);
-
-
+    fetchUsers(currentPage);
+  }, [currentPage, filters, perPage]);
+  
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: checked,
-    }));
+    
+    // 他のフィルターを解除し、選択されたフィルターのみをチェック
+    setFilters({
+      is_student: name === "is_student" ? checked : false,
+      is_staff: name === "is_staff" ? checked : false,
+      is_international_student: name === "is_international_student" ? checked : false,
+      is_teacher: name === "is_teacher" ? checked : false,
+      department: filters.department, // departmentはそのまま維持
+    });
   };
+
+
+  const handlePerPageItemChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+    setPerPage(Number(value));
+}
+  
 
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;
@@ -64,8 +111,8 @@ export default function Home() {
     <label className="flex items-center">
       <input
         type="checkbox"
-        name="studentOnly"
-        checked={filters.studentOnly}
+        name="is_student"
+        checked={filters.is_student}
         onChange={handleCheckboxChange}
         className="form-checkbox h-4 w-4 text-blue-600"
       />
@@ -74,8 +121,8 @@ export default function Home() {
     <label className="flex items-center">
       <input
         type="checkbox"
-        name="staffOnly"
-        checked={filters.staffOnly}
+        name="is_staff"
+        checked={filters.is_staff}
         onChange={handleCheckboxChange}
         className="form-checkbox h-4 w-4 text-blue-600"
       />
@@ -84,8 +131,8 @@ export default function Home() {
     <label className="flex items-center">
       <input
         type="checkbox"
-        name="internationalStudentOnly"
-        checked={filters.internationalStudentOnly}
+        name="is_international_student"
+        checked={filters.is_international_student}
         onChange={handleCheckboxChange}
         className="form-checkbox h-4 w-4 text-blue-600"
       />
@@ -94,8 +141,8 @@ export default function Home() {
     <label className="flex items-center">
       <input
         type="checkbox"
-        name="faculty"
-        checked={filters.faculty}
+        name="is_teacher"
+        checked={filters.is_teacher}
         onChange={handleCheckboxChange}
         className="form-checkbox h-4 w-4 text-blue-600"
       />
@@ -111,83 +158,108 @@ export default function Home() {
         className="w-full sm:w-48 p-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
       >
         <option value="">選択してください</option>
-        <option value="コンピュータサイエンス">コンピュータサイエンス</option>
-        <option value="経営学">経営学</option>
-        <option value="国際関係">国際関係</option>
-        <option value="言語学">言語学</option>
+        <option value="media">コンピュータサイエンス</option>
+        <option value="management">経営学</option>
+        <option value="internatianl">国際関係</option>
+        <option value="lanaguage">言語学</option>
       </select>
     </div>
+
+    {/* user can add per page item  defult is 50 */}
+    <div className="flex items-center">
+      <label className="text-gray-700 mr-2 text-sm">表示件数:</label>
+      <select
+        value={perPage}
+        onChange={handlePerPageItemChange}
+        className="w-full sm:w-48 p-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+      >
+        <option value="">選択してください</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="30">30</option>
+        <option value="50">50</option>
+      </select>
+      </div>
   </div>
 </section>
 
-      {/* Pagination Section */}
-<nav aria-label="Page navigation example" className="flex justify-center py-4">
-  <ul className="flex items-center -space-x-px h-10 text-lg">
-    <li>
-      <a
-        href="#"
-        className="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-        onClick={() => handlePageChange(currentPage - 1)}
-      >
-        <span className="sr-only">Previous</span>
-        <svg
-          className="w-4 h-4 rtl:rotate-180"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 6 10"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M5 1 1 5l4 4"
-          />
-        </svg>
-      </a>
-    </li>
-    {[...Array(totalPages)].map((_, index) => (
-      <li key={index}>
-        <a
-          href="#"
-          className={`flex items-center justify-center px-4 h-10 leading-tight ${
-            currentPage === index + 1
-              ? "z-10 text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-              : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-          }`}
-          onClick={() => handlePageChange(index + 1)}
-        >
-          {index + 1}
-        </a>
-      </li>
-    ))}
-    <li>
-      <a
-        href="#"
-        className="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-        onClick={() => handlePageChange(currentPage + 1)}
-      >
-        <span className="sr-only">Next</span>
-        <svg
-          className="w-4 h-4 rtl:rotate-180"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 6 10"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="m1 9 4-4-4-4"
-          />
-        </svg>
-      </a>
-    </li>
-  </ul>
-</nav>
+    {/* Pagination Section */}
+    <nav aria-label="Page navigation example" className="flex justify-center py-4">
+        <ul className="flex items-center -space-x-px h-10 text-lg">
+          <li>
+            <a
+              href="#"
+              className={`flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg ${currentPage === 1 ? "cursor-not-allowed" : "hover:bg-gray-100 hover:text-gray-700"}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(currentPage - 1);
+              }}
+            >
+              <span className="sr-only">Previous</span>
+              <svg
+                className="w-4 h-4 rtl:rotate-180"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 1 1 5l4 4"
+                />
+              </svg>
+            </a>
+          </li>
+          {[...Array(totalPages)].map((_, index) => (
+            <li key={index}>
+              <a
+                href="#"
+                className={`flex items-center justify-center px-4 h-10 leading-tight ${
+                  currentPage === index + 1
+                    ? "z-10 text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100"
+                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageChange(index + 1);
+                }}
+              >
+                {index + 1}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a
+              href="#"
+              className={`flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg ${currentPage === totalPages ? "cursor-not-allowed" : "hover:bg-gray-100 hover:text-gray-700"}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(currentPage + 1);
+              }}
+            >
+              <span className="sr-only">Next</span>
+              <svg
+                className="w-4 h-4 rtl:rotate-180"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 9 4-4-4-4"
+                />
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
 
 
 {/* Table Section */}
@@ -215,11 +287,11 @@ export default function Home() {
               className="w-10 h-10 rounded-full"
             />
           </td>
-          <td className="px-4 py-4 text-gray-900 dark:text-gray-100 font-medium">{user.id}</td>
-          <td className="px-4 py-4 text-gray-800 dark:text-gray-300">{user.username}</td>
+          <td className="px-4 py-4 text-gray-900 dark:text-gray-100 font-medium">{user.username}</td>
+          <td className="px-4 py-4 text-gray-800 dark:text-gray-300">{user.first_name} {user.last_name}</td>
           <td className="px-4 py-4 text-gray-600 dark:text-gray-400">{user.email}</td>
-          <td className="px-4 py-4 text-gray-700 dark:text-gray-300">経営情報学科</td>
-          <td className="px-4 py-4 text-gray-700 dark:text-gray-300">学生</td>
+          <td className="px-4 py-4 text-gray-700 dark:text-gray-300">{user.department}</td>
+          <td className="px-4 py-4 text-gray-700 dark:text-gray-300">{user.role}</td>
           <td className="px-4 py-4">
             <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition duration-200 mr-4">
               Edit
