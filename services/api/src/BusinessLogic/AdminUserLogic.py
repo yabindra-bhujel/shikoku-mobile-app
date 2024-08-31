@@ -115,5 +115,14 @@ class AdminUserLogic:
         password = ''.join(all_characters)
         return password
 
+    def delete(self, db: Session, user_id: int):
+        try:
+            user = db.query(User).filter(User.id == user_id).first()
+            if user is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            db.delete(user)
+            db.commit()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 

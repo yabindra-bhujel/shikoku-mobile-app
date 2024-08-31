@@ -29,7 +29,7 @@ logger = setup_logging()
 app = FastAPI(debug=True)
 
 # データベース debug_toolbar の設定
-app.add_middleware(DebugToolbarMiddleware)
+# app.add_middleware(DebugToolbarMiddleware)
 
 
 

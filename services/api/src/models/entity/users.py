@@ -59,7 +59,7 @@ class User(Base):
     school_events = relationship('SchoolEvent', back_populates='creator', cascade='all, delete-orphan')
 
     # Relationships for Settings
-    application_settings = relationship('ApplicationSetting', back_populates='user', uselist=False)
+    application_settings = relationship('ApplicationSetting', back_populates='user',  cascade='all, delete-orphan',  uselist=False)
 
     # Relationships for OTP
     otp = relationship('UserOtp', back_populates='user', uselist=False)

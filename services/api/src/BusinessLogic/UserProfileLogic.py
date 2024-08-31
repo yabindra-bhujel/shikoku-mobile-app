@@ -82,15 +82,15 @@ class UserProfileLogic:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found")
             
             profile_output = {
-                "user_id": user.id,
+                "id": user.id,
                 "first_name": user_profile.first_name,
                 "last_name": user_profile.last_name,
                 "bio": user_profile.bio,
-                "update_profile": None 
+                "image": None 
             }
 
             if user_profile.profile_picture:
-                profile_output["update_profile"] = str(request.url_for('static', path=user_profile.profile_picture))
+                profile_output["image"] = str(request.url_for('static', path=user_profile.profile_picture))
         
             return profile_output
         
