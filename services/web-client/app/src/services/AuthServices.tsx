@@ -18,6 +18,13 @@ export const getRefreshTokenFromCookies = () => {
   return cookie.split("=")[1];
 };
 
+
+export const removeRefreshTokenFromCookies = () => {
+  document.cookie = `refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; SameSite=Lax`;
+};
+
+
+
 export const loginUser = async (username: string, password: string) => {
   const formData = new URLSearchParams();
   formData.append("username", username);

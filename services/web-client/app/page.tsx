@@ -1,7 +1,7 @@
 "use client";
 
 import AdminLayout from "./src/route/AdminLayout";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 
 const defaultImageUrl = 'https://via.placeholder.com/32';
 
@@ -23,9 +23,11 @@ export default function Home() {
   const [user, setUser] = useState<any>([]);
 
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [perPage, setPerPage] = useState(30);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(30);
+  const [message, setMessage] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   const buildQueryParams = () => {
     const params = new URLSearchParams();
@@ -60,8 +62,39 @@ export default function Home() {
       const user = data.items;
       setUser(user);
     } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
     }
+  }
+
+  const deleteUser = async (id: number) => {
+    // confirm delete
+    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/admin/users/${id}`,{
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (response.status === 204) {
+        setMessage("User deleted successfully.");
+        fetchUsers(currentPage);
+      }else{
+        setError("There was a problem with the delete user.Please try again. Or contact the administrator.");
+      }
+  }
+  catch (error) {
+    setError("There was a problem with the delete user.Please try again. Or contact the administrator.");
+  }
+
+  finally{
+    setTimeout(() => {
+      setMessage("");
+      setError("");
+    }, 5000);
+  }
   }
   
   useEffect(() => {
@@ -104,7 +137,20 @@ export default function Home() {
 
   return (
     <AdminLayout>
+
+      {/* message */}
+      {message && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Success!</strong>
+        <span className="block sm:inline">{message}</span>
+      </div>}
+
+      {/* error */}
+      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Error!</strong>
+        <span className="block sm:inline">{error}</span>
+      </div>}
       {/* Filter UI Section */}
+
       <section className="bg-white shadow-md rounded-lg p-2 mb-2 border border-gray-200">
   <p className="text-sm text-gray-700 mb-2">フィルター</p>
   <div className="flex justify-between items-center flex-wrap gap-2">
@@ -296,7 +342,9 @@ export default function Home() {
             <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition duration-200 mr-4">
               Edit
             </button>
-            <button className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium transition duration-200">
+            <button
+              onClick={() => deleteUser(user.id)}
+             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium transition duration-200">
               Delete
             </button>
           </td>
@@ -311,3 +359,4 @@ export default function Home() {
     </AdminLayout>
   );
 }
+

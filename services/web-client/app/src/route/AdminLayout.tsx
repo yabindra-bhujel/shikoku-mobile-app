@@ -1,11 +1,69 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import PrivateRoute from "./PrivateRoute";
-import { IoNotificationsCircleSharp, IoSettings } from "react-icons/io5";
 import { MdOutlineAccountCircle } from "react-icons/md";
+import { API_BASE_URL } from "../services/config";
+import { removeRefreshTokenFromCookies } from "../services/AuthServices";
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  image?: string;
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user_profile`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      } else {
+        router.push("/login"); 
+      }
+    } catch (error) {
+      router.push("/login"); 
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (response.status === 204) {
+        // remove cookie
+        removeRefreshTokenFromCookies();
+        
+
+        router.push("/login");
+      } else {
+        setLogoutError("ログアウトに失敗しました。もう一度お試しください。");
+      }
+    } catch (error) {
+      setLogoutError("ログアウトに失敗しました。もう一度お試しください。");
+    }
+  }
+
   return (
     <PrivateRoute>
       {/* Main layout */}
@@ -20,38 +78,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             四国大学モバイルアプリユーザー管理システム
           </a>
           <div className="flex items-center gap-8 sm:gap-10">
-            <a
-              className="text-blue-500 hover:text-blue-400 focus:outline-none"
-              href="#"
-              aria-label="Notifications"
+            {/* 現在ログインしているユーザの情報 */}
+            <div className="flex items-center gap-2">
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={`${user.first_name} ${user.last_name}`}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <MdOutlineAccountCircle className="text-2xl text-gray-700" />
+              )}
+              <p className="text-gray-700">
+                {user?.first_name} {user?.last_name} <br />
+                <small>email@gmail.com</small>
+              </p>
+              <br />
+            </div>
+
+            {/* logout */}
+            <button 
+              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+              aria-label="Logout"
+              onClick={logout}
             >
-              <IoNotificationsCircleSharp className="text-3xl" />
-            </a>
-            <a
-              className="text-gray-600 hover:text-gray-500 focus:outline-none"
-              href="#"
-              aria-label="Account"
-            >
-              <MdOutlineAccountCircle className="text-3xl" />
-            </a>
-            <a
-              className="text-gray-600 hover:text-gray-500 focus:outline-none"
-              href="#"
-              aria-label="Settings"
-            >
-              <IoSettings className="text-3xl" />
-            </a>
+              ログアウト
+            </button>
           </div>
         </header>
 
         {/* Sub-navigation */}
         <nav className="bg-white shadow-md border-b-2 border-indigo-300 flex-none">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
+            <div className="flex gap-[30px] items-center h-16">
               <div className="flex space-x-8">
                 <a
                   href="/"
-                  className="text-gray-700 hover:text-indigo-700 font-medium focus:outline-none focus:text-indigo-700"
+                  className={`${pathname === "/"
+                    ? "text-indigo-700 bg-indigo-100 px-4 py-2 rounded-lg font-bold"
+                    : "text-gray-700"
+                    } hover:text-indigo-700 font-medium focus:outline-none focus:text-indigo-700`}
                 >
                   ユーザ一覧
                 </a>
@@ -59,15 +125,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="flex space-x-8">
                 <a
                   href="/user/new"
-                  className="text-gray-700 hover:text-indigo-700 font-medium focus:outline-none focus:text-indigo-700"
+                  className={`${pathname === "/user/new"
+                    ? "text-indigo-700 bg-indigo-100 px-4 py-2 rounded-lg font-bold"
+                    : "text-gray-700"
+                    } hover:text-indigo-700 font-medium focus:outline-none focus:text-indigo-700`}
                 >
                   ユーザ作成
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-700 hover:text-indigo-700 font-medium focus:outline-none focus:text-indigo-700"
-                >
-                  マニュアル
                 </a>
               </div>
             </div>
