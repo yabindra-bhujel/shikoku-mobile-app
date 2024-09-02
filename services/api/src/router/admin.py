@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status,  File, UploadFile, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status,  File, UploadFile, BackgroundTasks, Form, Request, Response
 from sqlalchemy.orm import Session, joinedload
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -15,18 +15,62 @@ import string
 import csv
 from io import StringIO
 from ..BusinessLogic.AdminUserLogic import AdminUserLogic
+from ..auth.logic import AuthLogic
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 db_dependency = Depends(get_db)
 auth = AuthSettings()
 logic = AdminUserLogic()
+auth_logic = AuthLogic()
+
+
+
+@router.post("/login", status_code=status.HTTP_200_OK)
+def admin_login(
+    response: Response,
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = db_dependency, 
+    
+):
+    """Login and return an access token."""
+    try:
+
+        user = auth_logic.authenticate_user(username, password, db)
+
+
+        # check if user is admin
+        if user.role != 'admin':
+            # if not admin return unauthorized
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized access")
+        
+        
+        access_token, refresh_token = auth_logic.login_token(db, user.username, password=password)
+
+
+        # アクセストークンとリフレッシュトークンがない場合
+        if access_token and refresh_token is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+
+        # アクセストークンをクッキーにセット
+        response.set_cookie(key="access_token", value=access_token)
+        response.set_cookie(key="refresh_token", value=refresh_token)
+        
+        # リフレッシュトークンをresponse で返す
+        return {"message": "Login successful", "refresh_token": refresh_token}
+    
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get("/users", response_model=Page[UserSchema])
 def get_users(
     db: Session = db_dependency, 
     user_filter: AdminUserFilter = Depends(AdminUserFilter),
-    params: Params = Depends()
+    params: Params = Depends(),
+    user = Depends(authenticate_admin)
 ):
     """Fetch and filter users with pagination."""
     try:
@@ -58,7 +102,7 @@ def create_user(
 async def create_user_from_csv(
     db: Session = db_dependency, 
     file: UploadFile = File(...), 
-    # user: User = Depends(get_current_user)
+    user: User = Depends(authenticate_admin)
 ): 
     try:
         # ファイルを読み込む

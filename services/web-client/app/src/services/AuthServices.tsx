@@ -1,15 +1,13 @@
 // services/AuthService.tsx
 import { API_BASE_URL } from "./config";
 
-export const saveRefreshTokenInCookies = (refreshToken: string) => {
-  const expires = new Date();
-  expires.setTime(expires.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
-  document.cookie = `refreshToken=${refreshToken}; expires=${expires.toUTCString()}; path=/; secure; SameSite=Lax`;
-};
+export const havaeRefreshTokenInCookies = () => {
+  return document.cookie.includes("refresh_token=");
+}
 
 export const getRefreshTokenFromCookies = () => {
   const cookies = document.cookie.split("; ");
-  const cookie = cookies.find((c) => c.startsWith("refreshToken="));
+  const cookie = cookies.find((c) => c.startsWith("refresh_token="));
 
   if (!cookie) {
     return null;
@@ -18,19 +16,16 @@ export const getRefreshTokenFromCookies = () => {
   return cookie.split("=")[1];
 };
 
-
-export const removeRefreshTokenFromCookies = () => {
-  document.cookie = `refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; SameSite=Lax`;
+export const removeCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 };
-
-
 
 export const loginUser = async (username: string, password: string) => {
   const formData = new URLSearchParams();
   formData.append("username", username);
   formData.append("password", password);
 
-  const res = await fetch(`${API_BASE_URL}/auth/access_token`, {
+  const res = await fetch(`${API_BASE_URL}/admin/login`, {
     method: "POST",
     headers: new Headers({
       "Content-Type": "application/x-www-form-urlencoded",

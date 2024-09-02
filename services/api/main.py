@@ -13,7 +13,7 @@ from src.router.likes import router as like_router
 from src.router.group import router as group_router
 from src.router.group_message import router as group_message_router
 from config.logging_config import setup_logging
-from config.middlewares import LogRequestsMiddleware
+from config.middlewares import TokenHandlingMiddleware
 from config.exception.exception import ExceptionHandlerMiddleware
 from src.websocketRouter.group_messge_router import router as websocket_group_message_router
 from src.router.school_event import router as school_event_router
@@ -43,7 +43,7 @@ app.add_middleware(
 )
 
 # ログミドルウェアの設定
-app.add_middleware(LogRequestsMiddleware, logger=logger)
+app.add_middleware(TokenHandlingMiddleware, logger=logger)
 
 
 # ...

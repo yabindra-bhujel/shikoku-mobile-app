@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { loginUser, saveRefreshTokenInCookies } from "../services/AuthServices";
+import { loginUser, removeCookie } from "../services/AuthServices";
+import { useRouter } from "next/navigation";
+
 export function useLogin() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -14,20 +17,14 @@ export function useLogin() {
     setSuccess(false);
 
     try {
-      const data = await loginUser(username, password);
-      const refreshToken = data.refresh_token;
+      const response = await loginUser(username, password);
+      setSuccess(true);
+      // remove cookie
+      removeCookie("refresh_token");
+      removeCookie("access_token");
 
-      if (refreshToken) {
-        saveRefreshTokenInCookies(refreshToken);
-        setSuccess(true);
+      router.push("/");
 
-        // Redirect to home page
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 3000);
-      } else {
-        throw new Error("No refresh token received");
-      }
     } catch (error) {
       setError("ユーザー名またはパスワードが間違っています");
     } finally {

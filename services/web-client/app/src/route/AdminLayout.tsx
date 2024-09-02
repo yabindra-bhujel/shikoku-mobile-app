@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import PrivateRoute from "./PrivateRoute";
 import { MdOutlineAccountCircle } from "react-icons/md";
 import { API_BASE_URL } from "../services/config";
-import { removeRefreshTokenFromCookies } from "../services/AuthServices";
 
 interface User {
   id: number;
@@ -51,11 +50,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       });
 
       if (response.status === 204) {
-        // remove cookie
-        removeRefreshTokenFromCookies();
-        
-
         router.push("/login");
+
+        // remove cookie
+
       } else {
         setLogoutError("ログアウトに失敗しました。もう一度お試しください。");
       }

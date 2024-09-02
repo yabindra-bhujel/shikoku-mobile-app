@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
-from datetime import timedelta
+from datetime import timedelta, datetime
 import logging
 import csv
 from io import StringIO
@@ -65,7 +65,7 @@ async def login_for_access_token(response: Response, background_tasks: Backgroun
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
         # アクセストークンをクッキーにセット
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="access_token", value=access_token)
         response.set_cookie(key="refresh_token", value=refresh_token)
 
         # リフレッシュトークンをresponse で返す
@@ -148,8 +148,14 @@ async def get_current_user(request: Request):
 
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(response: Response, request: Request):
-    # レスポンスからクッキーを削除
-    response.delete_cookie("access_token")
+
+    response.set_cookie(key="access_token", value="", max_age=0, path="/", domain=request.url.hostname)
+    response.set_cookie(key="refresh_token", value="", max_age=0, path="/", domain=request.url.hostname)
+
+
+
+    return {"message": "Logout successful"}
+
 
 
 @router.post("/change_password", status_code=status.HTTP_200_OK)
