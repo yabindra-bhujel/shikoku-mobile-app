@@ -60,6 +60,25 @@ const UserProfile = {
       throw error;
     }
   },
+
+  async updateBio(bio: string) {
+
+    const formData = new FormData();
+    formData.append("bio", bio);
+    try {
+      const response = await axiosInstance.put("/user_info",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default {
