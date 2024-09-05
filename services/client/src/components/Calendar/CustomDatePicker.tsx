@@ -1,11 +1,12 @@
+import React from "react";
 import {
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -16,7 +17,7 @@ interface DatePickerType {
   setShow: any;
   value: Date;
   customHandle: any;
-  isDark : boolean;
+  isDark: boolean;
 }
 
 const CustomDatePicker: React.FC<DatePickerType> = ({
@@ -27,7 +28,7 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
   customHandle,
   isDark,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const styles = StyleSheet.create({
     centeredView: {
@@ -77,6 +78,7 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
       color: isDark ? "white" : "black",
     },
   });
+
   return (
     <>
       <View style={styles.datePickerContainer}>
@@ -88,35 +90,56 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
             name="calendar"
             size={35}
             color={isDark ? "white" : "blue"}
-            onPress={setShow}
+            onPress={() => setShow(true)}
           />
         </View>
-        <Modal visible={show} transparent animationType="slide">
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <DateTimePicker
-                testID="startDatePicker"
-                value={value}
-                mode="date"
-                display="inline"
-                onChange={customHandle}
-                style={styles.datePickerButton}
-                timeZoneName={"Asia/Tokyo"}
-                locale="ja-JP"
-              />
-              <TouchableOpacity style={{ padding: 12 }}>
-                <Text
-                  onPress={setShow}
-                  style={{ padding: 20, fontSize: 18, 
-                    color: isDark ? "white" : "black" 
-                  }}
-                >
-                  {t("close")}
-                </Text>
-              </TouchableOpacity>
+
+        {show && Platform.OS === "ios" && (
+          <Modal visible={show} transparent animationType="slide">
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <DateTimePicker
+                  testID="startDatePicker"
+                  value={value}
+                  mode="date"
+                  display="inline"
+                  onChange={customHandle}
+                  style={styles.datePickerButton}
+                  timeZoneName={"Asia/Tokyo"}
+                  locale="ja-JP"
+                />
+                <TouchableOpacity style={{ padding: 12 }}>
+                  <Text
+                    onPress={() => setShow(false)} 
+                    style={{
+                      padding: 20,
+                      fontSize: 18,
+                      color: isDark ? "white" : "black",
+                    }}
+                  >
+                    {t("close")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        )}
+
+        {/* Render picker inline only when triggered on Android */}
+        {show && Platform.OS === "android" && (
+          <DateTimePicker
+            testID="startDatePicker"
+            value={value}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShow(false);  
+              customHandle(event, selectedDate);
+            }}
+            timeZoneName={"Asia/Tokyo"}
+            locale="ja-JP"
+          />
+        )}
       </View>
     </>
   );

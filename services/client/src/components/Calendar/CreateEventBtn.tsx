@@ -12,10 +12,11 @@ type props = {
   background?: string;
   color?: string;
   width?: number;
+  fontsize?: any;
 }
 
 const StyledButton2:React.FC<props> = (
-{width = 120, background = "#3399ff", color = "white", handlePress, title, icon}) => {
+{width = 120, background = "#3399ff", color = "white", handlePress, title,fontsize, icon}) => {
   const styles = StyleSheet.create({
     button: {
       alignItems: "center",
@@ -28,7 +29,7 @@ const StyledButton2:React.FC<props> = (
     buttonText: {
       padding: 15,
       color: color,
-      fontSize: 18,
+      fontSize: fontsize,
       fontWeight: "bold",
     },
   });

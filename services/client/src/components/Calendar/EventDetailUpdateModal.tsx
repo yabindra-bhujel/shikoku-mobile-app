@@ -13,6 +13,7 @@ import CalenderService from "@/src/api/CalenderService";
 import CustomDatePicker from "./CustomDatePicker";
 import CustomTimePicker from "./CustomTimePicker";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import moment from 'moment-timezone';
 
 const EventModal = ({
   visible,
@@ -89,9 +90,9 @@ const EventModal = ({
     let start =
       startDate.toISOString().split("T")[0] +
       "T" +
-      startTime.toLocaleTimeString();
+      moment(startTime).format("HH:mm:ss"); 
     let end =
-      endDate.toISOString().split("T")[0] + "T" + endTime.toLocaleTimeString();
+      endDate.toISOString().split("T")[0] + "T" + moment(endTime).format("HH:mm:ss"); 
 
     const eventData = {
       title,
@@ -99,7 +100,7 @@ const EventModal = ({
       start,
       end,
     };
-    console.log(eventData);
+    
     try {
       const res = await CalenderService.updateEvent(event.id, eventData);
       if (res) {
