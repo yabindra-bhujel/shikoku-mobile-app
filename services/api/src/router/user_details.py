@@ -12,8 +12,6 @@ router = APIRouter(prefix="/user_info", tags=["User Info"])
 db_dependency = Depends(get_db)
 
 
-
-
 @router.put("", status_code=status.HTTP_200_OK)
 def update_user_bio(user: User = Depends(get_current_user), db: Session = db_dependency, bio: str = Form(...)):
     try:
@@ -123,6 +121,50 @@ def add_interest(user: User = Depends(get_current_user), db: Session = db_depend
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
 
+@router.post("/club_activities", status_code=status.HTTP_201_CREATED)
+def add_club_activities(
+    user: User = Depends(get_current_user), 
+    db: Session = db_dependency, 
+    club_activities: str = Form(...)):
+    try:
+        # Fetch user instance
+        user = db.query(User).filter(User.id == user.id).first()
+
+        # Check if the ClubActivity already exists for this user
+        club_activities_for_user = db.query(
+            exists().where(
+                (ClubActivity.name == club_activities) &
+                (user_club_activities_association.c.user_id == user.id) &
+                (user_club_activities_association.c.club_activity_id == ClubActivity.id)
+            )
+        ).scalar()
+
+        if club_activities_for_user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ClubActivity already exists for user")
+
+        # Check if the ClubActivity exists in the database
+        existing_club_activities = db.query(ClubActivity).filter(ClubActivity.name == club_activities).first()
+
+        if not existing_club_activities:
+            # Create a new ClubActivity if it doesn't exist
+            new_club_activities = ClubActivity(name=club_activities)
+            db.add(new_club_activities)
+            db.commit()
+            db.refresh(new_club_activities)
+        else:
+            new_club_activities = existing_club_activities
+
+        # Associate the ClubActivity with the user
+        user.club_activities.append(new_club_activities)
+        db.commit()
+
+        return {"message": f"ClubActivity '{club_activities}' added successfully to user '{user.username}'"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
 @router.delete("/skills/{skill_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_skill(
     skill_id: int,
@@ -191,5 +233,37 @@ def delete_iinterest(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
 
+@router.delete("/club_activities/{club_activity_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_club_activity(
+    club_activity_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = db_dependency
+):
+    try:
+        # Fetch the user
+        user = db.query(User).filter(User.id == user.id).first()
+
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        # Fetch the ClubActivity to be deleted
+        club_activity = db.query(ClubActivity).filter(ClubActivity.id == club_activity_id).first()
+
+        if club_activity is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ClubActivity not found")
+
+        # Check if the user has the ClubActivity
+        if club_activity not in user.club_activities:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ClubActivity not associated with user")
+
+        # Remove the ClubActivity from the user's ClubActivities
+        user.club_activities.remove(club_activity)
+        db.commit()
+
+        return {"message": f"ClubActivity with ID '{club_activity_id}' removed successfully from user '{user.username}'"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
 
