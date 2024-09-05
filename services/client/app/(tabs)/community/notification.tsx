@@ -3,11 +3,13 @@ import { StyleSheet, View, ScrollView, RefreshControl, Text, TouchableOpacity } 
 import { useColorScheme } from "react-native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 
 const Notification = () => {
     const theme = useColorScheme();
     const router = useRouter();
+    const {t} = useTranslation();
   
     const goBack = () => {
       router.back();
@@ -57,7 +59,7 @@ const Notification = () => {
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             >
-                Notifications
+                {t("settings.notifications")}
             </Text>
           </View>
   

@@ -11,6 +11,7 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AntDesign } from "@expo/vector-icons";
 import { router, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export interface GroupData {
   id: string;
@@ -28,6 +29,7 @@ export interface GroupData {
 }
 const GroupHeader = ({ groupData }: { groupData: GroupData }) => {
   const isDark = useColorScheme() === 'dark';
+  const {t} = useTranslation();
 
   const goBack = () => {
     router.back();

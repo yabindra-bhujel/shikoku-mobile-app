@@ -3,6 +3,7 @@ import { FontAwesome5, FontAwesome, AntDesign, FontAwesome6 } from "@expo/vector
 import { router } from "expo-router";
 import { ScaledSheet } from "react-native-size-matters";
 import * as SecureStore from "expo-secure-store";
+import { useTranslation } from "react-i18next";
 
 interface ButtonData {
   route: string;
@@ -10,12 +11,9 @@ interface ButtonData {
   title: string;
 }
 
-// webscoket connection
-
-// 
-
 const SimpleScreen = () => {
   const theme = useColorScheme();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     SecureStore.deleteItemAsync("refreshToken");
@@ -25,15 +23,15 @@ const SimpleScreen = () => {
   };
 
   const buttonData: ButtonData[] = [
-    { route: "/community", icon: <FontAwesome6 name="people-roof" size={45} color="#ff6666" />, title: "Community" },
-    { route: "/calendar", icon: <FontAwesome5 name="calendar" size={45} color="blue" />, title: "Calendar" },
-    { route: "/chatbot", icon: <FontAwesome5 name="robot" size={45} color="green" />, title: "ChatBot" },
-    { route: "/event", icon: <FontAwesome5 name="school" size={45} color="purple" />, title: "School Events" },
-    { route: "/chat", icon: <FontAwesome name="wechat" size={45} color="#00A5CF" />, title: "Chat" },
+    { route: "/community", icon: <FontAwesome6 name="people-roof" size={45} color="#ff6666" />, title: t('commuIcons') },
+    { route: "/calendar", icon: <FontAwesome5 name="calendar" size={45} color="blue" />, title: t("CalendarIcons") },
+    { route: "/chatbot", icon: <FontAwesome5 name="robot" size={45} color="green" />, title: t("ChatBot") },
+    { route: "/event", icon: <FontAwesome5 name="school" size={45} color="purple" />, title: t("SchoolEvt") },
+    { route: "/chat", icon: <FontAwesome name="wechat" size={45} color="#00A5CF" />, title: t("Chat") },
     // { route: "/frequen", icon: <FontAwesome5 name="question" size={45} color="red" />, title: "A&Q" },
-    { route: "/setting", icon: <AntDesign name="setting" size={45} color="#CA3C25" />, title: "Settings" },
-    { route: "/login", icon: <AntDesign name="logout" size={45} color="#CA3C25"  onPress={handleLogout}/>, title: "Logout" },
-    { route: "/profile", icon: <AntDesign name="user" size={45} color="#CA3C25"/>, title: "Profile" },
+    { route: "/setting", icon: <AntDesign name="setting" size={45} color="#CA3C25" />, title: t("Settings") },
+    { route: "/login", icon: <AntDesign name="logout" size={45} color="#CA3C25"  onPress={handleLogout}/>, title: t("Logout") },
+    { route: "/profile", icon: <AntDesign name="user" size={45} color="#CA3C25"/>, title: t("profile") },
 
   ];
 

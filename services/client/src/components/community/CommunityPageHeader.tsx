@@ -9,10 +9,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 const CommunityPageHeader = () => {
   const theme = useColorScheme();
   const router = useRouter();
+  const {t} = useTranslation();
 
   const goBack = () => {
     router.back();
@@ -68,7 +70,7 @@ const CommunityPageHeader = () => {
               color: theme === "dark" ? "#fff" : "#000",
             }}
           >
-            Community
+            {t("Community.communityTitle")}
           </Text>
         </View>
 

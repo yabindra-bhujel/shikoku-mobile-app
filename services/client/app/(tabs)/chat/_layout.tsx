@@ -2,9 +2,11 @@ import React from "react";
 import { router, Stack } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { Text, TouchableOpacity, useColorScheme } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const StackLayout = () => {
   const isDark = useColorScheme() === "dark";
+  const {t} = useTranslation();
 
   const headerBackgroundColor = isDark ? "#333" : "#fff";
   const headerTextColor = isDark ? "#fff" : "#000";
@@ -33,7 +35,7 @@ const StackLayout = () => {
                   color: headerTextColor,
                 }}
               >
-                戻る
+                {t("back")}
               </Text>
             </TouchableOpacity>
           ),

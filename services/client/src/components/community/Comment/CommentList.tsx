@@ -6,9 +6,11 @@ import {
   useColorScheme,
 } from "react-native";
 import UserAvatar from "../../UserAvatar";
+import { useTranslation } from "react-i18next";
 
 const CommentList = ({ comments }) =>  {
     const theme = useColorScheme();
+    const {t} = useTranslation();
     
     return (
         <View>

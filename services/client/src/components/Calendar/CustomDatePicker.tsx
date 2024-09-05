@@ -8,6 +8,7 @@ import {
 import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AntDesign } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface DatePickerType {
   title: string;
@@ -26,6 +27,7 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
   customHandle,
   isDark,
 }) => {
+  const {t} = useTranslation();
 
   const styles = StyleSheet.create({
     centeredView: {
@@ -109,7 +111,7 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
                     color: isDark ? "white" : "black" 
                   }}
                 >
-                  Close
+                  {t("close")}
                 </Text>
               </TouchableOpacity>
             </View>

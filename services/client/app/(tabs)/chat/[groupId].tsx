@@ -20,6 +20,7 @@ import { myip } from "@/src/config/Api";
 import axiosInstance from "@/src/config/Api";
 import { useUser } from "@/src/hooks/UserContext";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 interface GroupData {
   id: string;
@@ -44,6 +45,7 @@ const ChatDetail = () => {
   const textInputRef = useRef<TextInput>(null);
   const flatListRef = useRef<FlatList<any>>(null);
   const { loggedInUserId, fullname } = useUser();
+  const {t} = useTranslation();
 
   const [messageData, setMessageData] = useState({
     message: "",
@@ -269,7 +271,7 @@ const ChatDetail = () => {
           <View style={styles.inputContainer}>
             <TextInput
               ref={textInputRef}
-              placeholder="メッセージを入力..."
+              placeholder={t("groupchat.inputmess")}
               placeholderTextColor={"gray"}
               style={styles.messageInputText}
               multiline
@@ -282,7 +284,7 @@ const ChatDetail = () => {
             />
             {inputValue.trim() !== "" && (
               <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-                <Text style={styles.sendButtonText}>送信</Text>
+                <Text style={styles.sendButtonText}>{t("groupchat.send")}</Text>
               </TouchableOpacity>
             )}
           </View>

@@ -8,10 +8,12 @@ import {
   } from "react-native";
   import Ionicons from "@expo/vector-icons/Ionicons";
   import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
   
   const EventHeader = () => {
     const theme = useColorScheme();
     const router = useRouter();
+    const {t} = useTranslation();
   
     const goBack = () => {
       router.back();
@@ -57,7 +59,7 @@ import {
                 color: theme === "dark" ? "#fff" : "#000",
               }}
             >
-              School Event
+              {t("schoolEvent.schooleventTitle")}
             </Text>
           </View>
   

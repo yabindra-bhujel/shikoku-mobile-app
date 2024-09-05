@@ -19,6 +19,7 @@ import CommentsService from "@/src/api/CommentServices";
 import CommentBox from "@/src/components/community/Comment/CommentBox";
 import CommentList from "@/src/components/community/Comment/CommentList";
 import ImagePost from "@/src/components/community/ImagePost";
+import { useTranslation } from "react-i18next";
 
 const PostDetail = () => {
   const router = useRouter();
@@ -29,6 +30,7 @@ const PostDetail = () => {
   const { postId } = useLocalSearchParams<{ postId: string }>() ?? {
     postId: "",
   };
+  const { t } = useTranslation();
 
   const goBack = () => {
     router.back();

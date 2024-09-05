@@ -27,6 +27,7 @@ import {
 } from "@expo/vector-icons";
 import AddMemberModal from "./AddMemberModal";
 import * as ImagePicker from "expo-image-picker";
+import { useTranslation } from "react-i18next";
 
 export default function SettingModal() {
   const { groupId = "0" } = useLocalSearchParams<{
@@ -40,6 +41,7 @@ export default function SettingModal() {
   const [groupImage, setGroupImage] = useState<string[] | undefined>();
   const isDark = useColorScheme() === "dark";
   const { loggedInUserId } = useUser();
+  const {t} = useTranslation();
 
   const fetchGroupInfo = async () => {
     if (!groupId) return;
@@ -139,15 +141,15 @@ export default function SettingModal() {
 
   const confirmDeleteGroup = () => {
     Alert.alert(
-      "Confirm Deletion",
-      "Are you sure you want to delete this group?",
+      t("groupchat.deleteConTitle"),
+      t("groupchat.deleteConfirm"),
       [
         {
-          text: "Cancel",
+          text: t("cancel"),
           style: "cancel",
         },
         {
-          text: "Delete",
+          text: t("delete"),
           style: "destructive",
           onPress: deleteGroup,
         },
@@ -170,24 +172,24 @@ export default function SettingModal() {
   const leaveGroup = async () => {
     const numericGroupId = Number(groupId);
     Alert.alert(
-      "グループの退出",
-      "グループを退出します?\n退出したあと、グループのメンバーとしては扱われません。",
+      t("groupchat.leaveConfirm"),
+      t("groupchat.leaveConfirmText"),
       [
         {
-          text: "キャンセル",
+          text: t("cancel"),
           style: "cancel",
         },
         {
-          text: "退出",
+          text: t("leave"),
           onPress: async () => {
             try {
               const res = await GroupServices.leaveGroup(numericGroupId);
-              Alert.alert("成功", "グループを退出しました。");
+              Alert.alert(t("success"), t("groupchat.leaveSuccess"));
               router.dismiss(3);
             } catch (error) {
               Alert.alert(
-                "エラー",
-                "退出際に問題が発生しました。もう一度試してみてください。"
+                t("error"),
+                t("groupchat.leaveProblem")
               );
             }
           },
@@ -300,7 +302,7 @@ export default function SettingModal() {
   if (!groupInfo) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Group not found.</Text>
+        <Text style={styles.errorText}>{t("groupchat.notfoundGroup")}</Text>
       </View>
     );
   }
@@ -328,7 +330,7 @@ export default function SettingModal() {
             )}
             <Text style={styles.groupName}>{groupInfo.name}</Text>
             <TouchableOpacity onPress={handleShowNameChange}>
-              <PaperText style={styles.changeName}>名前と説明の変更</PaperText>
+              <PaperText style={styles.changeName}>{t("groupchat.changenameDetail")}</PaperText>
             </TouchableOpacity>
             <View style={styles.rowgap10}>
               <TouchableOpacity
@@ -349,7 +351,7 @@ export default function SettingModal() {
                 size={24}
                 color={isDark ? "white" : "black"}
               />
-              <Text style={styles.groupDescription}>グループの説明:</Text>
+              <Text style={styles.groupDescription}>{t("groupchat.groupDetails")}</Text>
             </View>
             <View style={styles.descriptionTextContainer}>
               <Text style={styles.descriptionText}>
@@ -377,7 +379,7 @@ export default function SettingModal() {
                   size={22}
                   color={isDark ? "white" : "black"}
                 />
-                <Text style={styles.memberList}>メンバーリスト</Text>
+                <Text style={styles.memberList}>{t("groupchat.memberList")}</Text>
               </View>
               <AntDesign
                 name="right"
@@ -398,7 +400,7 @@ export default function SettingModal() {
                   color={isDark ? "white" : "black"}
                 />
                 <PaperText style={[styles.leaveGroupTitle, styles.margin10]}>
-                  グループの削除
+                  {t("groupchat.deletegroup")}
                 </PaperText>
               </View>
 
@@ -419,7 +421,7 @@ export default function SettingModal() {
                   { color: "red" },
                 ]}
               >
-                グループ退出
+                {t("groupchat.leavegroup")}
               </PaperText>
             </TouchableOpacity>
           </View>

@@ -14,6 +14,7 @@ import GroupServices from "@/src/api/GroupServices";
 import AddMemberModal from "@/src/components/GroupChat/settings/AddMemberModal";
 import CustomHeader from "@/src/components/GroupChat/settings/MemberCustomHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 type Member = {
   id: number;
@@ -47,6 +48,7 @@ export default function MembersScreen() {
     id: Number(groupId),
     group_members: members,
   });
+  const {t} = useTranslation();
 
   useEffect(() => {
     const checkForDuplicateIds = () => {
@@ -68,22 +70,22 @@ export default function MembersScreen() {
     }
 
     Alert.alert(
-      "Remove Member",
-      "Are you sure you want to remove this member?",
+      t("groupchat.removeMember"),
+      t("groupchat.removeConfirm"),
       [
         {
-          text: "Cancel",
+          text: t("cancel"),
           style: "cancel",
         },
         {
-          text: "Remove",
+          text: t("remove"),
           onPress: async () => {
             try {
               await GroupServices.removeMemberFromGroup(
                 numericGroupId,
                 memberId
               );
-              Alert.alert("Success", "Member removed successfully.");
+              Alert.alert(t("success"), t("groupchat.removeSuccess"));
               setMembers((prevMembers) =>
                 prevMembers.filter((member) => member.id !== memberId)
               );
@@ -95,8 +97,8 @@ export default function MembersScreen() {
               }));
             } catch (error) {
               Alert.alert(
-                "Error",
-                "Failed to remove member. Please try again later."
+                t("error"),
+                t("groupchat.removeProblem")
               );
             }
           },
@@ -117,8 +119,8 @@ export default function MembersScreen() {
         }));
       } catch (error) {
         Alert.alert(
-          "Error",
-          "Failed to fetch updated members. Please try again later."
+          t("error"),
+          t("groupchat.updateProblem")
         );
       }
     };
@@ -207,8 +209,8 @@ export default function MembersScreen() {
       setModalVisible(false);
     } catch (error) {
       Alert.alert(
-        "Error",
-        "Failed to fetch updated members. Please try again later."
+        t("error"),
+        t("groupchat.updateProblem")
       );
     }
   };
@@ -216,7 +218,7 @@ export default function MembersScreen() {
   if (members.length === 0) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>No members found.</Text>
+        <Text style={styles.errorText}>{t("groupchat.nomemberFound")}</Text>
       </View>
     );
   }
@@ -253,7 +255,7 @@ export default function MembersScreen() {
         )}
         <View>
           <Text style={styles.noAvailableUserName}>
-            {item.profile?.fullname || "有効な名前が見つかりませんでした"}
+            {item.profile?.fullname || t("groupchat.noavailableName")}
           </Text>
           <Text style={styles.statusText}>{getMemberStatus(item)}</Text>
         </View>
@@ -265,7 +267,7 @@ export default function MembersScreen() {
             onPress={() => handleRemoveMember(item.id)}
             style={styles.removeButton}
           >
-            <Text style={styles.removeButtonText}>削除</Text>
+            <Text style={styles.removeButtonText}>{t("delete")}</Text>
           </TouchableOpacity>
         )}
     </View>

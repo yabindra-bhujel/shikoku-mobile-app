@@ -6,11 +6,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import PostServices from "@/src/api/PostServices";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 const CreatePost = () => {
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState<string>("");
   const router = useRouter();
+  const {t} = useTranslation();
 
   const goBack = () => {
     router.back();
@@ -61,7 +63,7 @@ const CreatePost = () => {
 
       // check if image or content is empty
       if (images.length === 0 && content === "") {
-        Alert.alert("エラー", "写真かテキストのどちらかを入力してください。");
+        Alert.alert(t("error"), t("Community.nothingpost"));
         return;
       }
       const res = await PostServices.sendPost(formData);

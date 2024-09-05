@@ -14,6 +14,7 @@ import UserIconAndUsername from "@/src/components/GroupChat/UserIconAndUsername"
 import CreateGroup from "@/src/components/GroupChat/CreateGroup";
 import GroupServices from "@/src/api/GroupServices";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 export interface Group {
   id: number;
@@ -29,6 +30,7 @@ const GroupChat = () => {
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   const [search, setSearch] = useState<string>("");
   const isDark = useColorScheme() === "dark";
+  const {t} = useTranslation();
 
   const fetchGroups = async () => {
     try {
@@ -137,7 +139,7 @@ const GroupChat = () => {
           <View style={styles.headerSearchBarLeft}>
             <AntDesign name="search1" size={24} color={"gray"} />
             <TextInput
-              placeholder="Search"
+              placeholder={t("search")}
               placeholderTextColor={"gray"}
               value={search}
               onChangeText={handleSearch}

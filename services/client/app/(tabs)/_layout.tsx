@@ -4,9 +4,11 @@ import { AntDesign } from "@expo/vector-icons";
 import { View, useColorScheme } from "react-native";
 import { useState } from "react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const TabLayout = () => {
   const isDark = useColorScheme() === "dark";
+  const {t} = useTranslation();
 
   return (
     <UserProvider>
@@ -27,8 +29,8 @@ const TabLayout = () => {
         <Stack.Screen
           name="calendar"
           options={{
-            headerTitle: "ChatBot",
-            headerBackTitle: "Back",
+            headerTitle: t("calendar.calendarTitle"),
+            headerBackTitle: t("back"),
             headerTintColor: isDark ? "#fff" : "000",
             headerStyle: {
               backgroundColor: isDark ? "#333" : "#fff",

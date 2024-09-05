@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 import React from 'react';
 import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
 
 interface RepeatPickerTypes {
     repeat: string;
@@ -9,6 +10,8 @@ interface RepeatPickerTypes {
 
 const CustomRepeatPicker: React.FC<RepeatPickerTypes> = ({ repeat, setRepeat }) => {
     const isDark = useColorScheme() === "dark";
+    const {t} = useTranslation();
+
     const styles = StyleSheet.create({
         repeatContainer: {
           width: '90%',
@@ -34,17 +37,17 @@ const CustomRepeatPicker: React.FC<RepeatPickerTypes> = ({ repeat, setRepeat }) 
       });
   return (
     <View style={styles.repeatContainer}>
-      <Text style={styles.repeatTitle}>Repeat :</Text>
+      <Text style={styles.repeatTitle}>{t("calendar.repeatTitle")}</Text>
       <Picker
         selectedValue={repeat}
         onValueChange={setRepeat}
         style={styles.picker}
       >
-        <Picker.Item label="None" value="none"/>
-        <Picker.Item label="Daily" value="daily"/>
-        <Picker.Item label="Weekly" value="weekly"/>
-        <Picker.Item label="Monthly" value="monthly"/>
-        <Picker.Item label="Yearly" value="yearly"/>
+        <Picker.Item label={t("calendar.repeatNone")} value="none"/>
+        <Picker.Item label={t("calendar.repeatDaily")} value="daily"/>
+        <Picker.Item label={t("calendar.repeatWeekly")} value="weekly"/>
+        <Picker.Item label={t("calendar.repeatMonthly")} value="monthly"/>
+        <Picker.Item label={t("calendar.repeatYearly")} value="yearly"/>
       </Picker>
     </View>
   );

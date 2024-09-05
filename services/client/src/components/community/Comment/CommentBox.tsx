@@ -7,15 +7,17 @@ import {
   useColorScheme,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 const CommentBox = ({comment, setComment, submitComment}) => {
   const theme = useColorScheme();
+  const {t} = useTranslation();
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Add a comment"
+        placeholder={t("Community.addcomment")}
         value={comment}
         onChangeText={(text) => setComment(text)}
         multiline={true} 

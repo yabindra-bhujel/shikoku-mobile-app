@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Picker } from "@react-native-picker/picker";
+import { useTranslation } from "react-i18next";
 
 const ColorPicker = ({color, setColor, isDark}: {color: string, setColor: any, isDark: boolean}) => {
+  const {t} = useTranslation();
   return (
     <View style={{
       width: "90%",
@@ -13,7 +15,7 @@ const ColorPicker = ({color, setColor, isDark}: {color: string, setColor: any, i
     }}>
       <Text style={{
         fontSize: 16,
-      }}>Choose dot Color : </Text>
+      }}>{t("calendar.choosedotColor")} </Text>
       <Picker
         selectedValue={color}
         onValueChange={(itemValue, itemIndex) => setColor(itemValue)}
@@ -21,11 +23,11 @@ const ColorPicker = ({color, setColor, isDark}: {color: string, setColor: any, i
           width: "100%",
         }}
       >
-        <Picker.Item label="Red" value="red"/>
-        <Picker.Item label="Pink" value="pink" />
-        <Picker.Item label="Blue" value="blue" />
-        <Picker.Item label="Green" value="green" />
-        <Picker.Item label="Yellow" value="yellow" />
+        <Picker.Item label={t("colors.red")} value="red"/>
+        <Picker.Item label={t("colors.pink")} value="pink" />
+        <Picker.Item label={t("colors.blue")} value="blue" />
+        <Picker.Item label={t("colors.green")} value="green" />
+        <Picker.Item label={t("colors.yellow")} value="yellow" />
       </Picker>
     </View>
   );

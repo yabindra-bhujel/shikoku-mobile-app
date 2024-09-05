@@ -19,6 +19,7 @@ import { useUser } from "@/src/hooks/UserContext";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import GroupServices from "@/src/api/GroupServices";
 import axiosInstance from "@/src/config/Api";
+import { useTranslation } from "react-i18next";
 
 const AddMemberModal = ({
   visible,
@@ -39,6 +40,7 @@ const AddMemberModal = ({
   const [page, setPage] = useState<number>(1);
   const [hasMoreUsers, setHasMoreUsers] = useState<boolean>(true);
   const isDark = useColorScheme() === "dark";
+  const {t} = useTranslation();
 
   useEffect(() => {
     const fetchUsers = async (pageNumber: number) => {
@@ -214,15 +216,15 @@ const AddMemberModal = ({
         <View style={styles.centeredView}>
           <View style={styles.headerModal}>
             <TouchableOpacity style={styles.headerLeft} onPress={onClose}>
-              <Text style={styles.headerLeftRightText}>Close</Text>
+              <Text style={styles.headerLeftRightText}>{t("close")}</Text>
             </TouchableOpacity>
             <View style={styles.headerCenter}>
-              <Text style={styles.modalText}>Add Members</Text>
+              <Text style={styles.modalText}>{t("groupchat.addmember")}</Text>
             </View>
             <View style={styles.headerRight}>
               {selectedUsers.length > 0 && (
                 <TouchableOpacity onPress={addMember}>
-                  <Text style={styles.headerLeftRightText}>Add</Text>
+                  <Text style={styles.headerLeftRightText}>{t("add")}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -237,7 +239,7 @@ const AddMemberModal = ({
             />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search users"
+              placeholder={t("groupchat.userSearch")}
               onChangeText={(text) => setSearchQuery(text)}
               value={searchQuery}
             />
@@ -287,7 +289,7 @@ const AddMemberModal = ({
               ))
             ) : (
               <Text style={styles.noUsersText}>
-                No users available for adding.
+                {t("groupchat.nouserAvailable")}
               </Text>
             )}
             {loading && (

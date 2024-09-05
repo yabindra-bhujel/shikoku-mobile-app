@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TextInput, StyleSheet, View } from "react-native";
 
 const TextArea = ({text, setText}) => {
+    const {t} = useTranslation();
 
     return (
         <View style={styles.container}>
             <TextInput
                 style={styles.textArea}
-                placeholder="共有する内容を入力してください！"
+                placeholder={t("Community.clicktoinput")}
                 placeholderTextColor="gray"
                 value={text}
                 onChangeText={setText}

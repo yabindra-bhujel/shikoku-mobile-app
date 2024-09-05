@@ -14,18 +14,21 @@ import { useRouter } from "expo-router";
 import React from "react";
 import axiosInstance from "@/src/config/Api";
 import debounce from "lodash/debounce";
+import { useTranslation } from 'react-i18next';  // Import useTranslation
+import i18n from '@/services/config';
 
 interface Settings {
-  user_id: number;
-  is_profile_searchable: boolean;
-  is_message_notification_enabled: boolean;
-  is_post_notification_enabled: boolean;
-  is_survey_notification_enabled: boolean;
-  is_two_factor_authentication_enabled: boolean;
+  user_id?: number;
+  is_profile_searchable?: boolean | undefined;
+  is_message_notification_enabled?: boolean;
+  is_post_notification_enabled?: boolean;
+  is_survey_notification_enabled?: boolean;
+  is_two_factor_authentication_enabled?: boolean;
   language: string;
 }
 
 const Setting = () => {
+  const { t } = useTranslation();  // Initialize useTranslation
   const router = useRouter();
   const theme = useColorScheme();
   const [loading, setLoading] = React.useState(false);
@@ -38,7 +41,7 @@ const Setting = () => {
       setSettings(response.data);
       setLoading(false);
     } catch (error) {
-      Alert.alert('Error', "An error occurred while fetching settings. Please try again later.");
+      Alert.alert('Error', t('error_fetch_settings'));
       setLoading(false);
     }
   };
@@ -47,16 +50,18 @@ const Setting = () => {
     try {
       await axiosInstance.put('/settings', updatedSettings);
     } catch (error) {
-      Alert.alert('Error', "An error occurred while updating settings. Please try again later.");
+      Alert.alert('Error', t('error_update_settings'));
     }
   };
 
-  const updateLanguage = async () => {
+  const updateLanguage = async (newLang: string) => {
     try {
-      const response = await axiosInstance.put('/settings/language');
-      setSettings(response.data);
+      await i18n.changeLanguage(newLang);  // Change the language using i18next
+      const updatedSettings = { ...settings, language: newLang };
+      setSettings(updatedSettings);
+      await axiosInstance.put('/settings/language', { language: newLang });
     } catch (error) {
-      Alert.alert('Error', "An error occurred while updating the language. Please try again later.");
+      Alert.alert('Error', t('error_update_language'));
     }
   };
 
@@ -169,17 +174,17 @@ const Setting = () => {
               color={theme === 'dark' ? '#fff' : '#000'}
             />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={styles.headerTitle}>{t('settings.settingTitle')}</Text>
         </View>
       </View>
 
       <ScrollView>
         {/* Profile */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Profile</Text>
+          <Text style={styles.sectionTitle}>{t('profile')}</Text>
           <View style={styles.item}>
             <Ionicons name="people-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-            <Text style={styles.itemText}>Profile Searchable</Text>
+            <Text style={styles.itemText}>{t('settings.profileSearchable')}</Text>
             <Switch
               value={settings.is_profile_searchable}
               onValueChange={() => toggleSwitch('is_profile_searchable')}
@@ -189,10 +194,10 @@ const Setting = () => {
 
         {/* Notifications */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Text style={styles.sectionTitle}>{t('settings.notifications')}</Text>
           <View style={styles.item}>
             <Ionicons name="chatbubble-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-            <Text style={styles.itemText}>Message Notifications</Text>
+            <Text style={styles.itemText}>{t('settings.messageNotifications')}</Text>
             <Switch
               value={settings.is_message_notification_enabled}
               onValueChange={() => toggleSwitch('is_message_notification_enabled')}
@@ -200,7 +205,7 @@ const Setting = () => {
           </View>
           <View style={styles.item}>
             <Ionicons name="paper-plane-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-            <Text style={styles.itemText}>Post Notifications</Text>
+            <Text style={styles.itemText}>{t('settings.postNotifications')}</Text>
             <Switch
               value={settings.is_post_notification_enabled}
               onValueChange={() => toggleSwitch('is_post_notification_enabled')}
@@ -208,7 +213,7 @@ const Setting = () => {
           </View>
           <View style={styles.item}>
             <Ionicons name="megaphone-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-            <Text style={styles.itemText}>Survey Notifications</Text>
+            <Text style={styles.itemText}>{t('settings.surveyNotifications')}</Text>
             <Switch
               value={settings.is_survey_notification_enabled}
               onValueChange={() => toggleSwitch('is_survey_notification_enabled')}
@@ -218,10 +223,10 @@ const Setting = () => {
 
         {/* Security */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security</Text>
+          <Text style={styles.sectionTitle}>{t('settings.Security')}</Text>
           <View style={styles.item}>
             <Ionicons name="lock-closed-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-            <Text style={styles.itemText}>Two-Factor Authentication</Text>
+            <Text style={styles.itemText}>{t('settings.two-factor-auth')}</Text>
             <Switch
               value={settings.is_two_factor_authentication_enabled}
               onValueChange={() => toggleSwitch('is_two_factor_authentication_enabled')}
@@ -229,14 +234,13 @@ const Setting = () => {
           </View>
         </View>
 
-        {/* 言語設定 */}
+        {/* Language Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Languages</Text>
+          <Text style={styles.sectionTitle}>{t('language')}</Text>
           <View style={styles.item}>
             <Ionicons name="language-outline" size={20} color={theme === 'dark' ? '#ddd' : '#333'} />
-            <Text style={styles.itemText}>Language</Text>
-
-            <TouchableOpacity onPress={updateLanguage}>
+            <Text style={styles.itemText}>{t('settings.select_language')}</Text>
+            <TouchableOpacity onPress={() => updateLanguage(settings.language === 'en' ? 'ja' : 'en')}>
               <Text style={styles.itemText}>{settings.language === 'en' ? 'English' : '日本語'}</Text>
             </TouchableOpacity>
           </View>
@@ -247,3 +251,4 @@ const Setting = () => {
 };
 
 export default Setting;
+``

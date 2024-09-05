@@ -16,6 +16,7 @@ import CalenderService from '@/src/api/CalenderService';
 import CreateModal from "@/src/components/Calendar/EventCreateModal";
 import { CalendarClientEvent } from "@/src/components/CalendarEventTypes";
 import { useUser } from "@/src/hooks/UserContext";
+import { useTranslation } from "react-i18next";
 
 const CalendarScreen = () => {
   const isDark = useColorScheme() === 'dark';
@@ -27,6 +28,7 @@ const CalendarScreen = () => {
   >([]);
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
   const { loggedInUserId } = useUser();
+  const {t} = useTranslation();
 
   const fetchData = async () => {
     try {
@@ -218,6 +220,8 @@ const CalendarScreen = () => {
             textDayFontSize: 16,
             calendarBackground: isDark ? '#111' : 'white',
             monthTextColor: isDark ? 'white' : 'black',
+            textMonth: t('calendar.monthNames'),
+            textDayNames: t('calendar.dayNames'),
           }}
           style={{
             marginHorizontal: 10,
@@ -246,7 +250,7 @@ const CalendarScreen = () => {
               </TouchableOpacity>
             ))
           ) : (
-            <Text style={styles.noEventsText}>No events for this date</Text>
+            <Text style={styles.noEventsText}>{t("calendar.noEvent")}</Text>
           )}
         </View>
       </ScrollView>

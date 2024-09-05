@@ -11,12 +11,13 @@ import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import CalenderService from "@/src/api/CalenderService";
 import ColorPicker from "./ColorPicker";
-import StyledButton2 from "../StyledButton2";
+import StyledButton2 from "./CreateEventBtn";
 import CustomDatePicker from "./CustomDatePicker";
 import moment from "moment-timezone";
 import CustomTimePicker from "./CustomTimePicker";
 import CustomRepeatPicker from "./CustomRepeatPicker";
 import { CalendarEvent } from "../CalendarEventTypes";
+import { useTranslation } from "react-i18next";
 
 interface CreateModalProps {
   visible: boolean;
@@ -46,18 +47,20 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [repeatInterval, setRepeatInterval] = useState<
     "none" | "daily" | "weekly" | "monthly" | "yearly"
   >("none");
+  const {t} = useTranslation();
+
 
   const handleCreateEvent = async () => {
     if (title.trim() === "") {
-      alert("Please fill in the event title");
+      alert(t("calendar.noeventTitle"));
       return;
     }
     if (endDate < startDate) {
-      alert("End date cannot be before start date");
+      alert(t("calendar.startbigthanendErr"));
       return;
     }
     if (endTime < startTime) {
-      alert("End time cannot be before start time");
+      alert(t("calendar.starttimebigthanendErr"));
       return;
     }
 
@@ -265,21 +268,21 @@ const CreateModal: React.FC<CreateModalProps> = ({
             end={{ x: 0, y: 0 }}
             style={styles.headerContainer}
           >
-            <Text style={styles.headerText}>Create an Event</Text>
+            <Text style={styles.headerText}>{t("calendar.createeventTitle")}</Text>
           </LinearGradient>
           <ScrollView style={{ backgroundColor: isDark ? "#333" : "#ddd" }}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputTitle}>Event Title:</Text>
+              <Text style={styles.inputTitle}>{t("calendar.eventTitle")}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter event title"
+                placeholder={t("calendar.placeholderTitle")}
                 value={title}
                 onChangeText={(text) => setTitle(text)}
                 placeholderTextColor={"gray"}
               />
             </View>
             <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionTitle}>Description: </Text>
+              <Text style={styles.descriptionTitle}>{t("calendar.eventDescription")}</Text>
               <TextInput
                 editable
                 multiline
@@ -288,12 +291,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
                 maxLength={200}
                 value={description}
                 onChangeText={(text) => setDescription(text)}
-                placeholder="Enter event description"
+                placeholder={t("calendar.placeholderDes")}
                 placeholderTextColor={"gray"}
               />
             </View>
             <CustomDatePicker
-              title="Start Date"
+              title={t("calendar.startDate")}
               isDark={isDark}
               value={startDate}
               show={showStartDatePicker}
@@ -302,7 +305,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
             />
 
             <CustomDatePicker
-              title="End Date"
+              title={t("calendar.endDate")}
               isDark={isDark}
               value={endDate}
               show={showEndDatePicker}
@@ -311,13 +314,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
             />
             <View style={styles.timeFieldContainer}>
               <CustomTimePicker
-                title="Start Time"
+                title={t("calendar.startTime")}
                 isDark={isDark}
                 value={startTime}
                 setValue={handleSelectStartTime}
               />
               <CustomTimePicker
-                title="End Time"
+                title={t("calendar.endTime")}
                 isDark={isDark}
                 value={endTime}
                 setValue={handleSelectEndTime}
@@ -331,11 +334,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
           </ScrollView>
           <View style={styles.btnContainer}>
             <StyledButton2
-              title={"Cancel"}
+              title={t("cancel")}
               handlePress={onHide}
               background={"red"}
             />
-            <StyledButton2 title={"Save"} handlePress={handleCreateEvent} />
+            <StyledButton2 title={t("save")} handlePress={handleCreateEvent} />
           </View>
         </View>
       </View>

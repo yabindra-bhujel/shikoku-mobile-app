@@ -19,6 +19,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface GroupMessageListProps
   extends Omit<FlatListProps<any>, "data" | "renderItem"> {
@@ -35,6 +36,7 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
     const [deletedMessageIds, setDeletedMessageIds] = useState<string[]>([]);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
     const isDark = useColorScheme() === "dark";
+    const {t} = useTranslation();
 
     useEffect(() => {
       // Filter out deleted messages
@@ -154,15 +156,15 @@ const GroupMessageList = forwardRef<FlatList<any>, GroupMessageListProps>(
         const confirmDelete = () => {
           if (isCurrentUser) {
             Alert.alert(
-              "メッセージの削除",
-              `${item.message} \nこのメッセージを完全に削除しますか?`,
+              t("groupchat.deletemess"),
+              `${item.message} \n${t("groupchat.deleteComplete")}?`,
               [
                 {
-                  text: "キャンセル",
+                  text: t("cancel"),
                   style: "cancel",
                 },
                 {
-                  text: "オーケー",
+                  text: t("delete"),
                   onPress: () => handleDelete(item.id),
                   style: "destructive",
                 },

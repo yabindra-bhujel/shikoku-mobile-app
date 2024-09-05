@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import LikeServices from "@/src/api/LikeServices";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 interface PostFooterProps {
   totalLikes?: number;
@@ -22,7 +23,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
   const [isLiked, setIsLiked] = useState<boolean>(alreadyLiked);
   const [likesCount, setLikesCount] = useState<number>(totalLikes);
   const router = useRouter();
-
+  const { t } = useTranslation();
   useEffect(() => {
     setIsLiked(alreadyLiked);
     setLikesCount(totalLikes);
@@ -53,13 +54,13 @@ const PostFooter: React.FC<PostFooterProps> = ({
           color={isLiked ? "red" : "black"}
         />
         <Text style={[styles.actionText, { color: isLiked ? "red" : "#333" }]}>
-          {likesCount} Likes
+          {likesCount} {t("Community.likes")}
         </Text>
       </TouchableOpacity>
       {showComments && (
         <TouchableOpacity style={styles.actionButton} onPress={navigateToComments}>
           <AntDesign name="message1" size={24} color="black" />
-          <Text style={styles.actionText}>{totalComments} Comments</Text>
+          <Text style={styles.actionText}>{totalComments} {t("Community.comments")}</Text>
         </TouchableOpacity>
       )}
     </View>

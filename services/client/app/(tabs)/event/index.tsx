@@ -9,8 +9,8 @@ import {
   Image,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 import EventHeader from "@/src/components/event/EventHeader";
+import { useTranslation } from "react-i18next";
 
 interface EventProps {
   title: string;
@@ -21,6 +21,7 @@ interface EventProps {
 
 const SchoolEvent = () => {
   const theme = useColorScheme();
+  const {t} = useTranslation();
   const eventList: EventProps[] = [
     {
       title: "プログラミング",
@@ -154,14 +155,14 @@ const SchoolEvent = () => {
         <View style={{ padding: 10 }}>
           <View style={styles.searchContainer}>
             <TextInput
-              placeholder="Search"
+              placeholder={t("search")}
               style={styles.searchInput}
             />
             <View style={styles.searchIconContainer}>
               <Ionicons name="search" size={24} style={styles.searchIcon} />
             </View>
           </View>
-          <Text style={styles.headerText}>upcomming event</Text>
+          <Text style={styles.headerText}>{t("schoolEvent.upcommingEvent")}</Text>
           <View style={styles.body}>
             {eventList.map((event, index) => (
               <TouchableOpacity key={index} style={styles.card}>
