@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -7,50 +8,34 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { useUser } from "@/src/hooks/UserContext";
 import UserServices, { UserProfile } from "@/src/api/UserServices";
+import UserInfoServices from "@/src/api/UserInfo";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from 'expo-image-picker';
-import CustomizableHeader from "@/src/components/CustomizableHeader";
+import Header from "./Header";
 import Bio from "./Bio";
 import Interest from "./Interest";
-import UserInfoServices from "@/src/api/UserInfo";
 import Skill from "./Skill";
 import ClubActivity from "./ClubActivity";
+import UserPostCard from "./UserPostCard";
+import { UserInfoInterface } from "@/src/type/interfaces/UserInfoInterfaces";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-interface SkillSchema {
-  id: number;
-  name: string;
+enum Menu {
+  BASICINFO = 'basic',
+  POSTINFO = 'post'
 }
-
-interface InterestSchema {
-  id: number;
-  name: string;
-}
-
-interface ClubActivitySchema {
-  id: number;
-  name: string;
-}
-
-interface UserInfo {
-  user_id: number;
-  skills?: SkillSchema[];
-  interests?: InterestSchema[];
-  club_activities?: ClubActivitySchema[];
-}
-
 
 const ProfileDetail = () => {
   const [userData, setUserData] = useState<UserProfile>();
-  const { email } = useUser();
+  const { loggedInUserId, email } = useUser();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [imageChanged, setImageChanged] = useState<boolean>(false);
   const router = useRouter();
-  const [userInfo, setUserInfo] = useState<UserInfo>();
+  const [userInfo, setUserInfo] = useState<UserInfoInterface>();
+  const [activeMenu, setActiveMenu] = useState<string>(Menu.BASICINFO);
 
   const getProfile = async () => {
     try {
@@ -63,14 +48,21 @@ const ProfileDetail = () => {
   };
 
   const getUserInfo = async () => {
-    try{
+    try {
       const response = await UserInfoServices.getUserInfo();
       setUserInfo(response.data);
+      setProfileImage(response.data.user?.update_profile);
     } catch (error) {
       Alert.alert("ユーザー情報の取得に失敗しました。もう一度お試しください。");
     }
+  };
 
-  }
+  const handleProfileUpdate = (updatedData) => {
+    setUserData((prevData) => ({
+      ...prevData,
+      ...updatedData,
+    }));
+  };
 
   const goBack = () => {
     router.back();
@@ -122,20 +114,15 @@ const ProfileDetail = () => {
     }
   }, [imageChanged]);
 
-
   return (
     <View style={styles.container}>
-      <CustomizableHeader />
+      <Header onBackPress={goBack} />
       <LinearGradient
         colors={["rgba(181,217,211,1)", "rgba(148,187,233,1)"]}
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 1, y: 1 }}
         style={styles.headerContainer}
       >
-        <TouchableOpacity style={styles.backButton} onPress={goBack}>
-          <Ionicons name="chevron-back-sharp" size={24} color="#fff" />
-        </TouchableOpacity>
-
         <View style={styles.profileHeader}>
           <TouchableOpacity onPress={pickImage}>
             <Image
@@ -153,17 +140,52 @@ const ProfileDetail = () => {
         </View>
       </LinearGradient>
 
+      {/* Menu switch buttons */}
+      <View style={styles.switchButtonContainer}>
+        <View style={[activeMenu === Menu.BASICINFO && styles.activeButtonLine]}>
+          <TouchableOpacity
+            style={[styles.btnStyle, activeMenu === Menu.BASICINFO && styles.activeButton]}
+            onPress={() => setActiveMenu(Menu.BASICINFO)}
+            disabled={activeMenu === Menu.BASICINFO}
+          >
+            <Ionicons
+              name="information-circle-sharp"
+              size={24}
+              color={activeMenu === Menu.BASICINFO ? "#E6B227" : "black"}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={[activeMenu === Menu.POSTINFO && styles.activeButtonLine]}>
+          <TouchableOpacity
+            style={[styles.btnStyle, activeMenu === Menu.POSTINFO && styles.activeButton]}
+            onPress={() => setActiveMenu(Menu.POSTINFO)}
+            disabled={activeMenu === Menu.POSTINFO}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={24}
+              color={activeMenu === Menu.POSTINFO ? "#E6B227" : "black"}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Main content */}
       <ScrollView>
-        <Bio userData={userData} getProfile={getProfile} />
-
-        {/* 興味セクション */}
-        <Interest interestsProps={userInfo?.interests} fetchUserInfo={getUserInfo} />
-        
-        {/* スキルセットセクション */}
-        <Skill skillProps={userInfo?.skills} fetchUserInfo={getUserInfo} />
-
-        {/* 活動・サークルセクション */}
-        <ClubActivity clubActivitiesProps={userInfo?.club_activities}  fetchUserInfo={getUserInfo}/>
+        {activeMenu === Menu.BASICINFO && (
+          <View>
+            <Bio userData={userData} getProfile={getProfile} />
+            <Interest interestsProps={userInfo?.interests} fetchUserInfo={getUserInfo} />
+            <Skill skillProps={userInfo?.skills} fetchUserInfo={getUserInfo} />
+            <ClubActivity clubActivitiesProps={userInfo?.club_activities} fetchUserInfo={getUserInfo} />
+          </View>
+        )}
+        {activeMenu === Menu.POSTINFO && (
+          <View>
+            <UserPostCard user_id={loggedInUserId ?? undefined} />
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -176,7 +198,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     padding: 20,
-    height: 200,
+    height: 120,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomLeftRadius: 10,
@@ -189,21 +211,13 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: '#f5f5f5',
   },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    padding: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 50,
-  },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatar: {
-    height: 120,
-    width: 120,
+    height: 100,
+    width: 100,
     borderRadius: 60,
     borderWidth: 3,
     borderColor: "#fff",
@@ -226,6 +240,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#000",
     marginTop: 5,
+  },
+  switchButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  btnStyle: {
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+  },
+  activeButton: {
+    // backgroundColor: '#E6B227',
+  },
+  activeButtonLine: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: '#E6B227',
   },
 });
 

@@ -91,7 +91,18 @@ const UserInfoServices = {
         } catch (error) {
             throw error;
         }
+    },
+
+    async getUserPost(userId: number) {
+        try {
+            const response = await axiosInstance.get(`/posts/user/${userId}`);
+            return response;
+        } catch (error) {
+            throw error;
+        }
     }
+
+
 
 }
 

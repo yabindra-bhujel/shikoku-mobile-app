@@ -12,6 +12,7 @@ import os
 from pydantic import BaseModel
 import shutil
 from ..models.entity.post import Post, PostImage
+from typing import Dict
 
 
 
@@ -48,8 +49,6 @@ async def create_post(
         print(e)
         raise HTTPException(status_code=400, detail=str(e))
     
- 
-    
 @router.get("", status_code=status.HTTP_200_OK)
 async def get_posts(request: Request, db: Session = Depends(get_db), user: User = Depends(authenticate_user)):
 
@@ -76,4 +75,20 @@ async def delete_post(post_id: int, db: Session = db_dependency, user: User = De
         return None
     
     except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+async def get_user_posts(
+    request: Request, 
+    user_id: int,
+    db: Session = db_dependency,
+    user: User = Depends(authenticate_user)
+):
+    try:
+        posts = PostLogic.get_user_posts(db, request, user)
+        print(posts)
+        return posts
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

@@ -1,7 +1,8 @@
 from email.mime import image
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, exists, join, and_,desc
-from typing import List, Optional
+from typing import List, Optional, Dict
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import func
 from fastapi import HTTPException, status
 from typing import List
@@ -223,3 +224,13 @@ class PostLogic:
 
         db.delete(post)
         db.commit()
+
+    @staticmethod
+    def get_user_posts(db: Session, request: Request, user: User) -> List[dict]:
+
+        posts = db.query(Post).options(
+            joinedload(Post.images),
+        ).filter(Post.user_id == user.id).order_by(desc(Post.created_at)).all()
+
+
+        return [PostLogic._format_post_data(db, post, request, user) for post in posts]
