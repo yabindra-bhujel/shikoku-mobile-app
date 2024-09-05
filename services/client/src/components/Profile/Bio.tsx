@@ -5,24 +5,19 @@ import {
     View,
     Alert,
     TextInput,
+    ActivityIndicator
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import UserServices, { UserProfile } from "@/src/api/UserServices";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Markdown from "react-native-markdown-display";
 
-
 interface BioProps {
     userData?: UserProfile;
     getProfile: () => void;
 }
 
-const Bio = (
-    { userData
-        , getProfile
-    }: BioProps
-
-) => {
+const Bio = ({ userData, getProfile}: BioProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isBioEditing, setIsBioEditing] = useState<boolean>(false);
     const [bio, setBio] = useState<string>("");
@@ -33,8 +28,7 @@ const Bio = (
 
     const handleEditing = () => {
         setIsBioEditing(true);
-    }
-
+    };
 
     const saveBio = async () => {
         if (bio.trim() === userData?.bio || bio.trim() === "") {
@@ -54,62 +48,59 @@ const Bio = (
         }
     };
 
-
     return (
-
-
         <View style={styles.section}>
             <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
-                    <Ionicons name="people-outline" size={20} color="#333" />
-                    <Text style={styles.sectionTitle}>BIO</Text>
+                    <Ionicons name="person-circle-outline" size={24} color="#0033EA" />
+                    <Text style={styles.sectionTitle}>プロフィール</Text>
                 </View>
                 <View>
                     {isBioEditing ? (
-                        <TouchableOpacity onPress={saveBio}>
-                            <Ionicons name="save" size={20} color="#2196F3" />
+                        <TouchableOpacity onPress={saveBio} style={styles.iconButton}>
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color="#2196F3" />
+                            ) : (
+                                <Ionicons name="checkmark-circle-outline" size={24} color="#2196F3" />
+                            )}
                         </TouchableOpacity>
                     ) : (
-                        <TouchableOpacity onPress={() => handleEditing("bio")}>
-                            <Ionicons name="create" size={20} color="#9C27B0" />
+                        <TouchableOpacity onPress={handleEditing} style={styles.iconButton}>
+                            <Ionicons name="pencil-outline" size={24} color="#9C27B0" />
                         </TouchableOpacity>
                     )}
-
                 </View>
             </View>
 
             <View style={styles.item}>
                 {isBioEditing ? (
                     <TextInput
-                        style={[styles.itemText, { minHeight: 100 }]}
+                        style={[styles.itemText, styles.textInput]}
                         value={bio}
                         onChangeText={setBio}
                         multiline
+                        placeholder="プロフィールを入力"
                     />
                 ) : (
-
-                    <Markdown style={styles.itemText}>
-                        {bio}
+                    <Markdown style={styles.markdown}>
+                        {bio || "*プロフィールが登録されていません。編集ボタンを押して追加してください。*"}
                     </Markdown>
                 )}
-
             </View>
         </View>
     );
-
 };
-
 
 const styles = StyleSheet.create({
     section: {
         marginTop: 20,
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        marginHorizontal: 20,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 12,
         padding: 20,
+        marginHorizontal: 20,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.15,
         shadowRadius: 10,
         elevation: 5,
     },
@@ -125,7 +116,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         marginLeft: 10,
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#333',
     },
@@ -135,8 +126,23 @@ const styles = StyleSheet.create({
     itemText: {
         fontSize: 16,
         color: '#666',
-    }
+        borderColor: '#ccc',
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 8,
+        backgroundColor: '#fff',
+    },
+    textInput: {
+        minHeight: 100,
+        textAlignVertical: 'top',
+    },
+    iconButton: {
+        padding: 5,
+    },
+    markdown: {
+        fontSize: 16,
+        color: '#333',
+    },
 });
-
 
 export default Bio;

@@ -24,7 +24,8 @@ const Interest: React.FC<InterestProps> = ({ interestsProps, fetchUserInfo }) =>
     const [isInterestEditing, setIsInterestEditing] = useState<boolean>(false);
     const [interests, setInterests] = useState<InterestSchema[]>([]);
     const [newInterest, setNewInterest] = useState<string>('');
-    const interestColors = ["#FFC107", "#FF5722", "#4CAF50", "#2196F3", "#9C27B0", "#FF9800"];
+    const interestColors = ["#4CAF50", "#9C27B0", "#FF9800", "#673AB7", "#00BCD4", "#FF5722", "#E91E63", "#3F51B5", "#8BC34A", "#FFC107"];
+
 
     useEffect(() => {
         if (interestsProps) {
@@ -73,11 +74,14 @@ const Interest: React.FC<InterestProps> = ({ interestsProps, fetchUserInfo }) =>
         <View style={styles.section}>
             <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
-                    <Ionicons name="heart" size={20} color="red" />
+                    {/* <Ionicons name='heart-circle-sharp' size={20} color="rd" /> */}
+                    <Ionicons name='heart-circle-outline' size={20} color="red" />
+
+
                     <Text style={styles.sectionTitle}>興味 / 特技</Text>
                 </View>
                 <TouchableOpacity onPress={isInterestEditing ? updateInterest : handleEditing}>
-                    <Ionicons name={isInterestEditing ? "save" : "create"} size={24} color={isInterestEditing ? "#4CAF50" : "#FF9800"} />
+                    <Ionicons name={isInterestEditing ? 'checkmark-circle' : 'add-circle-outline'} size={24} color={isInterestEditing ? "#4CAF50" : "#FF9800"} />
                 </TouchableOpacity>
             </View>
 
@@ -87,7 +91,7 @@ const Interest: React.FC<InterestProps> = ({ interestsProps, fetchUserInfo }) =>
                     <View style={styles.editContainer}>
                         {interests.map((interest) => (
                             <View key={interest.id} style={[styles.interestBadge, { backgroundColor: interestColors[interests.findIndex(i => i.id === interest.id) % interestColors.length] }]}>
-                                <Ionicons name="heart-outline" size={16} color="#fff" />
+                                <Ionicons name="heart-circle-sharp" size={16} color="#fff" />
                                 <Text style={styles.interestText}>{interest.name}</Text>
                                 <TouchableOpacity onPress={() => handleDeleteInterest(interest.id)}>
                                     <Ionicons name="remove-circle" size={16} color="#fff" />
@@ -116,7 +120,7 @@ const Interest: React.FC<InterestProps> = ({ interestsProps, fetchUserInfo }) =>
                     </Text>}
                         {interests.map((interest) => (
                             <View key={interest.id} style={[styles.interestBadge, { backgroundColor: interestColors[interests.findIndex(i => i.id === interest.id) % interestColors.length] }]}>
-                                <Ionicons name="heart-outline" size={16} color="#fff" />
+                                 <Ionicons name="heart-circle-sharp" size={16} color="#fff" />
                                 <Text style={styles.interestText}>{interest.name}</Text>
                             </View>
                         ))}
@@ -184,6 +188,7 @@ const styles = StyleSheet.create({
     },
     interestText: {
         marginLeft: 5,
+        marginRight: 5,
         fontSize: 14,
         color: '#fff',
         fontWeight: '600',
@@ -199,14 +204,18 @@ const styles = StyleSheet.create({
         minWidth: 200,
     },
     addBtn: {
-        display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: 30,
-        height: 30,
-        backgroundColor: '#FF5733',
+        width: 40,
+        height: 40,
+        backgroundColor: '#27A0E6',
         borderRadius: 50,
-    }
+        shadowColor: '#6200EE',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
+        elevation: 5,
+    },
 });
 
 export default Interest;

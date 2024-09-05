@@ -6,8 +6,6 @@ import {
   View,
   ScrollView,
   Alert,
-  ActivityIndicator,
-  TextInput,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useUser } from "@/src/hooks/UserContext";
@@ -21,6 +19,7 @@ import Bio from "./Bio";
 import Interest from "./Interest";
 import UserInfoServices from "@/src/api/UserInfo";
 import Skill from "./Skill";
+import ClubActivity from "./ClubActivity";
 
 interface SkillSchema {
   id: number;
@@ -51,14 +50,7 @@ const ProfileDetail = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [imageChanged, setImageChanged] = useState<boolean>(false);
   const router = useRouter();
-  const [isSkillEditing, setIsSkillEditing] = useState<boolean>(false);
-  const [isActivityEditing, setIsActivityEditing] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<UserInfo>();
-
-  // Updated interests and colors
-  const skills = ["HTML", "CSS", "JavaScript", "React", "React Native", "Node.js", "Python"];
-  const skillColors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A6", "#FFC133", "#33FFF9"];
-  const activities = ["佐藤研究室", "書道部"];
 
   const getProfile = async () => {
     try {
@@ -170,23 +162,8 @@ const ProfileDetail = () => {
         {/* スキルセットセクション */}
         <Skill skillProps={userInfo?.skills} fetchUserInfo={getUserInfo} />
 
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="school-outline" size={20} color="#333" />
-            <Text style={styles.sectionTitle}>活動・サークル</Text>
-          </View>
-          <View style={styles.activityContainer}>
-            <View style={styles.activityCard}>
-              <Ionicons name="book-outline" size={30} color="#5A67D8" />
-              <Text style={styles.activityText}>佐藤研究室</Text>
-            </View>
-            <View style={styles.activityCard}>
-              <Ionicons name="brush-outline" size={30} color="#F56565" />
-              <Text style={styles.activityText}>書道部</Text>
-            </View>
-          </View>
-        </View>
+        {/* 活動・サークルセクション */}
+        <ClubActivity clubActivitiesProps={userInfo?.club_activities}  fetchUserInfo={getUserInfo}/>
       </ScrollView>
     </View>
   );
@@ -199,7 +176,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     padding: 20,
-    height: 240,
+    height: 200,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomLeftRadius: 10,
@@ -249,105 +226,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#000",
     marginTop: 5,
-  },
-  section: {
-    marginTop: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginHorizontal: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sectionTitle: {
-    marginLeft: 10,
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  item: {
-    marginTop: 10,
-  },
-  itemText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  interestContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 10,
-  },
-  interestBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
-    backgroundColor: '#FF5733',
-  },
-  interestText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  skillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 10,
-  },
-  skillBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
-    backgroundColor: '#FF5733',
-  },
-  skillText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  activityContainer: {
-    marginTop: 10,
-  },
-  activityCard: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  activityText: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
   },
 });
 

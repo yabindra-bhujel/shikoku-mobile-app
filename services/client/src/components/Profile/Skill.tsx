@@ -28,7 +28,8 @@ const Skill: React.FC<SkillProps> = ({ skillProps, fetchUserInfo }) => {
     const [newSkill, setNewSkill] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
 
-    const skillColors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A6", "#FFC133", "#33FFF9"];
+    const skillColors = [
+        "#FF5733", "#3357FF", "#FF33A6", "#FFC133", "#00796B", "#C2185B", "#F57C00", "#283593", "#D32F2F"];
 
     useEffect(() => {
         if (skillProps) {
@@ -79,27 +80,31 @@ const Skill: React.FC<SkillProps> = ({ skillProps, fetchUserInfo }) => {
         <View style={styles.section}>
             <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
-                    <FontAwesome name="code" size={20} color="purple" />
+                    <Ionicons name='code-slash' size={20} color="#51E090" />
                     <Text style={styles.sectionTitle}>スキルセット</Text>
                 </View>
-                <TouchableOpacity 
+                <TouchableOpacity
                     onPress={isSkillEditing ? updateInterest : handleEditing}
                     accessibilityLabel={isSkillEditing ? "Save Skills" : "Edit Skills"}
                     accessibilityHint={isSkillEditing ? "Saves the skills" : "Allows you to edit skills"}
                 >
-                    <Ionicons name={isSkillEditing ? "save" : "create"} size={24} color={isSkillEditing ? "#FF33A6" : "#33FF57"} />
+                    <Ionicons
+                        name={isSkillEditing ? "checkmark-done-circle" : "create-outline"}
+                        size={24}
+                        color={isSkillEditing ? "#03DAC6" : "#6200EE"}
+                    />
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.interestContainer}>
+            <View style={styles.skillContainer}>
                 {isSkillEditing ? (
                     <View style={styles.editContainer}>
                         {skills.map((skill) => (
-                            <View key={skill.id} style={[styles.interestBadge, { backgroundColor: skillColors[skills.findIndex(i => i.id === skill.id) % skillColors.length] }]}>
-                                <FontAwesome name="code" size={16} color="black" />
-                                <Text style={styles.interestText}>{skill.name}</Text>
+                            <View key={skill.id} style={[styles.skillBadge, { backgroundColor: skillColors[skills.findIndex(i => i.id === skill.id) % skillColors.length] }]}>
+                                <FontAwesome name="code" size={16} color="white" />
+                                <Text style={styles.skillText}>{skill.name}</Text>
                                 <TouchableOpacity onPress={() => handleDeleteInterest(skill.id)} accessibilityLabel="Delete Skill">
-                                    <Ionicons name="remove-circle" size={16} color="#fff" />
+                                    <Ionicons name="remove-circle" size={20} color="white" />
                                 </TouchableOpacity>
                             </View>
                         ))}
@@ -122,12 +127,12 @@ const Skill: React.FC<SkillProps> = ({ skillProps, fetchUserInfo }) => {
                         </View>
                     </View>
                 ) : (
-                    <View style={styles.interestContainer}>
-                        {skills.length === 0 && <Text>スキルが登録されていません。編集ボタンを押して追加してください。</Text>}
+                    <View style={styles.skillContainer}>
+                        {skills.length === 0 && <Text style={styles.noSkillsText}>スキルが登録されていません。編集ボタンを押して追加してください。</Text>}
                         {skills.map((skill) => (
-                            <View key={skill.id} style={[styles.interestBadge, { backgroundColor: skillColors[skills.findIndex(i => i.id === skill.id) % skillColors.length] }]}>
-                                <Ionicons name="heart-outline" size={16} color="#fff" />
-                                <Text style={styles.interestText}>{skill.name}</Text>
+                            <View key={skill.id} style={[styles.skillBadge, { backgroundColor: skillColors[skills.findIndex(i => i.id === skill.id) % skillColors.length] }]}>
+                                <Ionicons name='code-slash' size={20} color="white" />
+                                <Text style={styles.skillText}>{skill.name}</Text>
                             </View>
                         ))}
                     </View>
@@ -167,7 +172,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
     },
-    interestContainer: {
+    skillContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         marginTop: 10,
@@ -182,7 +187,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 10,
     },
-    interestBadge: {
+    skillBadge: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 8,
@@ -190,9 +195,15 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginRight: 10,
         marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 3,
     },
-    interestText: {
+    skillText: {
         marginLeft: 5,
+        marginRight: 5,
         fontSize: 14,
         color: '#fff',
         fontWeight: '600',
@@ -200,21 +211,28 @@ const styles = StyleSheet.create({
     textInput: {
         borderColor: '#ccc',
         borderWidth: 1,
-        borderRadius: 50,
+        borderRadius: 25,
         padding: 10,
         marginRight: 10,
         flex: 1,
         fontWeight: '600',
-        minWidth: 200,
     },
     addBtn: {
-        display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: 30,
-        height: 30,
-        backgroundColor: '#FF5733',
+        width: 40,
+        height: 40,
+        backgroundColor: '#0033EA',
         borderRadius: 50,
+        shadowColor: '#6200EE',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    noSkillsText: {
+        color: '#666',
+        fontSize: 16,
     },
 });
 
