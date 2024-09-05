@@ -69,7 +69,7 @@
         "nouserAvailable": "No users available for adding.",
         "nomemberFound": "No members found.",
         "removeMember": "Remove Member",
-        "removeConfirm": "Are you sure you want to remove this member ?",
+        "removeConfirm": "Are you sure want to remove this member ?",
         "removeSuccess": "Remove member successed !!",
         "removeProblem": "Failed to remove member. Please try again later!",
         "updateProblem": "Failed to update. Please try again later!",
@@ -119,7 +119,8 @@
         "repeatMonthly": "Monthly",
         "repeatYearly": "Yearly",
         "placeholderTitle": "Enter event title...",
-        "placeholderDes": "Enter event description..."
+        "placeholderDes": "Enter event description...",
+        "editEvent": "Edit Event"
     },
     "colors": {
         "red": "Red",

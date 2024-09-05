@@ -10,6 +10,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import moment from 'moment';
 
 interface DatePickerType {
   title: string;
@@ -18,6 +19,7 @@ interface DatePickerType {
   value: Date;
   customHandle: any;
   isDark: boolean;
+  contentWidth?: any;
 }
 
 const CustomDatePicker: React.FC<DatePickerType> = ({
@@ -27,8 +29,11 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
   value,
   customHandle,
   isDark,
+  contentWidth = "90%",
 }) => {
   const { t } = useTranslation();
+  const formatDate = (date: Date) => moment(date).format('YYYY/MM/DD'); // Use your desired format
+
 
   const styles = StyleSheet.create({
     centeredView: {
@@ -67,7 +72,7 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      width: "90%",
+      width: contentWidth,
       height: 60,
       backgroundColor: isDark ? "#222" : "#fff",
       borderRadius: 10,
@@ -84,7 +89,7 @@ const CustomDatePicker: React.FC<DatePickerType> = ({
       <View style={styles.datePickerContainer}>
         <View style={styles.datePicker}>
           <Text style={styles.selectedDate}>
-            {title}: {value.toLocaleDateString()}
+            {title}: {formatDate(value)}
           </Text>
           <AntDesign
             name="calendar"

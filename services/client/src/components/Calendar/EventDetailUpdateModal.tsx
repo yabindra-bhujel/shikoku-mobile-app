@@ -14,6 +14,7 @@ import CustomDatePicker from "./CustomDatePicker";
 import CustomTimePicker from "./CustomTimePicker";
 import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import moment from 'moment-timezone';
+import { useTranslation } from "react-i18next";
 
 const EventModal = ({
   visible,
@@ -35,6 +36,7 @@ const EventModal = ({
     newDate.setMilliseconds(0);
     return newDate;
   };
+  const {t} = useTranslation();
 
   // Initial state values
   const initialStartTime = setSpecificTime(today, "09:00:00");
@@ -54,12 +56,11 @@ const EventModal = ({
     if (event) {
       setTitle(event.title || "");
       setDescription(event.description || "");
-
-      const parsedStartDate = event.start ? new Date(event.start) : today;
-      const parsedEndDate = event.end ? new Date(event.end) : today;
+      const parsedStartDate = event.startDate ? new Date(event.startDate) : today;
+      const parsedEndDate = event.endDate ? new Date(event.endDate) : today;
       setStartDate(isNaN(parsedStartDate.getTime()) ? today : parsedStartDate);
       setEndDate(isNaN(parsedEndDate.getTime()) ? today : parsedEndDate);
-
+      
       // Extract and set the start and end times from the event
       const parsedStartTime = event.startTime ? setSpecificTime(today, event.startTime) : initialStartTime;
       const parsedEndTime = event.endTime ? setSpecificTime(today, event.endTime) : initialEndTime;
@@ -100,7 +101,6 @@ const EventModal = ({
       start,
       end,
     };
-    
     try {
       const res = await CalenderService.updateEvent(event.id, eventData);
       if (res) {
@@ -162,7 +162,7 @@ const EventModal = ({
               { backgroundColor: isDark ? "#333" : "#0073e6" },
             ]}
           >
-            <Text style={styles.headerText}>Edit event</Text>
+            <Text style={styles.headerText}>{t("calendar.editEvent")}</Text>
           </View>
           <ScrollView style={styles.bodyContainer}>
             <Text
@@ -173,7 +173,7 @@ const EventModal = ({
                 },
               ]}
             >
-              Title
+              {t("calendar.eventTitle")}
             </Text>
             <TextInput
               style={[
@@ -194,7 +194,7 @@ const EventModal = ({
                 },
               ]}
             >
-              Description
+              {t("calendar.eventDescription")}
             </Text>
             <TextInput
               editable
@@ -214,7 +214,7 @@ const EventModal = ({
               placeholderTextColor={"gray"}
             />
             <CustomDatePicker
-              title="Start Date"
+              title={t("calendar.startDate")}
               show={showStartDatePicker}
               setShow={() => setShowStartDatePicker(!showStartDatePicker)}
               value={startDate}
@@ -224,9 +224,10 @@ const EventModal = ({
                 setStartDate(currentDate);
               }}
               isDark={isDark}
+              contentWidth={'100%'}
             />
             <CustomDatePicker
-              title="End Date"
+              title={t("calendar.endDate")}
               show={showEndDatePicker}
               setShow={() => setShowEndDatePicker(!showEndDatePicker)}
               value={endDate}
@@ -236,34 +237,37 @@ const EventModal = ({
                 setEndDate(currentDate);
               }}
               isDark={isDark}
+              contentWidth={'100%'}
             />
             <View style={styles.timesContainer}>
               <CustomTimePicker
-                title="Start Time"
+                title={t("calendar.startTime")}
                 value={startTime}
                 setValue={handleSelectStartTime}
                 isDark={isDark}
+                width={"100%"}
               />
               <CustomTimePicker
-                title="End Time"
+                title={t("calendar.endTime")}
                 value={endTime}
                 setValue={handleSelectEndTime}
                 isDark={isDark}
+                width={"100%"}
               />
             </View>
           </ScrollView>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleSave}>
-              <Text style={styles.buttonText}>Save</Text>
+              <Text style={styles.buttonText}>{t("save")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.deleteButton]}
               onPress={handleDelete}
             >
-              <Text style={styles.buttonText}>Delete</Text>
+              <Text style={styles.buttonText}>{t("delete")}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={onClose}>
-              <Text style={styles.buttonText}>Close</Text>
+              <Text style={styles.buttonText}>{t("close")}</Text>
             </TouchableOpacity>
           </View>
         </View>

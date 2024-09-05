@@ -11,13 +11,13 @@ import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import CalenderService from "@/src/api/CalenderService";
 import ColorPicker from "./ColorPicker";
-import StyledButton2 from "./CreateEventBtn";
 import CustomDatePicker from "./CustomDatePicker";
 import moment from "moment-timezone";
 import CustomTimePicker from "./CustomTimePicker";
 import CustomRepeatPicker from "./CustomRepeatPicker";
 import { CalendarEvent } from "../CalendarEventTypes";
 import { useTranslation } from "react-i18next";
+import StyledButton2 from "./CreateEventBtn";
 
 interface CreateModalProps {
   visible: boolean;

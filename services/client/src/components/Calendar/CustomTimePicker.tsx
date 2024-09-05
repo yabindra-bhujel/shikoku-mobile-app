@@ -9,6 +9,7 @@ interface TimePickerTypes {
   value: Date;
   setValue: any;
   isDark: boolean;
+  width?: any;
 }
 
 const CustomTimePicker: React.FC<TimePickerTypes> = ({
@@ -17,6 +18,7 @@ const CustomTimePicker: React.FC<TimePickerTypes> = ({
   currentTime,
   setValue,
   isDark,
+  width = "90%"
 }) => {
   const [showPicker, setShowPicker] = useState(false);
 
@@ -44,7 +46,7 @@ const CustomTimePicker: React.FC<TimePickerTypes> = ({
       alignItems: "center",
       justifyContent: "space-between",
       backgroundColor: isDark ? "#222" : "#fafafa",
-      width: "90%",
+      width: width,
     },
     label: {
       fontSize: 16,
@@ -67,7 +69,7 @@ const CustomTimePicker: React.FC<TimePickerTypes> = ({
             value={value}
             mode="time"
             display="default"
-            onChange={handleTimeChange}
+            onChange={setValue}
             style={{ width: 100 }}
           />
         </View>
