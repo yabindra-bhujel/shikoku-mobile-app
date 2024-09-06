@@ -18,6 +18,7 @@ from config.exception.exception import ExceptionHandlerMiddleware
 from src.websocketRouter.group_messge_router import router as websocket_group_message_router
 from src.router.school_event import router as school_event_router
 from src.router.application_settings import router as application_settings_router
+from src.router.user_details import router as user_details_router
 
 # 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
@@ -71,6 +72,7 @@ app.include_router(group_message_router)
 app.include_router(school_event_router)
 app.include_router(application_settings_router)
 app.include_router(websocket_group_message_router)
+app.include_router(user_details_router)
 
 
 #  これは テスト用の HTML です

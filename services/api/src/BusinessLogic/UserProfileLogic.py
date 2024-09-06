@@ -81,12 +81,17 @@ class UserProfileLogic:
             if not user_profile:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found")
             
+            user = db.query(User).filter(User.id == user_profile.user_id).first()
+            
             profile_output = {
+                "id": user.username,
                 "user_id": user.id,
                 "first_name": user_profile.first_name,
                 "last_name": user_profile.last_name,
                 "bio": user_profile.bio,
-                "update_profile": None 
+                "update_profile": None,
+                "department": user.department,
+
             }
 
             if user_profile.profile_picture:

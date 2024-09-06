@@ -1,37 +1,59 @@
+import React, { useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
-  useColorScheme,
+  TouchableOpacity,
   View,
+  ScrollView,
+  Alert,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { useUser } from "@/src/hooks/UserContext";
 import UserServices, { UserProfile } from "@/src/api/UserServices";
-import UserAvatar from "../UserAvatar";
-import Header from "../CustomizableHeader";
-import { router } from "expo-router";
-import EditProfileModal from "./EditProfileModal";
-import CertificationList from "./CertificationDisplay";
-import { SafeAreaView } from "react-native-safe-area-context";
+import UserInfoServices from "@/src/api/UserInfo";
+import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from 'expo-image-picker';
+import Header from "./Header";
+import Bio from "./Bio";
+import Interest from "./Interest";
+import Skill from "./Skill";
+import ClubActivity from "./ClubActivity";
+import UserPostCard from "./UserPostCard";
+import { UserInfoInterface } from "@/src/type/interfaces/UserInfoInterfaces";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
+enum Menu {
+  BASICINFO = 'basic',
+  POSTINFO = 'post'
+}
 
 const ProfileDetail = () => {
-  const isDark = useColorScheme() === "dark";
   const [userData, setUserData] = useState<UserProfile>();
-  const { email } = useUser();
-  const [show, setShow] = useState(false);
-
-  const handleShowHideModal = () => {
-    setShow(!show);
-  };
+  const { loggedInUserId, email } = useUser();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [imageChanged, setImageChanged] = useState<boolean>(false);
+  const router = useRouter();
+  const [userInfo, setUserInfo] = useState<UserInfoInterface>();
+  const [activeMenu, setActiveMenu] = useState<string>(Menu.BASICINFO);
 
   const getProfile = async () => {
     try {
       const request = await UserServices.UserProfile.getProfile();
       setUserData(request.data);
+      setProfileImage(request.data.update_profile);
     } catch (error) {
-      throw error;
+      Alert.alert("プロフィール情報の取得に失敗しました。もう一度お試しください。");
+    }
+  };
+
+  const getUserInfo = async () => {
+    try {
+      const response = await UserInfoServices.getUserInfo();
+      setUserInfo(response.data);
+      setProfileImage(response.data.user?.update_profile);
+    } catch (error) {
+      Alert.alert("ユーザー情報の取得に失敗しました。もう一度お試しください。");
     }
   };
 
@@ -42,99 +64,202 @@ const ProfileDetail = () => {
     }));
   };
 
+  const goBack = () => {
+    router.back();
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+      setImageChanged(true);
+    }
+  };
+
+  const saveImage = async () => {
+    if (!profileImage) return;
+    try {
+      const formData = new FormData();
+      const uriParts = profileImage.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+
+      formData.append('file', {
+        uri: profileImage,
+        name: `profile.${fileType}`,
+        type: `image/${fileType}`,
+      });
+
+      await UserServices.UserProfile.updateImage(formData);
+      setImageChanged(false);
+      getProfile();
+    } catch (error) {
+      Alert.alert("画像の保存に失敗しました。再度お試しください。");
+    }
+  };
+
   useEffect(() => {
     getProfile();
+    getUserInfo();
   }, []);
 
+  useEffect(() => {
+    if (imageChanged) {
+      saveImage();
+    }
+  }, [imageChanged]);
+
   return (
-    <SafeAreaView style={[styles.container,{
-      backgroundColor: isDark ? "#333" : "#fff",
-    }]}>
-      <Header
-        onBackPress={() => router.back()}
-        title="Profile"
-        rightComponent={
-          <TouchableWithoutFeedback onPress={handleShowHideModal}>
-            <View>
-              <Text style={styles.editButtonText}>Edit</Text>
-            </View>
-          </TouchableWithoutFeedback>
-        }
-      />
-      <EditProfileModal
-        visible={show}
-        onHide={handleShowHideModal}
-        userData={userData}
-        onProfileUpdate={handleProfileUpdate}
-      />
-      <Image
-        style={styles.stretch}
-        source={{ uri: "https://picsum.photos/200/300" }}
-      />
-      <View style={styles.headerContainer}>
-        <UserAvatar url={userData?.update_profile} />
-        <View>
-          <Text style={[styles.headerText, {
-            color: isDark ? "#fff" : "#000",
-          }]}>{userData?.first_name ? `${userData?.first_name.toUpperCase()} ${userData?.last_name.toUpperCase()}` : "No Name available"}</Text>
-          <Text style={[styles.headerText, {
-            color: isDark ? "#fff" : "#000",
-          }]}>{email}</Text>
+    <View style={styles.container}>
+      <Header onBackPress={goBack} />
+      <LinearGradient
+        colors={["rgba(181,217,211,1)", "rgba(148,187,233,1)"]}
+        start={{ x: 0.5, y: 0.5 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerContainer}
+      >
+        <View style={styles.profileHeader}>
+          <TouchableOpacity onPress={pickImage}>
+            <Image
+              source={{ uri: profileImage || userData?.update_profile }}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
+
+          <View style={styles.userInfo}>
+            <Text style={styles.username}>
+              {userData?.first_name} {userData?.last_name}
+            </Text>
+            <Text style={styles.email}>{email}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      {/* Menu switch buttons */}
+      <View style={styles.switchButtonContainer}>
+        <View style={[activeMenu === Menu.BASICINFO && styles.activeButtonLine]}>
+          <TouchableOpacity
+            style={[styles.btnStyle, activeMenu === Menu.BASICINFO && styles.activeButton]}
+            onPress={() => setActiveMenu(Menu.BASICINFO)}
+            disabled={activeMenu === Menu.BASICINFO}
+          >
+            <Ionicons
+              name="information-circle-sharp"
+              size={24}
+              color={activeMenu === Menu.BASICINFO ? "#E6B227" : "black"}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={[activeMenu === Menu.POSTINFO && styles.activeButtonLine]}>
+          <TouchableOpacity
+            style={[styles.btnStyle, activeMenu === Menu.POSTINFO && styles.activeButton]}
+            onPress={() => setActiveMenu(Menu.POSTINFO)}
+            disabled={activeMenu === Menu.POSTINFO}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={24}
+              color={activeMenu === Menu.POSTINFO ? "#E6B227" : "black"}
+            />
+          </TouchableOpacity>
         </View>
       </View>
-      <View style={[styles.bioContainer,{
-        backgroundColor: isDark ? "#444" : "#7F97B2",
-      }]}>
-        {userData?.bio ? (
-          <Text style={[styles.bioText, {
-            color: isDark ? "#fff" : "#000",
-          }]}>{userData?.bio}</Text>
-        ) : (
-          <Text style={{
-            color: isDark ? "#fff" : "#000",
-          }}>No bio available</Text>
+
+      {/* Main content */}
+      <ScrollView>
+        {activeMenu === Menu.BASICINFO && (
+          <View>
+            <Bio userData={userData} getProfile={getProfile} />
+            <Interest interestsProps={userInfo?.interests} fetchUserInfo={getUserInfo} />
+            <Skill skillProps={userInfo?.skills} fetchUserInfo={getUserInfo} />
+            <ClubActivity clubActivitiesProps={userInfo?.club_activities} fetchUserInfo={getUserInfo} />
+          </View>
         )}
-      </View>
-      <CertificationList/>
-    </SafeAreaView>
+        {activeMenu === Menu.POSTINFO && (
+          <View>
+            <UserPostCard user_id={loggedInUserId ?? undefined} />
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
-
-export default ProfileDetail;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F0F4F8",
   },
   headerContainer: {
-    flexDirection: "row",
-    padding: 10,
-    marginHorizontal: 10,
-  },
-  stretch: {
-    width: "100%",
-    height: 200,
-  },
-  headerText: {
-    fontSize: 20,
-  },
-  userimage: {
-    height: 50,
-    width: 50,
-    borderRadius: 25,
-  },
-  bioContainer: {
     padding: 20,
-    // backgroundColor: "#7F97B2",
-    marginHorizontal: 20,
-    borderRadius: 15,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
+    position: 'relative',
+    backgroundColor: '#f5f5f5',
   },
-  bioText: {
-    fontSize: 16,
-    color: "#fff",
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  editButtonText: {
-    fontSize: 16,
-    color: "#0099ff",
+  avatar: {
+    height: 100,
+    width: 100,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: "#fff",
+    marginRight: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6.65,
+    elevation: 8,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  username: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  email: {
+    fontSize: 18,
+    color: "#000",
+    marginTop: 5,
+  },
+  switchButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  btnStyle: {
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+  },
+  activeButton: {
+    // backgroundColor: '#E6B227',
+  },
+  activeButtonLine: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: '#E6B227',
   },
 });
+
+export default ProfileDetail;

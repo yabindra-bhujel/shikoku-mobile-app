@@ -6,7 +6,13 @@ from ..models.entity.users import User
 from ..auth.router import get_current_user
 from ..BusinessLogic.PostLogic import PostLogic
 from ..auth.permissions import authenticate_user
-from fastapi_pagination import Page, Params
+from datetime import datetime
+import os
+from pydantic import BaseModel
+import shutil
+from ..models.entity.post import Post, PostImage
+from typing import Dict
+
 
 
 router = APIRouter(prefix="/posts", tags=["Post"])
@@ -65,5 +71,29 @@ async def delete_post(post_id: int, db: Session = db_dependency, user: User = De
         PostLogic.delete_post(db, post_id, user.id)
         return None
     
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+async def get_user_posts(
+    request: Request, 
+    user_id: int,
+    db: Session = db_dependency,
+    user: User = Depends(authenticate_user)
+):
+    try:
+        posts = PostLogic.get_user_posts(db, request, user)
+        return posts
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(post_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
+    try:
+        PostLogic.delete_post(db, post_id, user.id)
+        return None
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
