@@ -1,3 +1,5 @@
+import { ImageInterface } from "./PostInterface";
+
 interface User {
     id: number;
     first_name?: string;
@@ -17,7 +19,7 @@ interface Comment {
 export interface PostDetailInterface {
     id: number;
     content: string;
-    images: string[]; // Array of image URLs
+    images: ImageInterface[]; // Array of image URLs
     videos: string[]; // Array of video URLs
     files: string[]; // Array of file URLs
     created_at: string; // Assuming ISO 8601 format for date-time strings

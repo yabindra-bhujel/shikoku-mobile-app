@@ -56,7 +56,7 @@ const Post = () => {
             {post.content && <TextPost content={post.content} />}
 
             {/* check if have image then render images */}
-            {post.images?.length > 0 && <ImagePost images={post.images} />}
+            {post.images?.length > 0 && <ImagePost images={post.images.map(image => image.url)} />}
 
             <PostFooter
               totalLikes={post.total_likes}

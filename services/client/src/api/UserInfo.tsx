@@ -100,9 +100,33 @@ const UserInfoServices = {
         } catch (error) {
             throw error;
         }
+    },
+
+    async deletePostImage(postId: number, imageId: number) {
+        try{
+            const response = await axiosInstance.delete(`posts/delete_image/${postId}/${imageId}`);
+            return response;
+        }catch(error){
+            throw error;
+        }
+    },
+
+    async updatePostContent(postId: number, content: string) {
+        const fromData = new FormData();
+        fromData.append("content", content);
+        try{
+            const response = await axiosInstance.put(`posts/${postId}`, fromData,
+                {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }
+            );
+            return response;
+        }catch(error){
+            throw error;
+        }
     }
-
-
 
 }
 

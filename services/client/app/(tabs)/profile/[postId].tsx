@@ -195,7 +195,7 @@ const PostDetail = () => {
           </Text>
           }
 
-            {(post?.images?.length ?? 0) > 0 && <ImagePost images={post?.images?.map(image => image.url) ?? []} />}
+            {/* {(post?.images?.length ?? 0) > 0 && <ImagePost images={post?.images?.map(image => image.url) ?? []} />} */}
 
          
         </View>
@@ -216,13 +216,6 @@ const PostDetail = () => {
           <CommentList comments={comments ?? []} />
         </View>
       </ScrollView>
-      <View style={styles.commentBox}>
-        <CommentBox
-          comment={comment}
-          setComment={setComment}
-          submitComment={submitComment}
-        />
-      </View>
     </View>
   );
 };

@@ -97,3 +97,20 @@ async def delete_post(post_id: int, db: Session = db_dependency, user: User = De
         return None
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.delete("/delete_image/{post_id}/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post_image(post_id: int, image_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
+    try:
+        PostLogic.delete_post_image(db, post_id, image_id, user.id)
+        return None
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    
+
+@router.put("/{post_id}", status_code=status.HTTP_200_OK)
+def update_post_content(post_id: int, content = Form(...), db: Session = db_dependency, user: User = Depends(authenticate_user)):
+    try:
+        post = PostLogic.update_post_content(db, post_id, content, user.id)
+        return post
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
