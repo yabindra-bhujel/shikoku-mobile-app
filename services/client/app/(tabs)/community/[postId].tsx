@@ -76,9 +76,6 @@ const PostDetail = () => {
     }
   }
 
-  console.log(totalPages);
-  console.log(currentPage);
-
   const submitComment = async () => {
     if(comment.trim().length === 0) {
       return;
