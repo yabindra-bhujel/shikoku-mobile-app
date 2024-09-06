@@ -9,6 +9,12 @@ const StackLayout = () => {
           headerShown: false,
         }}
       />
+       <Stack.Screen
+        name="[postId]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

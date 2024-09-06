@@ -1,18 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import PostHeader from "../community/PostHeader";
 import UserInfoServices from "@/src/api/UserInfo";
 import TextPost from "../community/PostText";
 import ImagePost from "../community/ImagePost";
 import PostServices from "@/src/api/PostServices";
 import { EditPost } from "./EditPost";
-import { set } from "date-fns";
+import { useRouter } from "expo-router";
+
+
 
 interface User {
   id: number;
   first_name: string;
   last_name: string;
   profile_picture: string;
+}
+
+interface ImageInterface {
+  id: number;
+  url: string;
 }
 
 export interface UserPostInterface {
@@ -23,7 +30,7 @@ export interface UserPostInterface {
   is_active: boolean;
   total_comments: number;
   total_likes: number;
-  images?: string[];
+  images?: ImageInterface[];
 }
 
 interface UserPostCardProps {
@@ -34,10 +41,48 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
   const [posts, setPosts] = useState<UserPostInterface []>([]);
   const [userId, setUserId] = useState<number>(user_id);
   const [editPostId, setEditPostId] = useState<number | null>(null);
+  const [content, setContent] = useState<string>("");
+  const router = useRouter();
 
   const handleEditing = (postId: number) => {
     setEditPostId(prevPostId => prevPostId === postId ? null : postId);
   };
+
+
+  const handleUpdate = async (postId: number) => {
+    if(content.trim().length === 0)return;
+        try {
+            const response = await UserInfoServices.updatePostContent(postId, content);
+            if(response.status === 200){
+                setEditPostId(null);
+                setContent("");
+                getPosts();
+            }
+        } catch (error) {
+            Alert.alert("Error", "Failed to update post. Please try again later.");
+        }
+    }
+
+  useEffect(() => {
+    setUserId(user_id);
+  }, [user_id]);
+
+  const getPosts = async () => {
+    try {
+      const response = await UserInfoServices.getUserPost(userId);
+      setPosts(response.data);
+    } catch (error) {
+      console.error("Failed to fetch posts:", error);
+    }
+  };
+
+  useEffect(() => {
+    getPosts();
+  }, [userId]);
+
+  const navigationToPostDetail = (postId: number) => {
+    router.push(`/profile/${postId}`);
+  }
 
   const handleDelete = async (postId: number) => {
     try {
@@ -48,6 +93,8 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
         [
           {
             text: 'Delete',
+            style: 'destructive',
+
             onPress: async () => {
               try {
                 await PostServices.deletePost(postId);
@@ -67,39 +114,10 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
     }
   };
 
-  const handleUpdate = async (postId: number) => {
-    setEditPostId(null);
-    // try {
-    //   // Implement your update functionality here
-    //   // Example: update the post content and then set editPostId to null
-    //   await PostServices.updatePost(postId, { content: "Updated content" }); // Example payload
-    //   setEditPostId(null);
-    // } catch (error) {
-    //   console.error("Failed to update post:", error);
-    // }
-  };
-
-  useEffect(() => {
-    setUserId(user_id);
-  }, [user_id]);
-
-  const getPosts = async () => {
-    try {
-      const response = await UserInfoServices.getUserPost(userId);
-      setPosts(response.data);
-    } catch (error) {
-      console.error("Failed to fetch posts:", error);
-    }
-  };
-
-  useEffect(() => {
-    getPosts();
-  }, [userId]);
-
-  const image = "https://picsum.photos/200/300";
-
   return (
     <View style={styles.container}>
+
+      {posts.length === 0 && <Text style={styles.noPostAvailable}>No posts available</Text>}
       {posts.map((post) => (
         <View key={post.id} style={styles.postCard}>
           <PostHeader
@@ -115,15 +133,22 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
 
           {editPostId === post.id ? (
             <View>
-              <EditPost post={post} />
+              <EditPost 
+              post={post}
+              setContent={setContent}
+              content={content}
+               />
             </View>
           ) : (
             <View>
               {post.content && <TextPost content={post.content} />}
-              {(post.images?.length ?? 0) > 0 && <ImagePost images={[image]} />}
+            {(post.images?.length ?? 0) > 0 && <ImagePost images={post.images?.map(image => image.url) ?? []} />}
+
               <View style={styles.footer}>
                 <Text style={styles.likeCount}>{post.total_likes} Likes</Text>
-                <Text style={styles.commentCount}>{post.total_comments} Comments</Text>
+                <TouchableOpacity onPress={() => navigationToPostDetail(post.id)}>
+                  <Text style={styles.commentCount}>{post.total_comments} Comments</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -134,6 +159,13 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
 };
 
 const styles = StyleSheet.create({
+  noPostAvailable: {
+    fontSize: 16,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 20,
+  },
+
   container: {
     flex: 1,
     padding: 15,

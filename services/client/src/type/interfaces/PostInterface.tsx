@@ -1,7 +1,12 @@
+export interface ImageInterface {
+    id: number;
+    url: string;
+}
+
 export interface PostInterface {
     id: number;
     content: string;
-    images: string[];
+    images: ImageInterface[];
     created_at: string;
     user: {
         id: number;

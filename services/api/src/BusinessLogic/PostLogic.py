@@ -91,7 +91,6 @@ class PostLogic:
         
         return None
 
-    @staticmethod
     def _format_post_data(db: Session, post: Post, request: Request, request_user: User) -> dict:
 
         is_liked = db.query(exists().where(and_(Likes.user_id == request_user.id, Likes.post_id == post.id))).scalar()
@@ -112,12 +111,13 @@ class PostLogic:
 
         if post.images:
             base_url = str(request.base_url).rstrip("/") 
-            post_data["images"] = [f"{base_url}/static/post/{image.url}" for image in post.images]
+            # post_data["images"] = [f"{base_url}/static/post/{image.url}" for image in post.images]
+            post_data["images"] = [{"id": image.id, "url": f"{base_url}/static/post/{image.url}"} for image in post.images]
+
 
 
         return post_data    
-    
-    @staticmethod
+
     def _get_comment(db: Session, post_id: int, request: Request) -> List[dict]:
         try:
             comments = db.query(Comment).filter(Comment.post_id == post_id).order_by(desc(Comment.created_at)).all()
@@ -170,3 +170,37 @@ class PostLogic:
 
 
         return [PostLogic._format_post_data(db, post, request, user) for post in posts]
+
+    @staticmethod
+    def delete_post_image(db: Session, post_id: int, image_id: int, user_id: int) -> None:
+        post = db.query(Post).filter(Post.id == post_id).first()
+
+        if post is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+        if post.user_id != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not allowed to delete this post")
+
+        post_image = db.query(PostImage).filter(PostImage.id == image_id).first()
+
+        if post_image is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+
+        db.delete(post_image)
+        db.commit()
+        os.remove(os.path.join("static", "post", post_image.url))
+        return None
+    
+    @staticmethod
+    def update_post_content(db: Session, post_id: int, content: str, user_id: int) -> None:
+        post = db.query(Post).filter(Post.id == post_id).first()
+
+        if post is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+        if post.user_id != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not allowed to delete this post")
+
+        post.content = content
+        db.commit()
+        return None
