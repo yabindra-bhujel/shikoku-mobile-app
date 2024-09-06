@@ -87,8 +87,16 @@ async def get_user_posts(
 ):
     try:
         posts = PostLogic.get_user_posts(db, request, user)
-        print(posts)
         return posts
     except Exception as e:
         print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(post_id: int, db: Session = db_dependency, user: User = Depends(authenticate_user)):
+    try:
+        PostLogic.delete_post(db, post_id, user.id)
+        return None
+    except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

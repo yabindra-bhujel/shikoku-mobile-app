@@ -31,7 +31,19 @@ const PostServices = {
         } catch (error) {
             throw error;
         }
+    },
+
+    // user post services
+
+    async deletePost(postId: number){
+        try {
+            const result = await axiosInstance.delete(`/posts/${postId}`);
+            return result;
+        } catch (error) {
+            throw error;
+        }
     }
+
   }
 
 

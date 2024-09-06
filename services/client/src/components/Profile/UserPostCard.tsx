@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import PostHeader from "../community/PostHeader";
 import UserInfoServices from "@/src/api/UserInfo";
+import TextPost from "../community/PostText";
+import ImagePost from "../community/ImagePost";
+import PostServices from "@/src/api/PostServices";
+import { EditPost } from "./EditPost";
+import { set } from "date-fns";
 
 interface User {
   id: number;
@@ -10,7 +15,7 @@ interface User {
   profile_picture: string;
 }
 
-interface Post {
+export interface UserPostInterface {
   id: number;
   content: string;
   created_at: string;
@@ -26,8 +31,53 @@ interface UserPostCardProps {
 }
 
 const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<UserPostInterface []>([]);
   const [userId, setUserId] = useState<number>(user_id);
+  const [editPostId, setEditPostId] = useState<number | null>(null);
+
+  const handleEditing = (postId: number) => {
+    setEditPostId(prevPostId => prevPostId === postId ? null : postId);
+  };
+
+  const handleDelete = async (postId: number) => {
+    try {
+      // User confirmation
+      Alert.alert(
+        'Delete Post',
+        'Are you sure you want to delete this post?',
+        [
+          {
+            text: 'Delete',
+            onPress: async () => {
+              try {
+                await PostServices.deletePost(postId);
+                setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+              } catch (error) {
+                console.error("Failed to delete post:", error);
+              }
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } catch (error) {
+    }
+  };
+
+  const handleUpdate = async (postId: number) => {
+    setEditPostId(null);
+    // try {
+    //   // Implement your update functionality here
+    //   // Example: update the post content and then set editPostId to null
+    //   await PostServices.updatePost(postId, { content: "Updated content" }); // Example payload
+    //   setEditPostId(null);
+    // } catch (error) {
+    //   console.error("Failed to update post:", error);
+    // }
+  };
 
   useEffect(() => {
     setUserId(user_id);
@@ -38,13 +88,15 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
       const response = await UserInfoServices.getUserPost(userId);
       setPosts(response.data);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to fetch posts:", error);
     }
   };
 
   useEffect(() => {
     getPosts();
   }, [userId]);
+
+  const image = "https://picsum.photos/200/300";
 
   return (
     <View style={styles.container}>
@@ -54,12 +106,27 @@ const UserPostCard = ({ user_id = 0 }: UserPostCardProps) => {
             imageUrl={post.user.profile_picture}
             username={`${post.user.first_name} ${post.user.last_name}`}
             time={post.created_at}
+            showOptions={true}
+            isEditing={editPostId === post.id}
+            handleEditing={() => handleEditing(post.id)}
+            handleDelete={() => handleDelete(post.id)}
+            handleUpdate={() => handleUpdate(post.id)}
           />
-          <Text style={styles.postContent}>{post.content}</Text>
-          <View style={styles.footer}>
-            <Text style={styles.likeCount}>{post.total_likes} Likes</Text>
-            <Text style={styles.commentCount}>{post.total_comments} Comments</Text>
-          </View>
+
+          {editPostId === post.id ? (
+            <View>
+              <EditPost post={post} />
+            </View>
+          ) : (
+            <View>
+              {post.content && <TextPost content={post.content} />}
+              {(post.images?.length ?? 0) > 0 && <ImagePost images={[image]} />}
+              <View style={styles.footer}>
+                <Text style={styles.likeCount}>{post.total_likes} Likes</Text>
+                <Text style={styles.commentCount}>{post.total_comments} Comments</Text>
+              </View>
+            </View>
+          )}
         </View>
       ))}
     </View>
@@ -77,19 +144,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
-    // Shadow for iOS
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    // Elevation for Android
     elevation: 3,
-  },
-  postContent: {
-    fontSize: 16,
-    color: "#333",
-    marginVertical: 10,
-    lineHeight: 22,
   },
   footer: {
     flexDirection: "row",
