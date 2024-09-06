@@ -41,7 +41,7 @@ const ProfileDetail = () => {
     try {
       const request = await UserServices.UserProfile.getProfile();
       setUserData(request.data);
-      setProfileImage(request.data.update_profile);
+      setProfileImage(request.data.image);
     } catch (error) {
       Alert.alert("プロフィール情報の取得に失敗しました。もう一度お試しください。");
     }
@@ -51,17 +51,9 @@ const ProfileDetail = () => {
     try {
       const response = await UserInfoServices.getUserInfo();
       setUserInfo(response.data);
-      setProfileImage(response.data.user?.update_profile);
     } catch (error) {
       Alert.alert("ユーザー情報の取得に失敗しました。もう一度お試しください。");
     }
-  };
-
-  const handleProfileUpdate = (updatedData) => {
-    setUserData((prevData) => ({
-      ...prevData,
-      ...updatedData,
-    }));
   };
 
   const goBack = () => {

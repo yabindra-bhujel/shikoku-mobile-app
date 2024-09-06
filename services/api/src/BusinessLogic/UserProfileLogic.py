@@ -95,7 +95,7 @@ class UserProfileLogic:
             }
 
             if user_profile.profile_picture:
-                profile_output["update_profile"] = str(request.url_for('static', path=user_profile.profile_picture))
+                profile_output["image"] = str(request.url_for('static', path=user_profile.profile_picture))
         
             return profile_output
         

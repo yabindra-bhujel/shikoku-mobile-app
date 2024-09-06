@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean, DateTime
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Enum
 from sqlalchemy.sql import func
 from ..database import Base
 import enum
@@ -14,6 +14,7 @@ class UserRole(enum.Enum):
     TEACHER = 'teacher'
     USER = 'user'
 
+# TODO: ユーザ作成時に学部を選択できるようにする
 class Department(enum.Enum):
     JAPANESE_LITERATURE = 'literature'
     CALLIGRAPHY_AND_CULTURE = 'culture'
@@ -37,8 +38,7 @@ class User(Base):
     role = Column(String, default=UserRole.USER.value)
 
     # 大学の情報
-    department = Column(String, default=Department.JAPANESE_LITERATURE.value)
-    is_student = Column(Boolean, default=True)
+    department = Column(String, nullable=True)
     is_international_student = Column(Boolean, default=False)
 
     # Relationships
@@ -60,7 +60,7 @@ class User(Base):
     school_events = relationship('SchoolEvent', back_populates='creator', cascade='all, delete-orphan')
 
     # Relationships for Settings
-    application_settings = relationship('ApplicationSetting', back_populates='user', uselist=False)
+    application_settings = relationship('ApplicationSetting', back_populates='user',  cascade='all, delete-orphan',  uselist=False)
 
     # Relationships for OTP
     otp = relationship('UserOtp', back_populates='user', uselist=False)

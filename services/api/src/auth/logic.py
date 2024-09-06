@@ -80,7 +80,6 @@ class AuthLogic:
         password = data['password']
         role = data['role']
         department = data['department']
-        is_student = data['is_student'].lower() == 'true'
         is_international_student = data['is_international_student'] .lower() == 'true'
         first_name = data['first_name']
         last_name = data['last_name']
@@ -96,7 +95,6 @@ class AuthLogic:
                 email=email,
                 hashed_password=hashed_password, 
                 role=role, department=department,
-                is_student=is_student, 
                 is_international_student=is_international_student)
 
             try:
