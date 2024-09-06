@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { PostDetailInterface } from "@/src/type/interfaces/PostDetailInterface";
+import { PostDetailInterface, CommentListInterface } from "@/src/type/interfaces/PostDetailInterface";
 import PostServices from "@/src/api/PostServices";
 import UserAvatar from "@/src/components/UserAvatar";
 import PostFooter from "@/src/components/community/PostFooter";
@@ -25,6 +25,11 @@ const PostDetail = () => {
   const router = useRouter();
   const [post, setPost] = useState<PostDetailInterface>();
   const [comment, setComment] = useState<string>("");
+  const [comments, setComments] = useState<CommentListInterface[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
 
   const theme = useColorScheme();
   const { postId } = useLocalSearchParams<{ postId: string }>() ?? {
@@ -48,6 +53,32 @@ const PostDetail = () => {
     }
   }
 
+  async function fetchComments() {
+    if (!postId) return;
+
+    try {
+      const response = await CommentsService.getCommentsByPostId(parseInt(postId));
+      const newComments = response.data.items;
+
+      setComments((prevComments) => {
+        const allComments = [...newComments, ...prevComments];
+        // Remove duplicate messages
+        const uniqueallComments = Array.from(
+          new Set(allComments.map((cm) => cm.id))
+        ).map((id) => allComments.find((cm) => cm.id === id));
+        return uniqueallComments;
+      });
+      setCurrentPage(response.data.page);
+      setTotalPages(response.data.pages);
+
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch comments. Please try again later.");
+    }
+  }
+
+  console.log(totalPages);
+  console.log(currentPage);
+
   const submitComment = async () => {
     if(comment.trim().length === 0) {
       return;
@@ -61,6 +92,7 @@ const PostDetail = () => {
       await CommentsService.commentPost(commentData);
       setComment("");
       await fetchPost();
+      await fetchComments();
     } catch (error) {
       Alert.alert("Error", "Failed to comment on this post. Please try again.");
     }
@@ -68,6 +100,7 @@ const PostDetail = () => {
 
   useEffect(() => {
     fetchPost();
+    fetchComments();
   }, [postId]);
 
   const styles = StyleSheet.create({
@@ -184,7 +217,7 @@ const PostDetail = () => {
           marginLeft: 10,
           // padding: 10,
          }} >
-          <CommentList comments={post?.comments ?? []} />
+          <CommentList comments={comments ?? []} />
         </View>
       </ScrollView>
       <View style={styles.commentBox}>

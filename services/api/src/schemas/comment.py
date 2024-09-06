@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Dict
+from datetime import datetime
 
 class CommentInput(BaseModel):
     content: Optional[str] = None
@@ -10,3 +11,15 @@ class CommentRepliesInput(BaseModel):
     comment_id: int
     user_id: int 
     post_id: int
+
+class UserSchema(BaseModel):
+    username: str
+    profile_picture: Optional[str] = None
+
+class CommentSchma(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    post_id: int
+    user: UserSchema
+    replies: List[Dict] = []

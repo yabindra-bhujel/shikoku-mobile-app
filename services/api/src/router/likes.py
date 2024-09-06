@@ -20,11 +20,3 @@ async def like_toggle(like: LikeInput, db: Session = db_dependency, user: User =
     
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-@router.delete("/{like_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def dishlike(likeID: int, db: Session = db_dependency, user: User = Depends(get_current_user)):
-    try:
-        LikeLogic.dislike(db, likeID)
-        return None
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
