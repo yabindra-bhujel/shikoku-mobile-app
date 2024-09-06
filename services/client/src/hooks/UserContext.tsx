@@ -7,7 +7,6 @@ import React, {
   ReactNode,
 } from "react";
 import AuthServices from "@/src/api/AuthServices";
-import { useColorScheme } from "react-native";
 
 interface UserContextProps {
   loggedInUserId: number | null;
@@ -15,6 +14,7 @@ interface UserContextProps {
   fullname: string | null;
   email: string | null;
   image: any;
+  updateProfileImage: (newImage: string) => void;
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -23,12 +23,13 @@ const UserContext = createContext<UserContextProps>({
   fullname: null,
   email: null,
   image: null,
+  updateProfileImage: () => {},
 });
 
 export const useUser = () => useContext(UserContext);
 
 interface UserProviderProps {
-  children: ReactNode; // Define children as a ReactNode
+  children: ReactNode;
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
@@ -51,9 +52,20 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     getCurrentUser();
   }, []);
 
+  const updateProfileImage = (newImage: string) => {
+    setImage(newImage);
+  };
+
   return (
     <UserContext.Provider
-      value={{ loggedInUserId, username, fullname, email, image }}
+      value={{
+        loggedInUserId,
+        username,
+        fullname,
+        email,
+        image,
+        updateProfileImage,
+      }}
     >
       {children}
     </UserContext.Provider>

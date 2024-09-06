@@ -36,6 +36,7 @@ const ProfileDetail = () => {
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<UserInfoInterface>();
   const [activeMenu, setActiveMenu] = useState<string>(Menu.BASICINFO);
+  const { updateProfileImage } = useUser();
 
   const getProfile = async () => {
     try {
@@ -90,6 +91,7 @@ const ProfileDetail = () => {
       await UserServices.UserProfile.updateImage(formData);
       setImageChanged(false);
       getProfile();
+      updateProfileImage(profileImage);
     } catch (error) {
       Alert.alert("画像の保存に失敗しました。再度お試しください。");
     }

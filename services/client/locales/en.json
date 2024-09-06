@@ -34,7 +34,8 @@
         "surveyNotifications": "Survey Notifications",
         "Security": "Security",
         "two-factor-auth": "Two-Factor Authentication",
-        "select_language": "Select Langue"
+        "select_language": "Select Langue",
+        "languageChanged": "Language changed to English."
     },
     "Community": {
         "communityTitle": "Community",
