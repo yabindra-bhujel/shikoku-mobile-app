@@ -187,6 +187,11 @@ class PostLogic:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
 
         db.delete(post_image)
+
+        if post.content.strip() == "" and len(post.images) == 0:
+            db.delete(post)
+            db.commit()
+
         db.commit()
         os.remove(os.path.join("static", "post", post_image.url))
         return None
