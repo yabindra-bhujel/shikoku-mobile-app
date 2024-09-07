@@ -55,7 +55,14 @@ const AuthServices = {
     }
   },
 
-  async logout() {},
+  async logout() {
+    try {
+      const result = await axiosInstance.get("/auth/logout");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 
   async chanagePassword() {},
 

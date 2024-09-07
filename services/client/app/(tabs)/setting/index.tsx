@@ -14,8 +14,11 @@ import { useRouter } from "expo-router";
 import React from "react";
 import axiosInstance from "@/src/config/Api";
 import debounce from "lodash/debounce";
-import { useTranslation } from 'react-i18next';  // Import useTranslation
+import { useTranslation } from 'react-i18next';
 import i18n from '@/services/config';
+import AuthServices from "@/src/api/AuthServices";
+import * as SecureStore from "expo-secure-store";
+
 
 interface Settings {
   user_id?: number;
@@ -88,6 +91,38 @@ const Setting = () => {
     }
   };
 
+  const logout = async () => {
+    try{
+      const response = await AuthServices.logout();
+      if(response.status === 204){
+        SecureStore.deleteItemAsync("refreshToken");
+        SecureStore.deleteItemAsync("username");
+        SecureStore.deleteItemAsync("password");
+        router.push('/login');
+      }
+    }catch(error){
+      Alert.alert('Error', t('error_logout'));
+    }
+  }
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => logout(),
+        },
+      ]
+    );
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -146,6 +181,18 @@ const Setting = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'white',
+      padding: 8,
+      borderRadius: 8,
+    },
+    buttonText: {
+      fontSize: 16,
+      marginLeft: 10,
     },
   });
 
@@ -245,6 +292,14 @@ const Setting = () => {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* logout */}
+        <View style={styles.section}>
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <Ionicons name="log-out-outline" size={24} />
+        <Text style={styles.buttonText}>Log Out</Text>
+      </TouchableOpacity>
+    </View>
       </ScrollView>
     </View>
   );

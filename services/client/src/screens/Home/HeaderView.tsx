@@ -1,6 +1,5 @@
 import {
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   View,
@@ -8,7 +7,6 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import UserAvatar from "@/src/components/UserAvatar";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@/src/hooks/UserContext";
 
 const HeaderView = () => {
@@ -145,11 +143,6 @@ const HeaderView = () => {
                 </Text>
               </View>
             </View>
-            <MaterialIcons
-              name="notifications-active"
-              size={24}
-              color="white"
-            />
           </View>
         </LinearGradient>
       </View>
