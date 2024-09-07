@@ -162,10 +162,10 @@ const Login = () => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View>
             <View style={styles.headerLogo}>
-              <Image
+              {/* <Image
                 source={require("@/assets/images/64px-shikoku-logo.png")}
                 style={{ width: 64, height: 64 }} // Add style for image size
-              />
+              /> */}
               <View style={styles.headertitle}>
                 <Text style={styles.text1}>SHIKOKU UNIVERSITY</Text>
                 <Text style={styles.text2}>四国大学</Text>

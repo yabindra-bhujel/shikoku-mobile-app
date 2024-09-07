@@ -30,7 +30,7 @@ const ForgetPass = () => {
                 </View>
                 </TouchableOpacity>
                 <View style={styles.headerLogo}>
-                    <Image source={require('@/assets/images/64px-shikoku-logo.png')}/>
+                    {/* <Image source={require('@/assets/images/64px-shikoku-logo.png')}/> */}
                     <View style={styles.headtitle}>
                         <Text style={styles.text1}>SHIKOKU UNIVERSITY</Text>
                         <Text style={styles.text2}>四国大学</Text>
