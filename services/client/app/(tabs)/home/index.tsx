@@ -6,8 +6,8 @@ import {
   StatusBar,
   useColorScheme,
 } from "react-native";
-import SimpleScreen from "@/src/screens/Home/SimpleScreen";
 import HeaderView from "@/src/screens/Home/HeaderView";
+import Home from "@/src/screens/Home/HomeUi";
 
 const HomeScreen = () => {
 
@@ -29,7 +29,7 @@ const HomeScreen = () => {
           },
         ]}
       >
-        <SimpleScreen />
+        <Home />
       </ScrollView>
     </View>
   );
