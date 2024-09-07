@@ -18,6 +18,7 @@ from src.models.entity.school_event import SchoolEvent
 from src.models.entity.application_settings import ApplicationSetting
 from src.models.entity.user_otp import UserOtp
 from src.models.entity.user_details import Skill, Interest, ClubActivity, user_skills_association, user_interests_association, user_club_activities_association
+from src.models.entity.notification_token import ExpoToken
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

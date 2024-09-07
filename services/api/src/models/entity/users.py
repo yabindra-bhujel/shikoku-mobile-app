@@ -68,6 +68,9 @@ class User(Base):
     skills = relationship("Skill", secondary=user_skills_association, back_populates="users")
     interests = relationship("Interest", secondary=user_interests_association, back_populates="users")
     club_activities = relationship("ClubActivity", secondary=user_club_activities_association, back_populates="users")
+
+    # Relationships for ExpoToken
+    expo_token = relationship('ExpoToken', back_populates='user', uselist=False)
     
     def __repr__(self):
         return f'User: {self.username}'
