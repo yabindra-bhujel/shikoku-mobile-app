@@ -110,67 +110,6 @@ class GroupLogic:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-    # @staticmethod
-    # def get_groups(db: Session, user: User, request: Request):
-    #     try:
-    #         subquery = (
-    #             db.query(
-    #                 Group.id.label('group_id'),
-    #                 func.max(GroupMessage.created_at).label('last_message_time')
-    #             )
-    #             .outerjoin(GroupMessage, Group.id == GroupMessage.group_id)
-    #             .group_by(Group.id)
-    #             .subquery()
-    #         )
-
-    #         groups = (
-    #             db.query(Group, subquery.c.last_message_time)
-    #             .outerjoin(subquery, Group.id == subquery.c.group_id)
-    #             .filter(
-    #                 (Group.admin_id == user.id) |
-    #                 (Group.group_members.any(id=user.id))
-    #             )
-    #             .order_by(desc(subquery.c.last_message_time).nullslast())
-    #             .all()
-    #         )
-
-    #         group_list = []
-    #         for group, last_message_time in groups:
-    #             group_data = {
-    #                 "id": group.id,
-    #                 "name": group.name,
-    #                 "admin_id": group.admin_id,
-    #                 "created_at": group.created_at.astimezone(pytz.utc), 
-    #                 "member_count": len(group.group_members),
-    #                 "last_message": None,
-    #                 "group_image": str(request.url_for('static', path=group.group_image)) if group.group_image else None
-    #             }
-
-    #             if last_message_time:
-    #                 last_message = db.query(GroupMessage).filter(
-    #                     GroupMessage.group_id == group.id,
-    #                     GroupMessage.created_at == last_message_time
-    #                 ).first()
-
-    #                 if last_message is not None:
-    #                     user_profile = db.query(UserProfile).filter(UserProfile.user_id == last_message.sender_id).first()
-    #                     username = user_profile.first_name + " " + user_profile.last_name if user_profile else last_message.sender.username
-
-    #                     group_data["last_message"] = {
-    #                         "sender_id": last_message.sender_id,
-    #                         "message": last_message.message,
-    #                         "created_at": last_message.created_at.astimezone(pytz.utc),  
-    #                         "sender": username
-    #                     }
-
-    #             group_list.append(group_data)
-
-    #         return group_list
-
-    #     except Exception as e:
-    #         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-
     @staticmethod
     def get_group(db: Session, group_id: int, request: Request) -> Group:
         try:
@@ -355,24 +294,41 @@ class GroupLogic:
     @staticmethod
     def leave(db: Session, group_id: int, user: User) -> None:
         try:
+            # Retrieve the group by ID
             group = db.query(Group).filter(Group.id == group_id).first()
             if not group:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
-            
+
             # Ensure the user is attached to the session
             user_in_db = db.query(User).filter(User.id == user.id).one_or_none()
             if not user_in_db:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in database")
-            
+
+            # Check if the user is a member of the group
+            if user_in_db not in group.group_members:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not a member of this group")
+
+            # If the user is the admin, reassign the admin role
             if user_in_db.id == group.admin_id:
-                # chnage admin to another user
-                group.admin_id = group.group_members[0].id
-            else:
-                group.group_members.remove(user_in_db)
-            
+                if len(group.group_members) > 1:
+                    # Reassign admin to another user in the group
+                    new_admin = next(member for member in group.group_members if member.id != user_in_db.id)
+                    group.admin_id = new_admin.id
+                else:
+                    # If the user is the only member, delete the group
+                    db.delete(group)
+                    db.commit()
+                    return
+
+            # Remove the user from the group
+            group.group_members.remove(user_in_db)
+
+            # Check if there are no members left, then delete the group
+            if len(group.group_members) == 0:
+                db.delete(group)
+
             db.commit()
             db.refresh(group)
-            
 
         except HTTPException as http_exc:
             raise http_exc
