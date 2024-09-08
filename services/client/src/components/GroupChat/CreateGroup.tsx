@@ -92,7 +92,6 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
       group_type: "private",
       member_list: selectedUsers,
     };
-    console.log(data);
     try {
       const res = await GroupServices.createGroup(data);
       if (res) {
@@ -110,7 +109,6 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
         ? prevSelectedUsers.filter((id) => id !== userId)
         : [...prevSelectedUsers, userId]
     );
-    console.log(selectedUsers)
   };
 
   const filteredUsers = users.filter(

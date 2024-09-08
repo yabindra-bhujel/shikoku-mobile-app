@@ -73,7 +73,9 @@
         "removeSuccess": "メンバーの削除に成功しました！",
         "removeProblem": "メンバーの削除に失敗しました。後でもう一度お試しください！",
         "updateProblem": "更新に失敗しました。後でもう一度お試しください！",
-        "noavailableName": "使用可能な名前が見つかりません。"
+        "noavailableName": "使用可能な名前が見つかりません。",
+        "member_count": "メンバー数"
+
     },
     "calendar": {
         "calendarTitle": "カレンダー",

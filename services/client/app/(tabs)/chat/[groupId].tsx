@@ -21,6 +21,7 @@ import axiosInstance from "@/src/config/Api";
 import { useUser } from "@/src/hooks/UserContext";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 interface GroupData {
   id: string;

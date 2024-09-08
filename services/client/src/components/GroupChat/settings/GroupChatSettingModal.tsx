@@ -1,33 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  ScrollView,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  TouchableOpacity,
-  Image,
-  useColorScheme,
-} from "react-native";
-import { Text as PaperText } from "react-native-paper";
+import { View, ScrollView,Text,StyleSheet,ActivityIndicator,Alert,useColorScheme,} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import GroupServices from "@/src/api/GroupServices";
 import { GroupData } from "../GroupHeader";
 import { useUser } from "@/src/hooks/UserContext";
-import ChangeNameModal from "./ChangeNameModal";
-import {
-  FontAwesome6,
-  MaterialIcons,
-  SimpleLineIcons,
-  Entypo,
-  AntDesign,
-  Ionicons,
-} from "@expo/vector-icons";
 import AddMemberModal from "./AddMemberModal";
 import * as ImagePicker from "expo-image-picker";
 import { useTranslation } from "react-i18next";
+import GroupSettingHeader from "./GroupSettingHeader";
+import { SettingMenu } from "./SettingMenu";
 
 export default function SettingModal() {
   const { groupId = "0" } = useLocalSearchParams<{
@@ -68,6 +50,7 @@ export default function SettingModal() {
       fetchGroupInfo();
     }, [])
   );
+
   useEffect(() => {
     if (groupInfo?.group_image) {
       setGroupImage([groupInfo?.group_image]);
@@ -120,14 +103,8 @@ export default function SettingModal() {
   };
 
   const updateGroupMembers = (newMembers) => {
-    setGroupInfo((prev) =>
-      prev
-        ? {
-            ...prev,
-            group_members: newMembers,
-          }
-        : null
-    );
+    setGroupInfo((prev) =>prev? {
+      ...prev,group_members: newMembers}: null);
   };
 
   const deleteGroup = async () => {
@@ -154,18 +131,6 @@ export default function SettingModal() {
           onPress: deleteGroup,
         },
       ]
-    );
-  };
-
-  const handleUpdateGroup = (data: { name: string; description: string }) => {
-    setGroupInfo((prev) =>
-      prev
-        ? {
-            ...prev,
-            name: data.name,
-            description: data.description,
-          }
-        : null
     );
   };
 
@@ -199,6 +164,18 @@ export default function SettingModal() {
     );
   };
 
+  const navigateToMembers = () => {
+    router.push({
+      pathname: `/chat/members`,
+      params: {
+        group_members: JSON.stringify(groupInfo?.group_members),
+        admin_id: groupInfo?.admin_id,
+        logged_in_user_id: loggedInUserId,
+        group_id: groupInfo?.id,
+      },
+    });
+  }
+
   const styles = StyleSheet.create({
     loadingContainer: {
       flex: 1,
@@ -215,79 +192,14 @@ export default function SettingModal() {
       color: "red",
     },
     groupInfoContainer: {
-      padding: 20,
-    },
-    headerContainer: {
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    addMember: {
-      backgroundColor: "#ddd",
-      padding: 12,
-      borderRadius: 25,
-      marginTop: 10,
-    },
-    rowgap10: {
-      gap: 10,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    margin10: {
-      marginTop: 10,
-      marginBottom: 10,
-    },
-    rowBetween: {
-      marginBottom: 5,
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
-    groupName: {
-      fontSize: 20,
-      marginBottom: 20,
-      fontWeight: "bold",
-      color: isDark ? "white" : "#000",
-    },
-    changeName: {
-      fontSize: 16,
-      color: isDark ? "#039dfc" : "blue",
+      padding: 10,
     },
     groupInfo: {
       padding: 10,
       borderRadius: 10,
-      marginTop: 60,
+      marginTop: 10,
       marginBottom: 5,
       backgroundColor: isDark ? "#777" : "#fff",
-    },
-    TopLineContainer: {
-      borderTopColor: "gray",
-      borderTopWidth: 1,
-    },
-    groupDescription: {
-      fontSize: 18,
-      color: isDark ? "white" : "000",
-    },
-    descriptionTextContainer: {
-      padding: 10,
-    },
-    descriptionText: {
-      color: isDark ? "white" : "black",
-    },
-    memberList: {
-      fontSize: 18,
-      color: isDark ? "white" : "000",
-    },
-    leaveGroup: {
-      gap: 10,
-      padding: 10,
-      borderRadius: 10,
-      marginTop: 10,
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: isDark ? "#777" : "#fff",
-    },
-    leaveGroupTitle: {
-      fontSize: 18,
-      color: isDark ? "white" : "000",
     },
   });
 
@@ -311,130 +223,30 @@ export default function SettingModal() {
     <View style={{ flex: 1, backgroundColor: isDark ? "#333" : "#eee" }}>
       <ScrollView>
         <View style={styles.groupInfoContainer}>
-          <View style={styles.headerContainer}>
-            {groupImage ? (
-              <Image
-                source={{ uri: groupImage[groupImage.length - 1] }}
-                style={{ height: 150, width: 150, borderRadius: 50 }}
-              />
-            ) : (
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  color: isDark ? "white" : "#000",
-                }}
-              >
-                {groupInfo?.name?.charAt(0).toUpperCase()}
-              </Text>
-            )}
-            <Text style={styles.groupName}>{groupInfo.name}</Text>
-            <TouchableOpacity onPress={handleShowNameChange}>
-              <PaperText style={styles.changeName}>{t("groupchat.changenameDetail")}</PaperText>
-            </TouchableOpacity>
-            <View style={styles.rowgap10}>
-              <TouchableOpacity
-                style={styles.addMember}
-                onPress={handleShowAddMember}
-              >
-                <Ionicons name="person-add" size={24} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.addMember} onPress={pickImage}>
-                <Entypo name="image" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <GroupSettingHeader
+            groupInfo={groupInfo}
+            groupImage={groupImage}
+            pickImage={pickImage}
+            handleShowNameChange={handleShowNameChange}
+            handleShowAddMember={handleShowAddMember}
+            isDark={isDark}
+            refresDetaiScreen={handleRefreshGroupDetail}
+          />
+         
           <View style={styles.groupInfo}>
-            <View style={styles.rowgap10}>
-              <Entypo
-                name="info-with-circle"
-                size={24}
-                color={isDark ? "white" : "black"}
-              />
-              <Text style={styles.groupDescription}>{t("groupchat.groupDetails")}</Text>
-            </View>
-            <View style={styles.descriptionTextContainer}>
-              <Text style={styles.descriptionText}>
-                {groupInfo.description}
-              </Text>
-            </View>
-            <View style={styles.TopLineContainer} />
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: `/chat/members`,
-                  params: {
-                    group_members: JSON.stringify(groupInfo.group_members),
-                    admin_id: groupInfo.admin_id,
-                    logged_in_user_id: loggedInUserId,
-                    group_id: groupInfo.id,
-                  },
-                })
-              }
-              style={[styles.rowBetween, { marginTop: 15 }]}
-            >
-              <View style={styles.rowgap10}>
-                <FontAwesome6
-                  name="people-group"
-                  size={22}
-                  color={isDark ? "white" : "black"}
-                />
-                <Text style={styles.memberList}>{t("groupchat.memberList")}</Text>
-              </View>
-              <AntDesign
-                name="right"
-                size={24}
-                color={isDark ? "white" : "black"}
-              />
-            </TouchableOpacity>
-          </View>
-          {groupInfo.admin_id === loggedInUserId ? (
-            <TouchableOpacity
-              onPress={confirmDeleteGroup}
-              style={[styles.leaveGroup, styles.rowBetween]}
-            >
-              <View style={[styles.rowgap10]}>
-                <MaterialIcons
-                  name="delete"
-                  size={24}
-                  color={isDark ? "white" : "black"}
-                />
-                <PaperText style={[styles.leaveGroupTitle, styles.margin10]}>
-                  {t("groupchat.deletegroup")}
-                </PaperText>
-              </View>
-
-              <AntDesign
-                name="right"
-                size={24}
-                color={isDark ? "white" : "black"}
-              />
-            </TouchableOpacity>
-          ) : null}
-          <View style={styles.leaveGroup}>
-            <TouchableOpacity style={styles.rowgap10} onPress={leaveGroup}>
-              <SimpleLineIcons name="logout" size={21} color="red" />
-              <PaperText
-                style={[
-                  styles.leaveGroupTitle,
-                  styles.margin10,
-                  { color: "red" },
-                ]}
-              >
-                {t("groupchat.leavegroup")}
-              </PaperText>
-            </TouchableOpacity>
+            <SettingMenu
+              groupInfo={groupInfo}
+              loggedInUserId={loggedInUserId}
+              isDark={isDark}
+              navigateToMembers={navigateToMembers}
+              handleLeaveGroup={leaveGroup}
+              handleDeleteGroup={confirmDeleteGroup}
+             handleShowAddMember={handleShowAddMember}
+             />
           </View>
         </View>
       </ScrollView>
-      <ChangeNameModal
-        visible={showNameChange}
-        onClose={handleShowNameChange}
-        currentGroupId={parseInt(groupId, 10)}
-        groupInfo={groupInfo}
-        refresDetaiScreen={handleRefreshGroupDetail}
-        onUpdateGroup={handleUpdateGroup}
-      />
+ 
       <AddMemberModal
         visible={showAddMember}
         onClose={handleShowAddMember}
