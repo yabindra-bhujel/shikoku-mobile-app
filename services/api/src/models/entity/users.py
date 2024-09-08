@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from .notification import user_notifications
 from .group import group_members_association
 from .user_details import user_skills_association, user_club_activities_association, user_interests_association
+from .notification_token import ExpoToken
 
 class UserRole(enum.Enum):
     ADMIN = 'admin'
@@ -71,6 +72,7 @@ class User(Base):
 
     # Relationships for ExpoToken
     expo_token = relationship('ExpoToken', back_populates='user', uselist=False)
+
     
     def __repr__(self):
         return f'User: {self.username}'
