@@ -28,7 +28,7 @@ const GroupServices = {
     }
   },
 
-  async updateGroup(id: number, data: any) {
+  async updateGroup(id: string, data: any) {
     try {
       const result = await axiosInstance.put(`/groups/${id}`, data, {
         headers: {

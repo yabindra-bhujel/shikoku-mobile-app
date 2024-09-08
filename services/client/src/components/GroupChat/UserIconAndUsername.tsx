@@ -35,7 +35,7 @@ const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
       alignItems: "center",
       padding: 10,
       borderBottomWidth: 1,
-      backgroundColor: isDark ? "#333": "#fff",
+      backgroundColor: isDark ? "#333" : "#fff",
       borderBottomColor: "lightgray",
     },
     groupImageContainer: {
@@ -58,7 +58,7 @@ const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
     groupName: {
       fontSize: 18,
       fontWeight: "bold",
-      color: isDark ? "white": "black",
+      color: isDark ? "white" : "black",
     },
   });
 
@@ -82,12 +82,16 @@ const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
                   />
                 ) : (
                   <Text style={styles.groupInitial}>
-                    {group.name.charAt(0).toUpperCase()}
+                    {group?.name?.trim().replace(/\s+/g, '').charAt(0).toUpperCase()}
+
+
                   </Text>
                 )}
               </View>
               <View style={{ marginLeft: 10 }}>
-                <Text style={styles.groupName}>{group.name}</Text>
+                <Text style={styles.groupName}>
+                  {group?.name?.trim()}
+                </Text>
               </View>
             </View>
 

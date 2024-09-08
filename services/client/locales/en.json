@@ -73,7 +73,8 @@
         "removeSuccess": "Remove member successed !!",
         "removeProblem": "Failed to remove member. Please try again later!",
         "updateProblem": "Failed to update. Please try again later!",
-        "noavailableName": "No available name found."
+        "noavailableName": "No available name found.",
+        "member_count": "Member count"
     },
     "calendar": {
         "calendarTitle": "Calendar",

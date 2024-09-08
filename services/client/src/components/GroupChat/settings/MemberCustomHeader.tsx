@@ -14,10 +14,11 @@ const CustomHeader = ({ onAddMember }) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: 10,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
       borderBottomWidth: 1,
-      borderBottomColor: 'lightgray',
-      backgroundColor: isDark ? "#333" : "#eee",
+      borderBottomColor: isDark ? '#444' : '#ddd',
+      backgroundColor: isDark ? '#333' : '#f9f9f9',
     },
     backButton: {
       flexDirection: 'row',
@@ -26,28 +27,35 @@ const CustomHeader = ({ onAddMember }) => {
     backButtonText: {
       fontSize: 16,
       fontWeight: 'bold',
-      marginLeft: 5,
-      color: "#3399ff"
+      marginLeft: 8,
+      color: isDark ? '#4d9aff' : '#0066cc',
     },
     title: {
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: 'bold',
-      color: isDark ? "#fff" : "#333"
+      color: isDark ? '#fff' : '#333',
     },
     addButton: {
-      padding: 5,
+      padding: 8,
+    },
+    addButtonIcon: {
+      borderRadius: 50,
+      backgroundColor: isDark ? '#444' : '#ddd',
+      padding: 8,
     },
   });
 
   return (
     <View style={styles.headerContainer}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <AntDesign name="left" size={20} color="#3399ff" />
+        <AntDesign name="left" size={20} color={isDark ? '#4d9aff' : '#0066cc'} />
         <Text style={styles.backButtonText}>{t("back")}</Text>
       </TouchableOpacity>
       <Text style={styles.title}>{t("groupchat.memberList")}</Text>
       <TouchableOpacity onPress={onAddMember} style={styles.addButton}>
-        <AntDesign name="plus" size={24} color={isDark ? "white" : "black"} />
+        <View style={styles.addButtonIcon}>
+          <AntDesign name="plus" size={24} color={isDark ? '#fff' : '#000'} />
+        </View>
       </TouchableOpacity>
     </View>
   );

@@ -20,6 +20,8 @@ import { MaterialIcons, Feather } from "@expo/vector-icons";
 import GroupServices from "@/src/api/GroupServices";
 import axiosInstance from "@/src/config/Api";
 import { useTranslation } from "react-i18next";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 
 const AddMemberModal = ({
   visible,
@@ -50,8 +52,16 @@ const AddMemberModal = ({
         );
         const data = response.data;
         if (data && Array.isArray(data.items)) {
-          setUsers((prevUsers) => [...prevUsers, ...data.items]);
-          if (data.items.length < 50) {
+          // 既存のユーザーIDセットを作成
+          const existingUserIds = new Set(users.map(user => user.user_id));
+
+          // 新しいユーザーリストを作成し、重複を除外
+          const newUsers = data.items.filter(user => !existingUserIds.has(user.user_id));
+
+          // 新しいユーザーを追加
+          setUsers((prevUsers) => [...prevUsers, ...newUsers]);
+
+          if (newUsers.length < 50) {
             setHasMoreUsers(false);
           }
         } else {
@@ -101,7 +111,6 @@ const AddMemberModal = ({
     const data = {
       user_list: selectedUsers,
     };
-    console.log(data);
     try {
       const response = await GroupServices.addMember(groupInfo.id, data);
       if (response.status === 200) {
@@ -128,24 +137,54 @@ const AddMemberModal = ({
     centeredView: {
       borderRadius: 10,
     },
-    modalText: {
-      fontSize: 20,
+    headerText: {
+      fontSize: 18,
       fontWeight: "bold",
-      color: isDark ? "white" : "black",
+      color: isDark ? "#f5f5f5" : "#333",
     },
     headerModal: {
-      height: 50,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      backgroundColor: isDark ? "#555" : "#ddd",
-      alignItems: "center",
-      paddingHorizontal: 10,
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: isDark ? '#333' : '#f8f8f8',
+      paddingVertical: 15,
+      paddingHorizontal: 20,
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+      shadowColor: isDark ? '#000' : '#ccc',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
     },
     headerLeft: {
       flex: 1,
     },
-    headerLeftRightText: {
-      color: isDark ? "white" : "black",
+    headerRightText: {
+      color: isDark ? "#ffffff" : "#007bff",
+      fontSize: 18, 
+      fontWeight: "700",
+      textAlign: 'center',
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+      borderRadius: 25,
+      backgroundColor: isDark ? "#0056b3" : "#e0f7fa",
+      textTransform: 'uppercase',
+      elevation: 2,
+    },
+
+    headerLeftText: {
+      color: isDark ? "#ffffff" : "#ffffff",
+      fontSize: 18, 
+      fontWeight: "700",
+      textAlign: 'center',
+      paddingVertical: 8,
+      paddingHorizontal: 14, 
+      borderRadius: 25, 
+      backgroundColor: isDark ? "#ff3b30" : "#ff3b30", 
+      textTransform: 'uppercase',
+      elevation: 2,
     },
     headerCenter: {
       flex: 2,
@@ -160,17 +199,21 @@ const AddMemberModal = ({
       padding: 20,
       alignItems: "center",
       backgroundColor: isDark ? "#222" : "#eee",
+      borderRadius: 20,
     },
     searchBar: {
-      width: "100%",
-      height: 50,
-      gap: 10,
-      backgroundColor: isDark ? "#666" : "#fff",
-      borderRadius: 10,
-      marginBottom: 10,
-      paddingHorizontal: 10,
       flexDirection: "row",
       alignItems: "center",
+      backgroundColor: isDark ? "#333" : "#fff",
+      borderRadius: 10,
+      margin: 10,
+      paddingHorizontal: 10,
+      height: 50,
+      elevation: 1,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 1,
     },
     searchInput: {
       flex: 1,
@@ -182,6 +225,7 @@ const AddMemberModal = ({
       width: "100%",
       padding: 20,
       backgroundColor: isDark ? "#666" : "#fff",
+      borderRadius: 10,
     },
     userItem: {
       flexDirection: "row",
@@ -216,15 +260,15 @@ const AddMemberModal = ({
         <View style={styles.centeredView}>
           <View style={styles.headerModal}>
             <TouchableOpacity style={styles.headerLeft} onPress={onClose}>
-              <Text style={styles.headerLeftRightText}>{t("close")}</Text>
+              <Text style={styles.headerLeftText}>{t("close")}</Text>
             </TouchableOpacity>
             <View style={styles.headerCenter}>
-              <Text style={styles.modalText}>{t("groupchat.addmember")}</Text>
+              <Text style={styles.headerText}>{t("groupchat.addmember")}</Text>
             </View>
             <View style={styles.headerRight}>
               {selectedUsers.length > 0 && (
                 <TouchableOpacity onPress={addMember}>
-                  <Text style={styles.headerLeftRightText}>{t("add")}</Text>
+                  <Text style={styles.headerRightText}>{t("add")}</Text>
                 </TouchableOpacity>
               )}
             </View>
