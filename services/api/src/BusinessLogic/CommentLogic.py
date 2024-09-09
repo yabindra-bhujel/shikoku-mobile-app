@@ -143,7 +143,8 @@ class CommentLogic:
                 user_id=comment_reply.user_id,
                 post_id=comment_reply.post_id,
                 parent_comment_id=comment_reply.comment_id,
-                created_at=datetime.now(datetime.timezone.utc),
+                created_at=datetime.now(),
+
             )
 
             db.add(new_comment_reply)
