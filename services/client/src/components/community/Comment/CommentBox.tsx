@@ -11,7 +11,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
 
 const CommentBox = ({ comment, setComment, submitComment, replyingTo, cancelReply }) => {
-  const theme = useColorScheme();
   const { t } = useTranslation();
 
   return (
@@ -66,7 +65,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    width: "100%",
     paddingVertical: 10,
     paddingHorizontal: 15,
     fontSize: 14,

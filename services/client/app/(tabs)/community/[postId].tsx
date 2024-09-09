@@ -7,7 +7,6 @@ import {
   useColorScheme,
   Alert,
   ScrollView,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -25,6 +24,8 @@ import CommentBox from "@/src/components/community/Comment/CommentBox";
 import CommentList from "@/src/components/community/Comment/CommentList";
 import ImagePost from "@/src/components/community/ImagePost";
 import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useUser } from "@/src/hooks/UserContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const PostDetail = () => {
   const router = useRouter();
@@ -35,11 +36,10 @@ const PostDetail = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [replyingTo, setReplyingTo] = useState<CommentListInterface | null>(
-    null
-  );
+  const [replyToComment, setReplyToComment] =
+    useState<PostDetailInterface | null>(null);
+  const { loggedInUserId } = useUser();
 
-  const backgroundColor = useThemeColor({}, "background");
   const postBgColor = useThemeColor({}, "postbackground");
   const color = useThemeColor({}, "text");
 
@@ -87,12 +87,12 @@ const PostDetail = () => {
     }
   }
 
-  const onReply = (comment) => {
-    setReplyingTo(comment); // Set the comment being replied to
+  const onReply = (comment: any) => {
+    setReplyToComment(comment); // Set the comment being replied to
   };
 
   const cancelReply = () => {
-    setReplyingTo(null); // Reset the replying state
+    setReplyToComment(null); // Reset the replying state
   };
 
   const submitComment = async () => {
@@ -100,17 +100,31 @@ const PostDetail = () => {
       return;
     }
 
-    const commentData = {
-      content: comment,
-      post_id: parseInt(postId ?? ""),
-    };
+    // Check if we are replying to a comment or adding a top-level comment
+    const commentData = replyToComment
+      ? {
+          content: comment,
+          comment_id: replyToComment.id,
+          user_id: loggedInUserId,
+          post_id: parseInt(postId ?? ""),
+        }
+      : {
+          content: comment,
+          post_id: parseInt(postId ?? ""),
+        };
+
     try {
-      await CommentsService.commentPost(commentData);
+      if (replyToComment) {
+        await CommentsService.replyToComment(commentData);
+      } else {
+        await CommentsService.commentPost(commentData);
+      }
+
       setComment("");
-      await fetchPost();
+      setReplyToComment(null);
       await fetchComments();
     } catch (error) {
-      Alert.alert("Error", "Failed to comment on this post. Please try again.");
+      Alert.alert("Error", "Failed to submit comment. Please try again.");
     }
   };
 
@@ -177,14 +191,14 @@ const PostDetail = () => {
         </View>
       </ScrollView>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={[styles.commentBox, { backgroundColor: postBgColor }]}>
           <CommentBox
             comment={comment}
             setComment={setComment}
             submitComment={submitComment}
-            replyingTo={replyingTo}
+            replyingTo={replyToComment}
             cancelReply={cancelReply}
           />
         </View>
@@ -236,6 +250,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+    height: 'auto',
     borderTopWidth: 1,
     borderTopColor: "#ccc",
   },

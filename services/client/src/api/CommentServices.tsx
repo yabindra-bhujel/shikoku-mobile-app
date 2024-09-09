@@ -30,9 +30,9 @@ const CommentsService = {
     }
   },
 
-  async replyToComment(content: string) {
+  async replyToComment(data: any) {
     try {
-      const result = await axiosInstance.post(`/comments/replies`, { content });
+      const result = await axiosInstance.post(`/comments/replies`, data);
       return result;
     } catch (error) {
       throw error;

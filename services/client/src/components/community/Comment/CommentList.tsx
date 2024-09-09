@@ -8,49 +8,79 @@ const CommentList = ({ comments, onReply }) => {
   const { t } = useTranslation();
   const isDark = useColorScheme() === "dark";
 
+  // Function to render each comment (top-level and replies)
+  const renderComment = (comment, isReply = false) => (
+    <View
+      key={comment.id}
+      style={[
+        styles.commentItem,
+        isReply && { marginLeft: 30, marginTop: 10 }, // Indent replies
+      ]}
+    >
+      {/* Avatar Section */}
+      <UserAvatar url={comment.user.profile_picture} height={35} width={35} />
+
+      {/* Comment Content */}
+      <View style={styles.commentContent}>
+        {/* Username and Comment in one line */}
+        <Text style={styles.commentText}>
+          <Text
+            style={[
+              styles.username,
+              {
+                color: isDark ? "#fff" : "#000",
+              },
+            ]}
+          >
+            {comment.user.username}{" "}
+          </Text>
+          <Text
+            style={[
+              styles.comment,
+              {
+                color: isDark ? "#ccc" : "#333",
+              },
+            ]}
+          >
+            {comment.content}
+          </Text>
+        </Text>
+
+        {/* Timestamp */}
+        <Text style={styles.timeAgo}>
+          <DateFormat date={comment.created_at} />
+        </Text>
+
+        {/* Reply Button */}
+        <TouchableOpacity onPress={() => onReply(comment)}>
+          <Text style={styles.replyButton}>{t("Community.reply")}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <View>
       {comments.map((comment) => (
-        <View key={comment.id} style={styles.commentItem}>
-          {/* Avatar Section */}
-          <UserAvatar url={comment.user.profile_picture} height={35} width={35} />
+        <View key={comment.id}>
+          {/* Render Top-Level Comment */}
+          {renderComment(comment)}
 
-          {/* Comment Content */}
-          <View style={styles.commentContent}>
-            {/* Username and Comment in one line */}
-            <Text style={styles.commentText}>
-              <Text
-                style={[
-                  styles.username,
-                  {
-                    color: isDark ? "#fff" : "#000",
-                  },
-                ]}
-              >
-                {comment.user.username}{" "}
-              </Text>
-              <Text
-                style={[
-                  styles.comment,
-                  {
-                    color: isDark ? "#ccc" : "#333",
-                  },
-                ]}
-              >
-                {comment.content}
-              </Text>
-            </Text>
+          {/* Render Replies if any */}
+          {comment.replies &&
+            comment.replies.map((reply) => (
+              <View key={reply.id}>
+                {renderComment(reply, true)}
 
-            {/* Timestamp */}
-            <Text style={styles.timeAgo}>
-              <DateFormat date={comment.created_at} />
-            </Text>
-
-            {/* Reply Button */}
-            <TouchableOpacity onPress={() => onReply(comment)}>
-              <Text style={styles.replyButton}>{t("Community.reply")}</Text>
-            </TouchableOpacity>
-          </View>
+                {/* Add Reply Button for Replies */}
+                {reply.replies &&
+                  reply.replies.map((nestedReply) => (
+                    <View key={nestedReply.id}>
+                      {renderComment(nestedReply, true)}
+                    </View>
+                  ))}
+              </View>
+            ))}
         </View>
       ))}
     </View>
@@ -62,8 +92,7 @@ const styles = StyleSheet.create({
     color: "blue",
     marginTop: 5,
   },
-  commentsContainer: {
-  },
+  commentsContainer: {},
   commentItem: {
     flexDirection: "row",
     alignItems: "flex-start",
