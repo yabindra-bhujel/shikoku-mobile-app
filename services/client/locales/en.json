@@ -48,7 +48,8 @@
         "clicktoinput": "Click here to input !",
         "share": "Share",
         "view": "View",
-        "reply": "Reply"
+        "reply": "Reply",
+        "replyingTo": "Repling to"
     },
     "groupchat": {
         "groupchatTitle": "Group Chat",

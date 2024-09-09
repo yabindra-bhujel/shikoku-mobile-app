@@ -5,13 +5,10 @@ import {
   TouchableOpacity,
   TextInput,
   useColorScheme,
-  KeyboardAvoidingView,
-  Platform,
   Text,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
-import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 const CommentBox = ({ comment, setComment, submitComment, replyingTo, cancelReply }) => {
   const theme = useColorScheme();
@@ -51,6 +48,7 @@ const CommentBox = ({ comment, setComment, submitComment, replyingTo, cancelRepl
 const styles = StyleSheet.create({
   wrapper: {
     flexDirection: "column",
+    flex: 1,
   },
   replyingToContainer: {
     flexDirection: "row",
@@ -60,7 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   container: {
-    flexDirection: "row",
+   flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
     borderRadius: 20,
@@ -68,6 +66,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    width: "100%",
     paddingVertical: 10,
     paddingHorizontal: 15,
     fontSize: 14,

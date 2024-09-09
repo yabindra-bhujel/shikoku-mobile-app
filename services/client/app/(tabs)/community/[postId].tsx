@@ -35,7 +35,9 @@ const PostDetail = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [replyingTo, setReplyingTo] = useState<CommentListInterface | null>(null);
+  const [replyingTo, setReplyingTo] = useState<CommentListInterface | null>(
+    null
+  );
 
   const backgroundColor = useThemeColor({}, "background");
   const postBgColor = useThemeColor({}, "postbackground");
@@ -86,7 +88,11 @@ const PostDetail = () => {
   }
 
   const onReply = (comment) => {
-    setReplyingTo(comment);  // Set the comment being replied to
+    setReplyingTo(comment); // Set the comment being replied to
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null); // Reset the replying state
   };
 
   const submitComment = async () => {
@@ -167,21 +173,21 @@ const PostDetail = () => {
             padding: 10,
           }}
         >
-          <CommentList comments={comments ?? []}  onReply={onReply}/>
+          <CommentList comments={comments ?? []} onReply={onReply} />
         </View>
       </ScrollView>
-      <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-      <View style={[styles.commentBox, { backgroundColor: postBgColor }]}>
-      <CommentBox
-  comment={comment}
-  setComment={setComment}
-  submitComment={submitComment}
-  replyingTo={replyingTo}
-  cancelReply={cancelReply}
-/>
-      </View>
+        <View style={[styles.commentBox, { backgroundColor: postBgColor }]}>
+          <CommentBox
+            comment={comment}
+            setComment={setComment}
+            submitComment={submitComment}
+            replyingTo={replyingTo}
+            cancelReply={cancelReply}
+          />
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

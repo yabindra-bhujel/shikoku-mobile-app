@@ -48,7 +48,8 @@
         "clicktoinput": "ここをクリックして入力！",
         "share": "共有",
         "view": "ビュー",
-        "reply": "返事"
+        "reply": "返事",
+        "replyingTo": "返信に"
     },
     "groupchat": {
         "groupchatTitle": "グループチャット",
