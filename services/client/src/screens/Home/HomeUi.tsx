@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Only Ionicons
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ScaledSheet } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ const Home = () => {
     { route: '/setting', icon: <Ionicons name="settings-outline" size={45} color="#CA3C25" />, title: t('Settings') },
     { route: '/profile', icon: <Ionicons name="person-circle-outline" size={45} color="#CA3C25" />, title: t('profile') },
     { route: '/notification', icon: <Ionicons name="notifications-outline" size={45} color="#CA3C25" />, title: t('notification') },
+    {route: '/survey', icon: <Ionicons name='document-attach-outline' size={45} color="green" />, title: t('survey')},
   ];
 
   // Function to group buttons into pairs

@@ -67,6 +67,18 @@ const TabLayout = () => {
             headerShown: false,
           }}
         />
+
+        <Stack.Screen
+          name="survey"
+          options={{
+            headerTitle: "Survey",
+            headerBackTitle: t("back"),
+            headerTintColor: isDark ? "#fff" : "000",
+            headerStyle: {
+              backgroundColor: isDark ? "#333" : "#fff",
+            },
+          }}
+        />  
       </Stack>
     </UserProvider>
   );
