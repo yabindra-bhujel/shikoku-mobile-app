@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import UserAvatar from "../UserAvatar";
 import { DateFormat } from "@/src/ReusableComponents/DateFormat";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 interface PostHeaderProps {
   imageUrl?: string;
@@ -25,12 +26,16 @@ const PostHeader: React.FC<PostHeaderProps> = ({
   handleDelete = () => {},
   handleUpdate = () => {},
 }) => {
+
+  const backgroundColor = useThemeColor({}, "postbackground");
+  const color = useThemeColor({}, "tint");
+
   return (
-    <View style={styles.postHeader}>
+    <View style={[styles.postHeader, {backgroundColor}]}>
       <View style={styles.avatarAndText}>
-        <UserAvatar url={imageUrl} />
+        <UserAvatar url={imageUrl} height={40} width={40}/>
         <View style={styles.usernameTime}>
-          <Text style={styles.username}>{username}</Text>
+          <Text style={[styles.username, {color}]}>{username}</Text>
           <Text style={styles.time}>
             <DateFormat date={time} />
           </Text>
@@ -68,23 +73,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    paddingHorizontal: 8,
   },
   avatarAndText: {
     flexDirection: "row",
     alignItems: "center",
   },
   usernameTime: {
-    marginLeft: 10,
+    marginLeft: 8,
   },
   username: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
   },
   time: {
     fontSize: 12,

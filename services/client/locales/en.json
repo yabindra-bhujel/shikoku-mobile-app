@@ -45,7 +45,10 @@
         "nothingpost": "Fill text or images 写真かテキストのどちらかを入力してください。",
         "createpost": "Create Post",
         "post": "Post",
-        "clicktoinput": "Click here to input !"
+        "clicktoinput": "Click here to input !",
+        "share": "Share",
+        "view": "View",
+        "reply": "Reply"
     },
     "groupchat": {
         "groupchatTitle": "Group Chat",

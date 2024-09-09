@@ -1,75 +1,94 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-    Text,
-  useColorScheme,
-} from "react-native";
-import UserAvatar from "../../UserAvatar";
+import React from "react";
+import { StyleSheet, View, Text, useColorScheme, TouchableOpacity } from "react-native";
+import UserAvatar from "../../UserAvatar"; // Assuming this component works for showing avatars
 import { useTranslation } from "react-i18next";
+import { DateFormat } from "@/src/ReusableComponents/DateFormat";
 
-const CommentList = ({ comments }) =>  {
-    const theme = useColorScheme();
-    const {t} = useTranslation();
-    
-    return (
-        <View>
-        {comments.map((comment) => (
-          <View key={comment.id} style={styles.commentItem}>
-            <UserAvatar
-              url={comment.user.profile_picture}
-              height={35} 
-              width={35}
-            />
-            <View style={styles.commentContent}>
+const CommentList = ({ comments, onReply }) => {
+  const { t } = useTranslation();
+  const isDark = useColorScheme() === "dark";
+
+  return (
+    <View>
+      {comments.map((comment) => (
+        <View key={comment.id} style={styles.commentItem}>
+          {/* Avatar Section */}
+          <UserAvatar url={comment.user.profile_picture} height={35} width={35} />
+
+          {/* Comment Content */}
+          <View style={styles.commentContent}>
+            {/* Username and Comment in one line */}
+            <Text style={styles.commentText}>
               <Text
-                style={{
-                    fontWeight: "bold",
-                    fontSize: 10,
-                }}
+                style={[
+                  styles.username,
+                  {
+                    color: isDark ? "#fff" : "#000",
+                  },
+                ]}
               >
-                {comment.user.username}
-                </Text>
-              <Text 
-                style={{
-                  color: "gray",
-                  fontSize: 10,
-                }}
-              >{comment.created_at}</Text>
-              <View style ={{
-               
-              
-              }}>
+                {comment.user.username}{" "}
+              </Text>
               <Text
-                style={{
-                fontSize: 14,
-                paddingHorizontal: 5,
-                lineHeight: 15,
-                color: "#333333",
-                maxWidth: "95%",
-                width: "auto",
-                }}
-              >{comment.content}</Text>
-                
-                </View>
-             
-            </View>
+                style={[
+                  styles.comment,
+                  {
+                    color: isDark ? "#ccc" : "#333",
+                  },
+                ]}
+              >
+                {comment.content}
+              </Text>
+            </Text>
+
+            {/* Timestamp */}
+            <Text style={styles.timeAgo}>
+              <DateFormat date={comment.created_at} />
+            </Text>
+
+            {/* Reply Button */}
+            <TouchableOpacity onPress={() => onReply(comment)}>
+              <Text style={styles.replyButton}>{t("Community.reply")}</Text>
+            </TouchableOpacity>
           </View>
-        ))}
-      </View>
-    );
-}
+        </View>
+      ))}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
+  replyButton: {
+    color: "blue",
+    marginTop: 5,
+  },
+  commentsContainer: {
+  },
   commentItem: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 10,
+    marginBottom: 15, // Space between each comment
   },
   commentContent: {
-    flex: 1,
+    flex: 1, // Take up the remaining space beside the avatar
     flexDirection: "column",
-    // marginLeft: 10,
+  },
+  commentText: {
+    fontSize: 14,
+    lineHeight: 18,
+    color: "#333", // Dark text color
+    flexWrap: "wrap", // Ensure long comments wrap
+  },
+  username: {
+    fontWeight: "bold", // Bold username to highlight it
+  },
+  comment: {
+    fontWeight: "normal", // Regular comment text
+  },
+  timeAgo: {
+    fontSize: 12, // Smaller font size for timestamp
+    color: "gray", // Light gray for less focus on the timestamp
+    marginTop: 3, // Small margin to separate timestamp from comment text
   },
 });
 

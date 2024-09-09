@@ -22,6 +22,7 @@ import ClubActivity from "./ClubActivity";
 import UserPostCard from "./UserPostCard";
 import { UserInfoInterface } from "@/src/type/interfaces/UserInfoInterfaces";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 enum Menu {
   BASICINFO = 'basic',
@@ -37,6 +38,8 @@ const ProfileDetail = () => {
   const [userInfo, setUserInfo] = useState<UserInfoInterface>();
   const [activeMenu, setActiveMenu] = useState<string>(Menu.BASICINFO);
   const { updateProfileImage } = useUser();
+
+  const backgroundColor = useThemeColor({}, "background");
 
   const getProfile = async () => {
     try {
@@ -109,7 +112,7 @@ const ProfileDetail = () => {
   }, [imageChanged]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor}]}>
       <Header onBackPress={goBack} />
       <LinearGradient
         colors={["rgba(181,217,211,1)", "rgba(148,187,233,1)"]}
@@ -188,7 +191,6 @@ const ProfileDetail = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F4F8",
   },
   headerContainer: {
     padding: 20,

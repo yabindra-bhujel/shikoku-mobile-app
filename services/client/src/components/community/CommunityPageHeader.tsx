@@ -10,11 +10,15 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 const CommunityPageHeader = () => {
   const theme = useColorScheme();
   const router = useRouter();
   const {t} = useTranslation();
+
+  const backgroundColor = useThemeColor({}, "background");
+  const color = useThemeColor({}, "text");
 
   const goBack = () => {
     router.back();
@@ -23,10 +27,6 @@ const CommunityPageHeader = () => {
   const navigateToCreatePost = () => {
     router.push("/community/createpost");
   };
-
-  const navigateToNotification = () => {
-    router.push("/community/notification");
-  }
 
   const styles = StyleSheet.create({
     container: {},
@@ -81,28 +81,8 @@ const CommunityPageHeader = () => {
             gap: 10,
           }}
         >
-          <AntDesign
-            name="search1"
-            size={24}
-            color={theme === "dark" ? "#fff" : "#000"}
-            style={{ marginRight: 10, fontWeight: "bold" }}
-          />
-          <TouchableOpacity onPress={navigateToNotification}>
-          <Ionicons
-            name="notifications"
-            size={24}
-            color={theme === "dark" ? "#fff" : "#000"}
-            style={{ marginRight: 10, fontWeight: "bold" }}
-          />
-          </TouchableOpacity>
-
           <TouchableOpacity onPress={navigateToCreatePost}>
-            <FontAwesome6
-              name="add"
-              size={24}
-              color={theme === "dark" ? "#fff" : "#000"}
-              style={{ marginRight: 20, fontWeight: "bold" }}
-            />
+            <Text style={{color, marginRight: 5, fontSize: 18}}>Create</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -1,10 +1,24 @@
-import React from 'react';
-import { Text, StyleSheet, Pressable } from 'react-native';
+import React from "react";
+import { Text, StyleSheet, Pressable } from "react-native";
 
-export default function Button(props) {
-  const { onPress, title = 'Save' } = props;
+export default function Button(props: any) {
+  const {
+    onPress,
+    paddingHorizontal = 35,
+    paddingVertical = 12,
+    title = "Save",
+  } = props;
   return (
-    <Pressable style={styles.button} onPress={onPress}>
+    <Pressable
+      style={[
+        styles.button,
+        {
+          paddingHorizontal: paddingHorizontal,
+          paddingVertical: paddingVertical,
+        },
+      ]}
+      onPress={onPress}
+    >
       <Text style={styles.text}>{title}</Text>
     </Pressable>
   );
@@ -12,19 +26,17 @@ export default function Button(props) {
 
 const styles = StyleSheet.create({
   button: {
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingVertical: 12,
-  paddingHorizontal: 32,
-  borderRadius: 4,
-  elevation: 3,
-  backgroundColor: 'black',
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: "black",
   },
   text: {
     fontSize: 16,
     lineHeight: 21,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     letterSpacing: 0.25,
-    color: 'white',
+    color: "white",
   },
 });

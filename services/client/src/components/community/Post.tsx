@@ -6,11 +6,16 @@ import PostFooter from "./PostFooter";
 import { PostInterface } from "@/src/type/interfaces/PostInterface";
 import PostServices from "@/src/api/PostServices";
 import ImagePost from "./ImagePost";
-import TextPost from "./PostText";
+import TextPost from "./PostTextBody";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 const Post = () => {
   const [posts, setPosts] = useState<PostInterface[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const backgroundColor = useThemeColor({}, "background");
+  const postBgColor = useThemeColor({}, "postbackground")
+  const color = useThemeColor({}, "text");
 
   const fetchPosts = async () => {
     try {
@@ -39,14 +44,14 @@ const Post = () => {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, {backgroundColor}]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       {posts.length === 0 ? (
-        <Text style={styles.noPostsText}>No posts available</Text>
+        <Text style={[styles.noPostsText, {color}]}>No posts available</Text>
       ) : (
         posts.map((post) => (
-          <View key={post.id} style={styles.postContainer}>
+          <View key={post.id} style={[styles.postContainer, {backgroundColor: postBgColor}]}>
             <PostHeader
               imageUrl={post.user.profile_picture}
               username={post.user.first_name + " " + post.user.last_name}
@@ -74,13 +79,10 @@ const Post = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 10,
-    backgroundColor: "#f0f0f0",
   },
   noPostsText: {
     textAlign: "center",
     fontSize: 20,
-    color: "#888",
     marginTop: 20,
   },
   postContainer: {

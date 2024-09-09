@@ -4,6 +4,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import LikeServices from "@/src/api/LikeServices";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 interface PostFooterProps {
   totalLikes?: number;
@@ -24,6 +25,10 @@ const PostFooter: React.FC<PostFooterProps> = ({
   const [likesCount, setLikesCount] = useState<number>(totalLikes);
   const router = useRouter();
   const { t } = useTranslation();
+  
+  const backgroundColor = useThemeColor({}, "postbackground");
+  const color = useThemeColor({}, "text");
+
   useEffect(() => {
     setIsLiked(alreadyLiked);
     setLikesCount(totalLikes);
@@ -46,21 +51,21 @@ const PostFooter: React.FC<PostFooterProps> = ({
   };
 
   return (
-    <View style={styles.postFooter}>
+    <View style={[styles.postFooter, {backgroundColor}]}>
       <TouchableOpacity style={styles.actionButton} onPress={toggleLike}>
         <AntDesign
           name={isLiked ? "heart" : "hearto"}
-          size={24}
-          color={isLiked ? "red" : "black"}
+          size={23}
+          color={isLiked ? "red" : color}
         />
-        <Text style={[styles.actionText, { color: isLiked ? "red" : "#333" }]}>
+        <Text style={[styles.actionText, { color: isLiked ? "red" : color }]}>
           {likesCount} {t("Community.likes")}
         </Text>
       </TouchableOpacity>
       {showComments && (
         <TouchableOpacity style={styles.actionButton} onPress={navigateToComments}>
-          <AntDesign name="message1" size={24} color="black" />
-          <Text style={styles.actionText}>{totalComments} {t("Community.comments")}</Text>
+          <AntDesign name="message1" size={24} color={color} />
+          <Text style={[styles.actionText, {color}]}>{totalComments} {t("Community.comments")}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -72,10 +77,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "lightgray",
+    paddingTop: 5,
+    paddingLeft: 10,
   },
   actionButton: {
     flexDirection: "row",
@@ -85,7 +88,6 @@ const styles = StyleSheet.create({
   actionText: {
     marginLeft: 5,
     fontSize: 12,
-    color: "#333",
     fontWeight: "600",
   },
 });

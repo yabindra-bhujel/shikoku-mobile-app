@@ -45,7 +45,10 @@
         "nothingpost": "テキストまたは写真を入力してください。",
         "createpost": "投稿を作成",
         "post": "投稿",
-        "clicktoinput": "ここをクリックして入力！"
+        "clicktoinput": "ここをクリックして入力！",
+        "share": "共有",
+        "view": "ビュー",
+        "reply": "返事"
     },
     "groupchat": {
         "groupchatTitle": "グループチャット",

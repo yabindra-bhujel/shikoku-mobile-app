@@ -1,4 +1,6 @@
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 
 interface TextPostProps {
@@ -7,6 +9,10 @@ interface TextPostProps {
 
 const TextPost: React.FC<TextPostProps> = ({ content }) => {
   const [showFullText, setShowFullText] = useState(false);
+  const {t} = useTranslation();
+
+  const background = useThemeColor({}, "postbackground");
+  const color = useThemeColor({}, "text");
 
   const toggleText = () => {
     setShowFullText(!showFullText);
@@ -16,8 +22,8 @@ const TextPost: React.FC<TextPostProps> = ({ content }) => {
   const textToShow = content ? (showFullText ? content : content.slice(0, 200)) : '';
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{textToShow}</Text>
+    <View style={[styles.container, {backgroundColor: background}]}>
+      <Text style={[styles.text, {color}]}>{textToShow}</Text>
       {content && content.length > 200 && (
         <TouchableOpacity onPress={toggleText} style={styles.readMoreButton}>
           <Text style={styles.readMoreText}>{showFullText ? "Read less" : "Read more"}</Text>
@@ -29,16 +35,12 @@ const TextPost: React.FC<TextPostProps> = ({ content }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffffff",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    elevation: 5,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   text: {
     fontSize: 16,
-    lineHeight: 24,
-    color: "#333333",
+    lineHeight: 22,
   },
   readMoreButton: {
     alignSelf: "flex-start",

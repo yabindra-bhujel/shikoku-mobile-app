@@ -1,6 +1,6 @@
 import { UserProvider } from "@/src/hooks/UserContext";
-import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { router, Stack } from "expo-router";
+import { Text, TouchableOpacity, useColorScheme } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Provider as PaperProvider } from "react-native-paper";
 
@@ -63,12 +63,17 @@ const TabLayout = () => {
           <Stack.Screen
             name="setting"
             options={{
-              headerShown: false,
+              headerTitle: t("settings.settingTitle"),
+              headerBackTitle: t("back"),
+              headerTintColor: isDark ? "#fff" : "000",
+              headerStyle: {
+                backgroundColor: isDark ? "#333" : "#fff",
+              },
             }}
           />
         </Stack>
       </PaperProvider>
-    </UserProvider> 
+    </UserProvider>
   );
 };
 

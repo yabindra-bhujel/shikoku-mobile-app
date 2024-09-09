@@ -10,7 +10,7 @@ import {
   Switch,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
+import { router, Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import axiosInstance from "@/src/config/Api";
 import debounce from "lodash/debounce";
@@ -122,6 +122,7 @@ const Setting = () => {
       backgroundColor: theme === "dark" ? "#1e1e1e" : "#fff",
       borderRadius: 10,
       marginHorizontal: 10,
+      zIndex: 2,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
@@ -171,29 +172,10 @@ const Setting = () => {
         visible={showSnackbar}
         onDismiss={() => setShowSnackbar(false)}
         duration={3000}
-        style={{zIndex: 99}}
+        style={{ zIndex: 99 }}
       >
         {snackbarMessage}
       </Snackbar>
-      <View>
-        <View
-          style={{
-            height: 54,
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-          }}
-        />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={goBack} style={styles.backButton}>
-            <Ionicons
-              name="chevron-back-sharp"
-              size={24}
-              color={theme === "dark" ? "#fff" : "#000"}
-            />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t("settings.settingTitle")}</Text>
-        </View>
-      </View>
-
       <ScrollView>
         {/* Profile */}
         <View style={styles.section}>

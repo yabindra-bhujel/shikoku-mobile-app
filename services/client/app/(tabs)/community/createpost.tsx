@@ -1,23 +1,38 @@
-import { StyleSheet, ScrollView, View, TouchableOpacity, Image, Alert } from "react-native";
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Image,
+  Alert,
+  Text,
+  useColorScheme,
+} from "react-native";
 import React, { useState } from "react";
 import PostCreateHeader from "@/src/components/PostCreate/PostCreateHeader";
 import TextArea from "@/src/ReusableComponents/TextArea";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import * as ImagePicker from 'expo-image-picker';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import * as ImagePicker from "expo-image-picker";
 import PostServices from "@/src/api/PostServices";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { AntDesign } from "@expo/vector-icons";
+import Button from "@/src/ReusableComponents/Button";
+
 
 const CreatePost = () => {
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState<string>("");
   const router = useRouter();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
+  const isDark = useColorScheme() === "dark";
+
+  const backgroundColor = useThemeColor({}, "background");
 
   const goBack = () => {
     router.back();
   };
-
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -47,19 +62,19 @@ const CreatePost = () => {
   const sendPost = async () => {
     try {
       const formData = new FormData();
-  
+
       images.forEach((imageUri, index) => {
-        const uriParts = imageUri.split('.');
+        const uriParts = imageUri.split(".");
         const fileType = uriParts[uriParts.length - 1];
-  
-        formData.append('images', {
+
+        formData.append("images", {
           uri: imageUri,
           name: `image${index}.${fileType}`,
           type: `image/${fileType}`,
         } as unknown as Blob);
       });
-  
-      formData.append('content', content);
+
+      formData.append("content", content);
 
       // check if image or content is empty
       if (images.length === 0 && content === "") {
@@ -72,27 +87,33 @@ const CreatePost = () => {
         setContent("");
         goBack();
       }
-
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
+       
+      <PostCreateHeader post={sendPost} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
-          backgroundColor: "white",
+          backgroundColor,
         }}
       >
-        <PostCreateHeader post={sendPost} />
         <View>
-          <TextArea text={content} setText={setContent} />
+          <TextArea text={content} setText={setContent}/>
         </View>
         <View style={styles.imageContainer}>
           {images.map((imageUri, index) => (
-            <View key={index} style={[styles.imageWrapper, images.length === 1 ? styles.fullWidth : styles.halfWidth]}>
+            <View
+              key={index}
+              style={[
+                styles.imageWrapper,
+                images.length === 1 ? styles.fullWidth : styles.halfWidth,
+              ]}
+            >
               <Image source={{ uri: imageUri }} style={styles.image} />
               <TouchableOpacity
                 style={styles.closeIcon}
@@ -119,51 +140,51 @@ const CreatePost = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    // backgroundColor: "white",
   },
   button: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 20,
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'blue',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "blue",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonEnabled: {
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
   },
   buttonText: {
     fontSize: 24,
-    color: 'white',
+    color: "white",
   },
   imageContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 10,
   },
   imageWrapper: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 10,
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 350,
     marginBottom: 5,
   },
   fullWidth: {
-    width: '100%',
+    width: "100%",
   },
   halfWidth: {
-    width: '50%',
+    width: "50%",
   },
   closeIcon: {
-    position: 'absolute',
+    position: "absolute",
     top: 5,
     right: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 2,
     borderRadius: 150,
   },

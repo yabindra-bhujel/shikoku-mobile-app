@@ -5,48 +5,69 @@ import {
   TouchableOpacity,
   TextInput,
   useColorScheme,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
-const CommentBox = ({comment, setComment, submitComment}) => {
+const CommentBox = ({ comment, setComment, submitComment, replyingTo, cancelReply }) => {
   const theme = useColorScheme();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder={t("Community.addcomment")}
-        value={comment}
-        onChangeText={(text) => setComment(text)}
-        multiline={true} 
-        numberOfLines={1} 
-        maxLength={5} 
-      />
-      <TouchableOpacity style={styles.sendButton} onPress={submitComment}>
-        <Ionicons name="send" size={24} color="black" />
-      </TouchableOpacity>
+    <View style={styles.wrapper}>
+      {/* Replying To Text */}
+      {replyingTo && (
+        <View style={styles.replyingToContainer}>
+          <Text>
+            {t("Community.replyingTo")} {replyingTo.user.username}
+          </Text>
+          <TouchableOpacity onPress={cancelReply}>
+            <Ionicons name="close" size={16} color="gray" />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          placeholder={t("Community.addcomment")}
+          value={comment}
+          onChangeText={(text) => setComment(text)}
+          multiline={true}
+          autoFocus={true}
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={submitComment}>
+          <Ionicons name="send" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flexDirection: "column",
+  },
+  replyingToContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+  },
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "transparent", 
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginBottom: 10,
     borderWidth: 1,
     borderRadius: 20,
     borderColor: "#ccc",
   },
   input: {
     flex: 1,
-    minHeight: 40,
-    maxHeight: 'auto',
     paddingVertical: 10,
     paddingHorizontal: 15,
     fontSize: 14,

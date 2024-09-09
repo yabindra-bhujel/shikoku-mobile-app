@@ -2,9 +2,12 @@ import React, { useState, useCallback } from "react";
 import { StyleSheet, View, ScrollView, RefreshControl } from "react-native";
 import CommunityPageHeader from "@/src/components/community/CommunityPageHeader";
 import Post from "@/src/components/community/Post";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 
 const Community = () => {
   const [refreshing, setRefreshing] = useState(false);
+
+  const backgroundColor = useThemeColor({}, "background");
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -13,8 +16,8 @@ const Community = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <CommunityPageHeader />
+    <View style={[styles.container, {backgroundColor}]}>
+      {/* <CommunityPageHeader /> */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={

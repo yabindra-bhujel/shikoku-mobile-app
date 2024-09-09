@@ -36,18 +36,6 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  headerView: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 55,
-    paddingLeft: 28,
-    paddingRight: 20,
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
   bodyContainer: {
     flex: 1,
     padding: 10,

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import PostHeader from "../community/PostHeader";
 import UserInfoServices from "@/src/api/UserInfo";
-import TextPost from "../community/PostText";
+import TextPost from "../community/PostTextBody";
 import ImagePost from "../community/ImagePost";
 import PostServices from "@/src/api/PostServices";
 import { EditPost } from "./EditPost";

@@ -9,6 +9,7 @@ import {
   import { useRouter } from "expo-router";
   import Button from "@/src/ReusableComponents/Button";
 import { useTranslation } from "react-i18next";
+import { SafeAreaView } from "react-native-safe-area-context";
   
   const PostCreateHeader = ({post}) => {
     const theme = useColorScheme();
@@ -25,7 +26,7 @@ import { useTranslation } from "react-i18next";
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: 10,
+        padding: 5,
         backgroundColor: theme === "dark" ? "#333" : "#fff",
         borderBottomWidth: 1,
         borderBottomColor: "lightgray",
@@ -33,13 +34,7 @@ import { useTranslation } from "react-i18next";
     });
   
     return (
-      <View style={styles.container}>
-        <View
-          style={{
-            height: 54,
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-          }}
-        />
+      <SafeAreaView style={styles.container}>
         <View style={styles.communityHomeHeader}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TouchableOpacity
@@ -56,7 +51,7 @@ import { useTranslation } from "react-i18next";
           <View>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: "bold",
                 color: theme === "dark" ? "#fff" : "#000",
               }}
@@ -69,16 +64,17 @@ import { useTranslation } from "react-i18next";
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              gap: 10,
             }}
           >
             <Button
              title={t("Community.post")}
              onPress={post}
+             paddingHorizontal={18}
+             paddingVertical={8}
               />
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   };
   
