@@ -38,6 +38,24 @@ const CommentsService = {
       throw error;
     }
   },
+
+  async deleteComment(commentId: number) {
+    try {
+      const result = await axiosInstance.delete(`/comments/${commentId}`);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async deleteReplyComment(replyId: number) {
+    try {
+      const result = await axiosInstance.delete(`/comments/replies/${replyId}`);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default CommentsService;

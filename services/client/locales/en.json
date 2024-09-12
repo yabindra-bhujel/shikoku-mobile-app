@@ -49,7 +49,9 @@
         "share": "Share",
         "view": "View",
         "reply": "Reply",
-        "replyingTo": "Repling to"
+        "replyingTo": "Repling to",
+        "hoursAgo": "hour ago",
+        "minutesAgo": "minute ago"
     },
     "groupchat": {
         "groupchatTitle": "Group Chat",

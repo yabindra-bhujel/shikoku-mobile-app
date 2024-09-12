@@ -53,7 +53,6 @@ const PostDetail = () => {
 
   async function fetchPost() {
     if (!postId) return;
-
     try {
       const response = await PostServices.getPostById(postId);
       const data: PostDetailInterface = await response.data;
@@ -128,6 +127,33 @@ const PostDetail = () => {
     }
   };
 
+  const deleteCommentHandler = (commentId: number) => {
+    CommentsService.deleteComment(commentId)
+      .then(() => {
+        setComments((prevComments:any) =>
+          prevComments.filter((cm) => cm.id !== commentId)
+        );
+      })
+      .catch((error) => {
+        Alert.alert("Error", "Failed to delete comment. Please try again.");
+      });
+  };
+
+  const deleteReplyHandler = (replyId: number) => {
+    CommentsService.deleteReplyComment(replyId)
+      .then(() => {
+        setComments((prevComments) =>
+          prevComments.map((comment) => ({
+            ...comment,
+            replies: comment.replies.filter((reply) => reply.id !== replyId),
+          }))
+        );
+      })
+      .catch((error) => {
+        Alert.alert("Error", "Failed to delete reply. Please try again.");
+      });
+  };
+
   useEffect(() => {
     fetchPost();
     fetchComments();
@@ -187,7 +213,12 @@ const PostDetail = () => {
             padding: 10,
           }}
         >
-          <CommentList comments={comments ?? []} onReply={onReply} />
+          <CommentList
+            comments={comments ?? []}
+            onReply={onReply}
+            onDeleteComment={deleteCommentHandler}
+            onDeleteReply={deleteReplyHandler}
+          />
         </View>
       </ScrollView>
       <KeyboardAvoidingView
@@ -243,14 +274,14 @@ const styles = StyleSheet.create({
   footer: {
     paddingBottom: 10,
     flexDirection: "column",
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: "lightgray",
   },
   commentBox: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    height: 'auto',
+    height: "auto",
     borderTopWidth: 1,
     borderTopColor: "#ccc",
   },

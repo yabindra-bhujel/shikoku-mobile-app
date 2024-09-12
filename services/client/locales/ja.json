@@ -49,7 +49,9 @@
         "share": "共有",
         "view": "ビュー",
         "reply": "返事",
-        "replyingTo": "返信に"
+        "replyingTo": "返信に",
+        "hoursAgo": "時間前",
+        "minutesAgo": "分前"
     },
     "groupchat": {
         "groupchatTitle": "グループチャット",

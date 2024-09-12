@@ -32,4 +32,5 @@ export interface PostDetailInterface {
 
 export interface CommentListInterface {
     comments: Comment[];
+    replies: any;
 }
