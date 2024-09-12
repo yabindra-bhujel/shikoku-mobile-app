@@ -9,6 +9,12 @@ const RootLayout = () => {
         options={{ headerShown: false,
         }}
       />
+        <Stack.Screen
+        name="[surveyid]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

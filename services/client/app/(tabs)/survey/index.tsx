@@ -1,19 +1,35 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Linking } from "react-native";
 import { DateFormat } from "@/src/ReusableComponents/DateFormat";
 import { Ionicons } from '@expo/vector-icons'; // For icons
+import { useRouter } from "expo-router";
 
 const Survey = () => {
-    // Dummy data for the survey list
+    const router = useRouter();
+
     const surveys = [
-        { id: 1, title: "Customer Satisfaction", date: new Date('2024-09-01') },
-        { id: 2, title: "Product Feedback", date: new Date('2024-09-02') },
-        { id: 3, title: "Employee Engagement", date: new Date('2024-09-03') },
+        { 
+            id: 1,
+            title: "Customer Satisfaction",
+            date: new Date('2024-09-01'),
+            url: "https://docs.google.com/forms/d/e/1FAIpQLSf0_c2NS4qpyVsN9n7nRMszlxyl1gdxeh9dL0ReuEUOEJ2aXQ/viewform?usp=sf_link",
+         },
     ];
+
+
+    const navigationToSurvey = (id: number) => {
+        router.push(`/survey/${id}`);
+    }
+    
 
     // Render each survey item
     const renderSurveyItem = ({ item }) => (
-        <TouchableOpacity style={styles.surveyItem} activeOpacity={0.7}>
+        <TouchableOpacity 
+            style={styles.surveyItem} 
+            activeOpacity={0.7} 
+            onPress={() => navigationToSurvey(item.id)}
+            
+        >
             <View style={styles.surveyInfo}>
                 <Text style={styles.surveyTitle}>{item.title}</Text>
                 <Text style={styles.surveyDate}>
