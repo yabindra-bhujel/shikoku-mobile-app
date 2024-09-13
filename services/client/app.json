@@ -13,14 +13,18 @@
       "backgroundColor": "#fff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shukoku-u-mobile.client"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["INTERNET"],
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO"
+      ],
       "useNextNotificationsApi": true,
       "config": {
         "intentFilters": [
@@ -32,7 +36,10 @@
                 "host": "128.172.0.1"
               }
             ],
-            "category": ["BROWSABLE", "DEFAULT"]
+            "category": [
+              "BROWSABLE",
+              "DEFAULT"
+            ]
           }
         ]
       }
@@ -50,6 +57,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6b9316b4-53db-4865-be8b-d9f4c4fb3da8"
+      }
     }
   }
 }
