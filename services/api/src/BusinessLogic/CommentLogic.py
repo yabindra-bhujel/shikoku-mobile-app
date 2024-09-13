@@ -14,6 +14,9 @@ from ..models.entity.user_profile import UserProfile
 
 class CommentLogic:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_comments(db: Session, post_id: int, request: Request, user: User) -> Page[CommentSchma]:
         try:
@@ -67,6 +70,22 @@ class CommentLogic:
                     .all()
                 )
 
+                comment_reply_to_reply = (
+                    db.query(
+                        CommentReply.id,
+                        CommentReply.content,
+                        CommentReply.created_at,
+                        CommentReply.post_id,
+                        CommentReply.parent_comment_id,
+                        func.concat(UserProfile.first_name, ' ', UserProfile.last_name).label('username'),
+                        UserProfile.profile_picture
+                    )
+                    .join(UserProfile, CommentReply.user_id == UserProfile.user_id)
+                    .filter(CommentReply.parent_comment_id == comment.id)
+                    .order_by(desc(CommentReply.created_at))
+                    .all()
+                )
+
                 for reply in comment_replies:
                     comment_dict["replies"].append(
                         {
@@ -80,6 +99,22 @@ class CommentLogic:
                                 "profile_picture": str(request.url_for('static', path=reply.profile_picture)) 
                                 if reply.profile_picture else None,
                             },
+                            "replies": [
+                                {
+                                    "id": reply.id,
+                                    "content": reply.content,
+                                    "created_at": reply.created_at,
+                                    "post_id": reply.post_id,
+                                    "parent_comment_id": reply.parent_comment_id,
+                                    "user": {
+                                        "username": reply.username,
+                                        "profile_picture": str(request.url_for('static', path=reply.profile_picture)) 
+                                        if reply.profile_picture else None,
+                                    }
+                                }
+                                for reply in comment_reply_to_reply
+                            ]
+
                         }
                     )
 
