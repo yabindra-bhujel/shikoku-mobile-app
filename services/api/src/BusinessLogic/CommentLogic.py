@@ -74,6 +74,7 @@ class CommentLogic:
                             "content": reply.content,
                             "created_at": reply.created_at,
                             "post_id": reply.post_id,
+                            "parent_comment_id": comment.id,
                             "user": {
                                 "username": reply.username,
                                 "profile_picture": str(request.url_for('static', path=reply.profile_picture)) 
