@@ -68,6 +68,7 @@ class CommentLogic:
                     )
                     .join(UserProfile, CommentReply.user_id == UserProfile.user_id)
                     .filter(CommentReply.parent_comment_id == comment.id)
+                    .filter(CommentReply.parent_reply_id == None)
                     .order_by(desc(CommentReply.created_at))
                     .all()
                 )
