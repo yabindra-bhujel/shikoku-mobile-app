@@ -38,5 +38,10 @@ class CommentReply(Base):
     parent_comment_id = Column(Integer, ForeignKey('comments.id', ondelete='CASCADE'), nullable=False)
     parent_comment = relationship('Comment', back_populates='replies')
 
+    # Reference to parent comment (same table)
+    parent_reply_id = Column(Integer, ForeignKey('comment_replies.id', ondelete='CASCADE'), nullable=True)
+    parent_reply = relationship('CommentReply', remote_side=[id], backref='replies')
+
+
     def __repr__(self):
         return f'CommentReply(id={self.id}, content={self.content})' 

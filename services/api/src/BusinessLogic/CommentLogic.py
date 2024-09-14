@@ -20,7 +20,7 @@ class CommentLogic:
     @staticmethod
     def get_comments(db: Session, post_id: int, request: Request, user: User) -> Page[CommentSchma]:
         try:
-            # コメントのクエリ
+            # Comment query
             query = (
                 db.query(
                     Comment.id,
@@ -35,10 +35,10 @@ class CommentLogic:
                 .order_by(desc(Comment.created_at))
             )
 
-            # ページネーション
+            # Pagination
             paginated_comments = paginate(db, query)
 
-            # 各コメントの処理
+            # Process each comment
             processed_comments = []
             for comment in paginated_comments.items:
                 comment_dict = {
@@ -54,29 +54,15 @@ class CommentLogic:
                     "replies": []
                 }
 
-                # 返事を取得
+                # Fetch replies for this comment
                 comment_replies = (
                     db.query(
                         CommentReply.id,
                         CommentReply.content,
                         CommentReply.created_at,
                         CommentReply.post_id,
-                        func.concat(UserProfile.first_name, ' ', UserProfile.last_name).label('username'),
-                        UserProfile.profile_picture
-                    )
-                    .join(UserProfile, CommentReply.user_id == UserProfile.user_id)
-                    .filter(CommentReply.parent_comment_id == comment.id)
-                    .order_by(desc(CommentReply.created_at))
-                    .all()
-                )
-
-                comment_reply_to_reply = (
-                    db.query(
-                        CommentReply.id,
-                        CommentReply.content,
-                        CommentReply.created_at,
-                        CommentReply.post_id,
                         CommentReply.parent_comment_id,
+                        CommentReply.parent_reply_id,
                         func.concat(UserProfile.first_name, ' ', UserProfile.last_name).label('username'),
                         UserProfile.profile_picture
                     )
@@ -87,36 +73,52 @@ class CommentLogic:
                 )
 
                 for reply in comment_replies:
-                    comment_dict["replies"].append(
-                        {
-                            "id": reply.id,
-                            "content": reply.content,
-                            "created_at": reply.created_at,
-                            "post_id": reply.post_id,
-                            "parent_comment_id": comment.id,
-                            "user": {
-                                "username": reply.username,
-                                "profile_picture": str(request.url_for('static', path=reply.profile_picture)) 
-                                if reply.profile_picture else None,
-                            },
-                            "replies": [
-                                {
-                                    "id": reply.id,
-                                    "content": reply.content,
-                                    "created_at": reply.created_at,
-                                    "post_id": reply.post_id,
-                                    "parent_comment_id": reply.parent_comment_id,
-                                    "user": {
-                                        "username": reply.username,
-                                        "profile_picture": str(request.url_for('static', path=reply.profile_picture)) 
-                                        if reply.profile_picture else None,
-                                    }
-                                }
-                                for reply in comment_reply_to_reply
-                            ]
-
-                        }
+                    # Fetch nested replies for this reply (reply to reply)
+                    nested_replies = (
+                        db.query(
+                            CommentReply.id,
+                            CommentReply.content,
+                            CommentReply.created_at,
+                            CommentReply.post_id,
+                            CommentReply.parent_comment_id,
+                            func.concat(UserProfile.first_name, ' ', UserProfile.last_name).label('username'),
+                            UserProfile.profile_picture
+                        )
+                        .join(UserProfile, CommentReply.user_id == UserProfile.user_id)
+                        .filter(CommentReply.parent_reply_id == reply.id)
+                        .order_by(desc(CommentReply.created_at))
+                        .all()
                     )
+
+                    reply_dict = {
+                        "id": reply.id,
+                        "content": reply.content,
+                        "created_at": reply.created_at,
+                        "post_id": reply.post_id,
+                        "parent_comment_id": reply.parent_comment_id,
+                        "user": {
+                            "username": reply.username,
+                            "profile_picture": str(request.url_for('static', path=reply.profile_picture)) 
+                            if reply.profile_picture else None,
+                        },
+                        "replies": [
+                            {
+                                "id": nested_reply.id,
+                                "content": nested_reply.content,
+                                "created_at": nested_reply.created_at,
+                                "post_id": nested_reply.post_id,
+                                "parent_comment_id": nested_reply.parent_comment_id,
+                                "user": {
+                                    "username": nested_reply.username,
+                                    "profile_picture": str(request.url_for('static', path=nested_reply.profile_picture)) 
+                                    if nested_reply.profile_picture else None,
+                                }
+                            }
+                            for nested_reply in nested_replies
+                        ]
+                    }
+
+                    comment_dict["replies"].append(reply_dict)
 
                 processed_comments.append(comment_dict)
 
@@ -142,8 +144,6 @@ class CommentLogic:
                 post_id=comment.post_id,
                 created_at=datetime.now(),
             )
-
-            # 
             db.add(new_comment)
             db.commit()
             db.refresh(new_comment)
@@ -156,6 +156,7 @@ class CommentLogic:
             return new_comment
 
         except Exception as e:
+            print(e)
             raise e
 
     @staticmethod
@@ -191,7 +192,29 @@ class CommentLogic:
 
         except Exception as e:
             raise e
+        
+    @staticmethod
+    def create_comment_reply_to_reply(db: Session, comment_reply: CommentReplyToReplySchema, user: User) -> CommentReply:
+        try:
+            new_comment_reply = CommentReply(
+                content=comment_reply.content,
+                user_id=user.id,
+                post_id=comment_reply.post_id,
+                parent_comment_id=comment_reply.comment_id,
+                parent_reply_id=comment_reply.parent_comment_id,
+                created_at=datetime.now(),
+            )
 
+            db.add(new_comment_reply)
+            db.commit()
+            db.refresh(new_comment_reply)
+
+            return new_comment_reply
+
+        except Exception as e:
+            raise e
+
+        
     @staticmethod
     def delete_comment_reply(db: Session, comment_reply_id: int, user_id: int) -> None:
         comment_reply = (
