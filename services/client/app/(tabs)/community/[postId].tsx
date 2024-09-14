@@ -128,7 +128,7 @@ const PostDetail = () => {
   };
 
   const deleteCommentHandler = (commentId: number) => {
-    CommentsService.deleteComment(commentId)
+    CommentsService.deleteComment(commentId, parseInt(postId ?? ""))
       .then(() => {
         setComments((prevComments:any) =>
           prevComments.filter((cm) => cm.id !== commentId)
@@ -140,7 +140,7 @@ const PostDetail = () => {
   };
 
   const deleteReplyHandler = (replyId: number) => {
-    CommentsService.deleteReplyComment(replyId)
+    CommentsService.deleteReplyComment(replyId, parseInt(postId ?? ""))
       .then(() => {
         setComments((prevComments) =>
           prevComments.map((comment) => ({

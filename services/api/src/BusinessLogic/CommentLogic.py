@@ -160,21 +160,39 @@ class CommentLogic:
             raise e
 
     @staticmethod
-    def delete_comment(db: Session, comment_id: int, user_id: int) -> None:
-        comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    def delete_comment(db: Session, comment_id: int, user_id: int, post_id: int) -> None:
 
-        if comment.user_id != user_id:
-            raise Exception("Unauthorized")
+        post = db.query(Post).filter(Post.id == post_id).first()
 
-        if comment is None:
-            raise Exception("Comment not found")
+        if not post:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        comment = CommentLogic.get_comment_helper(db, comment_id)
+        CommentLogic.check_user_ownership(comment, user_id)
 
-        db.delete(comment)
-        db.commit()
+        try:
+            db.delete(comment)
+            db.commit()
+
+            total_replies = db.query(CommentReply).filter(CommentReply.post_id == post.id).count()
+            total_comments = db.query(Comment).filter(Comment.post_id == post.id).count()
+
+            post.total_comments = total_comments + total_replies
+            db.commit()
+            db.refresh(post)
+
+        except Exception as e:
+            print(e)
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
 
     @staticmethod
     def create_comment_reply(db: Session, comment_reply: CommentInput) -> Comment:
         try:
+            post = db.query(Post).filter(Post.id == comment_reply.post_id).first()
+            if not post:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
             new_comment_reply = CommentReply(
                 content=comment_reply.content,
                 user_id=comment_reply.user_id,
@@ -188,6 +206,11 @@ class CommentLogic:
             db.commit()
             db.refresh(new_comment_reply)
 
+            # Update the post's total_likes
+            post.total_comments += 1
+            db.commit()
+            db.refresh(post)
+
             return new_comment_reply
 
         except Exception as e:
@@ -196,6 +219,10 @@ class CommentLogic:
     @staticmethod
     def create_comment_reply_to_reply(db: Session, comment_reply: CommentReplyToReplySchema, user: User) -> CommentReply:
         try:
+            post = db.query(Post).filter(Post.id == comment_reply.post_id).first()
+            if not post:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+            
             new_comment_reply = CommentReply(
                 content=comment_reply.content,
                 user_id=user.id,
@@ -209,6 +236,11 @@ class CommentLogic:
             db.commit()
             db.refresh(new_comment_reply)
 
+            # Update the post's total_likes
+            post.total_comments += 1
+            db.commit()
+            db.refresh(post)
+
             return new_comment_reply
 
         except Exception as e:
@@ -216,10 +248,20 @@ class CommentLogic:
 
         
     @staticmethod
-    def delete_comment_reply(db: Session, comment_reply_id: int, user_id: int) -> None:
-        comment_reply = (
-            db.query(CommentReply).filter(CommentReply.id == comment_reply_id).first()
-        )
+    def delete_comment_reply(db: Session, comment_reply_id: int, user_id: int, post_id: int) -> None:
+        post = db.query(Post).filter(Post.id == post_id).first()
+
+        if not post:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+        comment_reply = db.query(CommentReply).filter(CommentReply.id == comment_reply_id).first()
+
+        if not comment_reply:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment reply not found")
+        
+        CommentLogic.check_user_ownership(comment_reply, user_id)
+
+
 
         if comment_reply.user_id != user_id:
             raise Exception("Unauthorized")
@@ -227,5 +269,30 @@ class CommentLogic:
         if comment_reply is None:
             raise Exception("Comment reply not found")
 
-        db.delete(comment_reply)
-        db.commit()
+        try:
+            db.delete(comment_reply)
+            db.commit()
+
+            total_replies = db.query(CommentReply).filter(CommentReply.parent_comment_id == comment_reply.parent_comment_id).count()
+            total_comments = db.query(Comment).filter(Comment.post_id == post.id).count()
+
+            post.total_comments = total_comments + total_replies
+            db.commit()
+            db.refresh(post)
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    @staticmethod
+    def check_user_ownership(comment: Comment, user_id: int):
+        if comment.user_id != user_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized action")
+
+
+    @staticmethod
+    def get_comment_helper(db: Session, comment_id: int) -> Comment:
+        comment = db.query(Comment).filter(Comment.id == comment_id).first()
+        if not comment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+        return comment

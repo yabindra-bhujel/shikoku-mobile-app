@@ -39,18 +39,18 @@ const CommentsService = {
     }
   },
 
-  async deleteComment(commentId: number) {
+  async deleteComment(commentId: number, postId: number) {
     try {
-      const result = await axiosInstance.delete(`/comments/${commentId}`);
+      const result = await axiosInstance.delete(`/comments/${commentId}/${postId}`);
       return result;
     } catch (error) {
       throw error;
     }
   },
 
-  async deleteReplyComment(replyId: number) {
+  async deleteReplyComment(replyId: number, postId: number) {
     try {
-      const result = await axiosInstance.delete(`/comments/replies/${replyId}`);
+      const result = await axiosInstance.delete(`/comments/replies/${replyId}/${postId}`);
       return result;
     } catch (error) {
       throw error;
