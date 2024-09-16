@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -6,40 +6,129 @@ import {
   useColorScheme,
   TouchableOpacity,
   Alert,
+  LayoutAnimation,
 } from "react-native";
-import UserAvatar from "../../UserAvatar"; // Assuming this component works for showing avatars
+import UserAvatar from "../../UserAvatar";
 import { useTranslation } from "react-i18next";
 import moment from "moment";
-import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import { Ionicons } from "@expo/vector-icons";
+import { SimpleLineIcons } from "@expo/vector-icons";
+import { useActionSheet } from '@expo/react-native-action-sheet'; // Import useActionSheet
+
+// Separate component for rendering each comment
+const CommentItem = ({ comment, level, isReply, onReply, handleDelete, isDark, commentTime }) => {
+  const [commentHeight, setCommentHeight] = useState(0);
+  const { showActionSheetWithOptions } = useActionSheet(); // Destructure the hook
+
+  const handleLongPress = () => {
+    // Action sheet options
+    const options = ["Reply", "Delete", "Report", "Cancel"];
+    const destructiveButtonIndex = 1; // Set "Delete" as the destructive button
+    const cancelButtonIndex = 3; // Set "Cancel" as the cancel button
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+        title: "Choose an action",
+        message: "Select an option for this comment",
+      },
+      (buttonIndex) => {
+        if (buttonIndex === 0) {
+          // Reply
+          onReply(comment);
+        } else if (buttonIndex === 1) {
+          // Delete
+          handleDelete(comment, isReply);
+        } else if (buttonIndex === 2) {
+          // Report
+          Alert.alert("Reported", "You have reported this comment.");
+        }
+      }
+    );
+  };
+
+  return (
+    <TouchableOpacity
+      onLongPress={handleLongPress}
+      activeOpacity={0.7}
+    >
+      <View
+        style={[
+          styles.commentItem,
+          isReply && { marginLeft: level * 20, marginTop: 10 },
+        ]}
+        onLayout={(event) => {
+          const { height } = event.nativeEvent.layout;
+          setCommentHeight(height);
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        }}
+      >
+        <View style={[styles.line, { height: commentHeight }]} />
+        <UserAvatar url={comment.user.profile_picture} height={35} width={35} />
+        <View style={styles.commentContent}>
+          <View style={styles.commentText}>
+            <View style={styles.commentHeader}>
+              <Text
+                style={[
+                  styles.username,
+                  {
+                    color: isDark ? "#fff" : "#000",
+                  },
+                ]}
+              >
+                {comment.user.username}
+              </Text>
+              <SimpleLineIcons name="options" size={22} color="black" onPress={handleLongPress}/>
+            </View>
+            <Text style={styles.timeAgo}>{commentTime(comment.created_at)}</Text>
+            <View>
+              <Text
+                style={[
+                  styles.comment,
+                  {
+                    color: isDark ? "#ccc" : "#333",
+                  },
+                ]}
+              >
+                {comment.content}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity onPress={() => onReply(comment)}>
+            <Text style={styles.replyButton}>Reply</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const CommentList = ({ comments, onReply, onDeleteComment, onDeleteReply }) => {
   const { t } = useTranslation();
   const isDark = useColorScheme() === "dark";
 
-  // Function to format comment time
   const commentTime = (createdTime) => {
     const commentMoment = createdTime.split("T");
     const commentHour = commentMoment[1].split(":");
     const today = moment().format("YYYY-MM-DD");
     const todayHour = moment().format("HH:mm");
 
-    // Check if the comment was created today
     if (commentMoment[0] === today) {
-      // Return "X minutes ago", "X hours ago" etc.
       const momentTime =
         parseInt(todayHour.split(":")[0]) * 60 +
         parseInt(todayHour.split(":")[1]);
       const commentTime =
         parseInt(commentHour[0]) * 60 + parseInt(commentHour[1]);
       const timeDiff = momentTime - commentTime;
-      if (timeDiff < 60) {
-        return `${timeDiff} ${t("Community.minutesAgo")}`;
+      if (timeDiff < 1) {
+        return "just now";
+      } else if (timeDiff < 60) {
+        return `${timeDiff} minutes ago`;
       } else if (timeDiff < 3600) {
-        return `${Math.floor(timeDiff / 60)} ${t("Community.hoursAgo")}`;
+        return `${Math.floor(timeDiff / 60)} hours ago`;
       }
     } else {
-      // Return formatted date and time for comments not from today
       return `${commentMoment[0]} ${commentHour[0]}:${commentHour[1]}`;
     }
   };
@@ -51,9 +140,9 @@ const CommentList = ({ comments, onReply, onDeleteComment, onDeleteReply }) => {
         text: "Delete",
         onPress: () => {
           if (isReply) {
-            onDeleteReply(comment.id); // Handle reply deletion
+            onDeleteReply(comment.id);
           } else {
-            onDeleteComment(comment.id); // Handle top-level comment deletion
+            onDeleteComment(comment.id);
           }
         },
         style: "destructive",
@@ -61,89 +150,56 @@ const CommentList = ({ comments, onReply, onDeleteComment, onDeleteReply }) => {
     ]);
   };
 
-  // Sort the comments by time (newest to oldest)
   const sortedComments = comments.sort((a, b) => {
     return moment(a.created_at).diff(moment(b.created_at));
   });
-
-  // Function to render a line
-  const renderLine = (level) => {
-    return <View style={[styles.line, { marginLeft: level * 20 }]} />;
-  };
-
-  // Function to render each comment (top-level and replies)
-  const renderComment = (comment, level = 0, isReply = false) => (
-    <View
-      key={comment.id}
-      style={[styles.commentItem, isReply && { marginLeft: level * 20, marginTop: 10 }]}
-    >
-      <UserAvatar url={comment.user.profile_picture} height={35} width={35} />
-      <View style={styles.commentContent}>
-        <View style={styles.commentText}>
-          <View style={styles.commentHeader}>
-            <Text
-              style={[
-                styles.username,
-                {
-                  color: isDark ? "#fff" : "#000",
-                },
-              ]}
-            >
-              {comment.user.username}
-            </Text>
-            <TouchableOpacity onPress={() => handleDelete(comment, isReply)}>
-              <Ionicons name="trash" size={20} color="red" />
-            </TouchableOpacity>
-
-            <SimpleLineIcons name="options" size={20} color="black" />
-          </View>
-          <Text style={styles.timeAgo}>{commentTime(comment.created_at)}</Text>
-          <View>
-            <Text
-              style={[
-                styles.comment,
-                {
-                  color: isDark ? "#ccc" : "#333",
-                },
-              ]}
-            >
-              {comment.content}
-            </Text>
-          </View>
-        </View>
-        <TouchableOpacity onPress={() => onReply(comment)}>
-          <Text style={styles.replyButton}>{t("Community.reply")}</Text>
-        </TouchableOpacity>
-      </View>
-      {renderLine(level)}
-    </View>
-  );
 
   return (
     <View>
       {sortedComments.map((comment) => (
         <View key={comment.id} style={styles.divideComment}>
           {/* Render Top-Level Comment */}
-          {renderComment(comment, 0)}
+          <CommentItem
+            comment={comment}
+            level={0}
+            isReply={false}
+            onReply={onReply}
+            handleDelete={handleDelete}
+            isDark={isDark}
+            commentTime={commentTime}
+          />
 
           {/* Render Replies if any, sorted by time */}
           {comment.replies &&
             comment.replies
-              .sort((a, b) => moment(a.created_at).diff(moment(b.created_at))) // Sort replies by time
+              .sort((a, b) => moment(a.created_at).diff(moment(b.created_at)))
               .map((reply) => (
                 <View key={reply.id}>
-                  {renderComment(reply, 1, true)}
+                  <CommentItem
+                    comment={reply}
+                    level={1}
+                    isReply={true}
+                    onReply={onReply}
+                    handleDelete={handleDelete}
+                    isDark={isDark}
+                    commentTime={commentTime}
+                  />
 
                   {/* Nested replies sorted by time */}
                   {reply.replies &&
                     reply.replies
-                      .sort((a, b) =>
-                        moment(a.created_at).diff(moment(b.created_at))
-                      )
+                      .sort((a, b) => moment(a.created_at).diff(moment(b.created_at)))
                       .map((nestedReply) => (
-                        <View key={nestedReply.id}>
-                          {renderComment(nestedReply, 2, true)}
-                        </View>
+                        <CommentItem
+                          key={nestedReply.id}
+                          comment={nestedReply}
+                          level={2}
+                          isReply={true}
+                          onReply={onReply}
+                          handleDelete={handleDelete}
+                          isDark={isDark}
+                          commentTime={commentTime}
+                        />
                       ))}
                 </View>
               ))}
@@ -158,11 +214,11 @@ const styles = StyleSheet.create({
     color: "blue",
     marginTop: 5,
   },
-  commentsContainer: {},
   commentItem: {
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 15,
+    position: "relative", // Ensure the line stays inside the comment container
   },
   divideComment: {
     marginBottom: 10,
@@ -195,11 +251,12 @@ const styles = StyleSheet.create({
     padding: 1,
   },
   line: {
-    borderLeftWidth: 1,
+    borderLeftWidth: 2,
     borderLeftColor: "#ccc",
-    height: '100%',
-    position: 'absolute',
+    position: "absolute",
     left: 0,
+    top: 0,
+    marginLeft: 18, // Adjust this to align with your content
   },
 });
 

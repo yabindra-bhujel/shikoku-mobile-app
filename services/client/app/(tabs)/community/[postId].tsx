@@ -4,7 +4,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  useColorScheme,
   Alert,
   ScrollView,
   KeyboardAvoidingView,

@@ -3,6 +3,7 @@ import { router, Stack } from "expo-router";
 import { Text, TouchableOpacity, useColorScheme } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Provider as PaperProvider } from "react-native-paper";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 const TabLayout = () => {
   const isDark = useColorScheme() === "dark";
@@ -11,6 +12,7 @@ const TabLayout = () => {
   return (
     <UserProvider>
       <PaperProvider>
+        <ActionSheetProvider>
         <Stack>
           <Stack.Screen
             name="home"
@@ -72,6 +74,7 @@ const TabLayout = () => {
             }}
           />
         </Stack>
+        </ActionSheetProvider>
       </PaperProvider>
     </UserProvider>
   );
