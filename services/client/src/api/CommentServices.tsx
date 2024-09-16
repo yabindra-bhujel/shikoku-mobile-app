@@ -39,9 +39,20 @@ const CommentsService = {
     }
   },
 
+  async replyToReply(data: any) {
+    try {
+      const result = await axiosInstance.post(`/comments/replies/reply`, data);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async deleteComment(commentId: number, postId: number) {
     try {
-      const result = await axiosInstance.delete(`/comments/${commentId}/${postId}`);
+      const result = await axiosInstance.delete(
+        `/comments/${commentId}/${postId}`
+      );
       return result;
     } catch (error) {
       throw error;
@@ -50,7 +61,9 @@ const CommentsService = {
 
   async deleteReplyComment(replyId: number, postId: number) {
     try {
-      const result = await axiosInstance.delete(`/comments/replies/${replyId}/${postId}`);
+      const result = await axiosInstance.delete(
+        `/comments/replies/${replyId}/${postId}`
+      );
       return result;
     } catch (error) {
       throw error;

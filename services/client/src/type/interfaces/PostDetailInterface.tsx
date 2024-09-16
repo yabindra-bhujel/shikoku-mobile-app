@@ -28,9 +28,15 @@ export interface PostDetailInterface {
     total_comments: number;
     total_likes: number;
     is_liked: boolean;
+    replies: any;
+    parent_comment_id: number;
+    comment: any;
 }
 
 export interface CommentListInterface {
     comments: Comment[];
     replies: any;
+    parent_comment_id: number;
+    id: number;
+    comment: any;
 }

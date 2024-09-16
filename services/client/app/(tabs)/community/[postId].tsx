@@ -38,6 +38,10 @@ const PostDetail = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [replyToComment, setReplyToComment] =
     useState<PostDetailInterface | null>(null);
+  const [replyToReply, setReplyToReply] = useState<CommentListInterface | null>(
+    null
+  );
+
   const { loggedInUserId } = useUser();
 
   const postBgColor = useThemeColor({}, "postbackground");
@@ -86,51 +90,74 @@ const PostDetail = () => {
     }
   }
 
-  const onReply = (comment: any) => {
-    setReplyToComment(comment); // Set the comment being replied to
+  const onReply = (comment: PostDetailInterface, isReplyToReply = false) => {
+    if (isReplyToReply) {
+      setReplyToReply(comment); 
+      setReplyToComment(null);
+    } else {
+      setReplyToComment(comment); 
+      setReplyToReply(null);
+    }
   };
+  
 
   const cancelReply = () => {
-    setReplyToComment(null); // Reset the replying state
+    setReplyToComment(null); 
+    setReplyToReply(null);
   };
 
   const submitComment = async () => {
     if (comment.trim().length === 0) {
       return;
     }
-
-    // Check if we are replying to a comment or adding a top-level comment
-    const commentData = replyToComment
-      ? {
-          content: comment,
-          comment_id: replyToComment.id,
-          user_id: loggedInUserId,
-          post_id: parseInt(postId ?? ""),
-        }
-      : {
-          content: comment,
-          post_id: parseInt(postId ?? ""),
-        };
-
+  
+    let commentData;
+  
+    // Determine if this is a new comment, a reply to a comment, or a reply to a reply
+    if (replyToReply) {
+      commentData = {
+        content: comment,
+        reply_id: replyToComment?.id || 0,
+        parent_comment_id: replyToReply.id,
+        post_id: parseInt(postId ?? ""),
+      };
+    } else if (replyToComment) {
+      commentData = {
+        content: comment,
+        comment_id: replyToComment.id, // Use comment ID for reply-to-comment
+        user_id: loggedInUserId,
+        post_id: parseInt(postId ?? ""),
+      };
+    } else {
+      commentData = {
+        content: comment,
+        post_id: parseInt(postId ?? ""), // Top-level comment
+      };
+    }
+  
     try {
-      if (replyToComment) {
-        await CommentsService.replyToComment(commentData);
+      if (replyToReply) {
+        await CommentsService.replyToReply(commentData); // API call for reply-to-reply
+      } else if (replyToComment) {
+        await CommentsService.replyToComment(commentData); // API call for reply-to-comment
       } else {
-        await CommentsService.commentPost(commentData);
+        await CommentsService.commentPost(commentData); // API call for new comment
       }
-
-      setComment("");
-      setReplyToComment(null);
-      await fetchComments();
+  
+      setComment(""); // Clear the input
+      setReplyToComment(null); // Reset reply-to-comment
+      setReplyToReply(null);   // Reset reply-to-reply
+      await fetchComments(); // Refresh the comment list
     } catch (error) {
       Alert.alert("Error", "Failed to submit comment. Please try again.");
     }
   };
+  
 
   const deleteCommentHandler = (commentId: number) => {
     CommentsService.deleteComment(commentId, parseInt(postId ?? ""))
       .then(() => {
-        setComments((prevComments:any) =>
+        setComments((prevComments: any) =>
           prevComments.filter((cm) => cm.id !== commentId)
         );
       })
@@ -229,7 +256,8 @@ const PostDetail = () => {
             comment={comment}
             setComment={setComment}
             submitComment={submitComment}
-            replyingTo={replyToComment}
+            replyToComment={replyToComment}
+            replyToReply={replyToReply}
             cancelReply={cancelReply}
           />
         </View>

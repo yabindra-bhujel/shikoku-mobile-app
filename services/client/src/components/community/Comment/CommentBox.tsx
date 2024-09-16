@@ -4,14 +4,23 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  useColorScheme,
   Text,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTranslation } from "react-i18next";
 
-const CommentBox = ({ comment, setComment, submitComment, replyingTo, cancelReply }) => {
+const CommentBox = ({
+  comment,
+  setComment,
+  submitComment,
+  replyToComment,
+  replyToReply,
+  cancelReply,
+}) => {
   const { t } = useTranslation();
+
+  // Determine if it's a reply to a comment or a reply to a reply
+  const replyingTo = replyToReply || replyToComment;
 
   return (
     <View style={styles.wrapper}>
@@ -57,7 +66,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   container: {
-   flexDirection: "row",
+    flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
     borderRadius: 20,
