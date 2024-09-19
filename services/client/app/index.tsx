@@ -3,15 +3,15 @@ import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import AuthServices from '@/src/api/AuthServices'; 
 import * as SecureStore from 'expo-secure-store'; 
 import { router } from 'expo-router';
+import AuthServices from './../src/api/AuthServices';
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState<boolean>(false);
 
   useEffect(() => {
-    async function prepare() {
+    async function prepare() {1
       try {
         await SplashScreen.preventAutoHideAsync();
         await Font.loadAsync(Entypo.font);
