@@ -14,16 +14,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>EXApplication-ExpoApplication_privacy.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>EXApplication.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>EXConstants-EXConstants.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -44,16 +34,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>EXNotifications-ExpoNotifications_privacy.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>EXNotifications.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>EXSplashScreen.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -65,16 +45,6 @@
 			<false/>
 		</dict>
 		<key>ExpoAsset.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>ExpoDevice-ExpoDevice_privacy.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>ExpoDevice.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -324,6 +294,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>React-RuntimeHermes.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>React-callinvoker.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -349,7 +324,7 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>React-jsc.xcscheme</key>
+		<key>React-hermes.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -475,6 +450,11 @@
 			<false/>
 		</dict>
 		<key>glog.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>hermes-engine.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
