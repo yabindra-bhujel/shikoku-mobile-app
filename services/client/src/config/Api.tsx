@@ -2,9 +2,9 @@ import axios from 'axios';
 
 // export const myip = '192.168.1.81'
 // export const myip = "172.30.59.228"
-export const myip = '172.16.8.168'
+export const myip = 'http://127.0.0.1'
 
-const BASE_URL = `http://${myip}:8000`;
+const BASE_URL = `${myip}:8000`;
 const axiosInstance = axios.create({
     // api の全てのリクエストに対して、この baseURL が付与される 
     baseURL: BASE_URL,

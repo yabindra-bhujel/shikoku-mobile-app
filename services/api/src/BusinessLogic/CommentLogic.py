@@ -10,7 +10,7 @@ from ..schemas.comment import *
 from datetime import datetime
 from ..models.entity.post import Post
 from ..models.entity.user_profile import UserProfile
-
+from ..services.PushNotificationService import PushNotificationService
 
 class CommentLogic:
 
@@ -116,6 +116,11 @@ class CommentLogic:
             post.total_comments += 1
             db.commit()
             db.refresh(post)
+
+            # notify the post owner
+            comment_user = db.query(User).filter(User.id == user.id).first()
+            push_notification_service = PushNotificationService(db=db)
+            push_notification_service.send_comment_created_notification(post=post, commenter=comment_user)
 
             return new_comment
 

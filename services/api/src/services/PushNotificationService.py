@@ -13,6 +13,23 @@ class PushNotificationService:
         self.rollbar_client = rollbar_client
         self.session = session or PushClient()
 
+    def send_comment_created_notification(self, post: Post, commenter: User) -> None:
+        
+        notification_token = self.db.query(ExpoToken.token).filter(ExpoToken.user_id == post.user_id).first()
+        if not notification_token:
+            return
+        
+        title = "New Comment Created."
+        message = f"{commenter.user_profile.first_name} {commenter.user_profile.last_name} commented on your post."
+        extra = {
+            "post_id": post.id,
+            "user_id": commenter.id,
+            "type": "comment",
+            "url": f"/post/{post.id}"
+        }
+
+        self._send_notifications([notification_token[0]], title, message, extra)
+
     def send_post_created_notification(self, post: Post) -> None:
         notification_tokens = self._get_all_user_notification_token(self.db)
         if not notification_tokens:

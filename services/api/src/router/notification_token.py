@@ -8,14 +8,14 @@ from ..models.entity.notification_token import ExpoToken
 router = APIRouter(prefix="/notification_token", tags=["Notification Token"])
 db_dependency = Depends(get_db)
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_notification_token(
         token: str = Form(...),
-        user_id: str = Form(...),
-        db: Session = db_dependency):
+        db: Session = db_dependency,
+        user: User = Depends(get_current_user)):
     # TODO: ユーザをcookieから取得するように変更する
     try:
-        user = db.query(User).filter(User.id == user_id).first()
+        user = db.query(User).filter(User.id == user.id).first()
         if user is None:
             raise ValueError("User not found")
         
