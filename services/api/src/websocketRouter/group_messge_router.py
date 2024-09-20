@@ -5,6 +5,7 @@ from typing import Annotated
 from ..models.database import get_db
 from ..BusinessLogic.messenging.Groups.ConnectionManager import ConnectionManager
 from ..BusinessLogic.messenging.Groups.GroupMessageLogic import GroupMessageLogic
+from ..services.PushNotificationService import PushNotificationService
 
 router = APIRouter(prefix="/ws", tags=["Group Message"])
 db_dependency = Annotated[Session, Depends(get_db)]

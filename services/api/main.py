@@ -23,7 +23,6 @@ from src.router.notification_token import router as notification_token_router
 from src.router.admin import router as admin_router
 # 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
-from src.services.NotificationService.NotificationConnectionManager import NotificationConnectionManager
 
 # ログの設定
 logger = setup_logging()
