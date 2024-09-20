@@ -11,7 +11,7 @@ export default function App() {
   const [appIsReady, setAppIsReady] = useState<boolean>(false);
 
   useEffect(() => {
-    async function prepare() {1
+    async function prepare() {
       try {
         await SplashScreen.preventAutoHideAsync();
         await Font.loadAsync(Entypo.font);

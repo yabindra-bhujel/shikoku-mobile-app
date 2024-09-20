@@ -15,7 +15,7 @@ class PushNotificationService:
 
     def send_comment_created_notification(self, post: Post, commenter: User) -> None:
         
-        notification_token = self.db.query(ExpoToken.token).filter(ExpoToken.user_id == post.user_id).first()
+        notification_token = self._get_post_owner_notification_token(self.db, post)
         if not notification_token:
             return
         
@@ -28,7 +28,7 @@ class PushNotificationService:
             "url": f"/post/{post.id}"
         }
 
-        self._send_notifications([notification_token[0]], title, message, extra)
+        self._send_notifications([notification_token], title, message, extra)
 
     def send_post_created_notification(self, post: Post) -> None:
         notification_tokens = self._get_all_user_notification_token(self.db)
@@ -115,3 +115,18 @@ class PushNotificationService:
             .all()
         )
         return [token[0] for token in query]
+    
+    def _get_post_owner_notification_token(self, db: DatabaseSession, post: Post) -> str:
+        query = (
+            db.query(ExpoToken.token)
+            .join(User, User.id == ExpoToken.user_id)
+            .join(ApplicationSetting, ApplicationSetting.user_id == User.id)
+            .filter(User.is_active == True)
+            .filter(ExpoToken.is_active == True)
+            .filter(ApplicationSetting.is_post_notification_enabled == True)
+            .first()
+        )
+        return query[0] if query else None 
+
+
+
