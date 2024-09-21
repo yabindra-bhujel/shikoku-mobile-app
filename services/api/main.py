@@ -20,6 +20,7 @@ from src.router.school_event import router as school_event_router
 from src.router.application_settings import router as application_settings_router
 from src.router.user_details import router as user_details_router
 from src.router.notification_token import router as notification_token_router
+from src.router.notifications import router as notification_router
 from src.router.admin import router as admin_router
 # 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
@@ -74,6 +75,7 @@ app.include_router(application_settings_router)
 app.include_router(websocket_group_message_router)
 app.include_router(user_details_router)
 app.include_router(notification_token_router)
+app.include_router(notification_router)
 app.include_router(admin_router)
 
 

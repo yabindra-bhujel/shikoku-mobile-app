@@ -6,6 +6,8 @@ from ..models.entity.notification_token import ExpoToken
 from ..models.entity.post import Post
 from ..models.entity.users import User
 from ..models.entity.application_settings import ApplicationSetting
+from ..models.entity.notification import Notification, NotificationRead
+from ..enum.NotificationType import NotificationType
 
 class PushNotificationService:
     def __init__(self, db: DatabaseSession, rollbar_client=None, session=None) -> None:
@@ -18,17 +20,10 @@ class PushNotificationService:
         notification_token = self._get_post_owner_notification_token(self.db, post)
         if not notification_token:
             return
-        
-        title = "New Comment Created."
-        message = f"{commenter.user_profile.first_name} {commenter.user_profile.last_name} commented on your post."
-        extra = {
-            "post_id": post.id,
-            "user_id": commenter.id,
-            "type": "comment",
-            "url": f"/post/{post.id}"
-        }
+        notification = self._create_notification(post, commenter)
+        self._associate_notification_with_user(post.user, notification)
+        self._send_notifications([notification_token], notification.title, notification.message, self._get_extra_data(post, commenter))
 
-        self._send_notifications([notification_token], title, message, extra)
 
     def send_post_created_notification(self, post: Post) -> None:
         notification_tokens = self._get_all_user_notification_token(self.db)
@@ -126,7 +121,41 @@ class PushNotificationService:
             .filter(ApplicationSetting.is_post_notification_enabled == True)
             .first()
         )
-        return query[0] if query else None 
+        return query[0] if query else None
+    
+    def _create_notification(self, post: Post, commenter: User) -> Notification:
+        title = "New Comment Created."
+        message = f"{commenter.user_profile.first_name} {commenter.user_profile.last_name} commented on your post."
+
+        notification = Notification(
+            title=title,
+            message=message,
+            possible_url=f"/post/{post.id}",
+            notification_type=NotificationType.INFO.value
+        )
+        self.db.add(notification)
+        self.db.commit()
+        return notification
+    
+    def _associate_notification_with_user(self, user: User, notification: Notification) -> None:
+        notification.users.append(user)
+        self.db.commit()
+        
+        notification_read = NotificationRead(
+            user_id=user.id,
+            notification_id=notification.id
+        )
+        self.db.add(notification_read)
+        self.db.commit()
+
+    def _get_extra_data(self, post: Post, commenter: User) -> dict:
+        return {
+            "post_id": post.id,
+            "user_id": commenter.id,
+            "type": "comment",
+            "url": f"/post/{post.id}"
+        }
+
 
 
 
