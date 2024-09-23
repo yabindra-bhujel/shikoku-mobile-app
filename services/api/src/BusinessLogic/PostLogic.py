@@ -12,6 +12,7 @@ from ..models.entity.likes import Likes
 from ..utils.post_utils import PostUtils
 from ..models.entity.user_profile import UserProfile
 from ..models.entity.users import User
+from ..services.PushNotificationService import PushNotificationService
 
 class PostLogic:
     
@@ -40,6 +41,11 @@ class PostLogic:
 
             db.commit()
             db.refresh(new_post)
+
+            # send notification to all users
+            notification_service = PushNotificationService(db)
+            notification_service.send_post_created_notification(new_post)
+
             return new_post
 
         except Exception as e:

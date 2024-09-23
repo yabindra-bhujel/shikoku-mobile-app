@@ -25,7 +25,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ],
+, "app/index.tsx"  ],
   "exclude": [
     "node_modules",
     "babel.config.js",

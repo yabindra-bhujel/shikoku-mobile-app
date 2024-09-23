@@ -1,10 +1,9 @@
 import { UserProvider } from "@/src/hooks/UserContext";
+import { NotificationProvider } from "@/src/hooks/notificationProvider";
 import { Stack } from "expo-router";
-import { AntDesign } from "@expo/vector-icons";
-import { View, useColorScheme } from "react-native";
-import { useState } from "react";
-import React from "react";
+import { View, useColorScheme, TouchableOpacity  } from "react-native";
 import { useTranslation } from "react-i18next";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const TabLayout = () => {
   const isDark = useColorScheme() === "dark";
@@ -12,6 +11,7 @@ const TabLayout = () => {
 
   return (
     <UserProvider>
+      <NotificationProvider>
       <Stack>
         <Stack.Screen
           name="home"
@@ -66,8 +66,32 @@ const TabLayout = () => {
           options={{
             headerShown: false,
           }}
+          
+        />
+        <Stack.Screen
+          name="notification"
+          options={{
+            headerTitle: "Notification",
+            headerBackTitle: t("back"),
+            headerTintColor: isDark ? "#fff" : "000",
+            headerStyle: {
+              backgroundColor: isDark ? "#333" : "#fff",
+            },
+            // headerRight: () => (
+            //   <View style={{ marginRight: 10 }}>
+            //     <TouchableOpacity onPress={handleMoreOptionsPress}>
+            //       <Ionicons
+            //         name="ellipsis-horizontal-outline"
+            //         size={24}
+            //         color={isDark ? "#fff" : "#000"}
+            //       />
+            //     </TouchableOpacity>
+            //   </View>
+            // ),
+          }}
         />
       </Stack>
+      </NotificationProvider>
     </UserProvider>
   );
 };

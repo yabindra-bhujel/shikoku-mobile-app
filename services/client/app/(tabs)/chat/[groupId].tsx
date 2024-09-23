@@ -16,7 +16,7 @@ import GroupHeader from "@/src/components/GroupChat/GroupHeader";
 import { useLocalSearchParams } from "expo-router";
 import GroupServices from "@/src/api/GroupServices";
 import GroupMessageList from "@/src/components/GroupChat/GroupMessageList";
-import { myip } from "@/src/config/Api";
+import { SERVER_HOST } from "@/src/config/Api";
 import axiosInstance from "@/src/config/Api";
 import { useUser } from "@/src/hooks/UserContext";
 import { useFocusEffect } from "@react-navigation/native";
@@ -126,8 +126,9 @@ const ChatDetail = () => {
     const initializeWebSocket = () => {
       if (!groupId) return;
 
-      const socketUrl = `ws://${myip}:8000/ws/${groupId}`;
+      const socketUrl = `ws://${SERVER_HOST}:8000/ws/${groupId}`;
       const ws = new WebSocket(socketUrl);
+
 
       ws.onopen = () => {};
 

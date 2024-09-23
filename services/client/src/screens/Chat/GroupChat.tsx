@@ -21,6 +21,7 @@ export interface Group {
   name: string;
   description: string;
   group_image?: string;
+  last_message?: [];
 }
 
 const GroupChat = () => {
