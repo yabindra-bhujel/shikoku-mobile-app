@@ -51,7 +51,9 @@
         "reply": "返事",
         "replyingTo": "返信に",
         "hoursAgo": "時間前",
-        "minutesAgo": "分前"
+        "minutesAgo": "分前",
+        "chooseAction" : "アクションを選択してください",
+        "selectAnOption":"このコメントのオプションを選択してください"
     },
     "groupchat": {
         "groupchatTitle": "グループチャット",

@@ -51,7 +51,9 @@
         "reply": "Reply",
         "replyingTo": "Repling to",
         "hoursAgo": "hour ago",
-        "minutesAgo": "minute ago"
+        "minutesAgo": "minute ago",
+        "chooseAction" : "Choose an action",
+        "selectAnOption":"Select an option for this comment"
     },
     "groupchat": {
         "groupchatTitle": "Group Chat",

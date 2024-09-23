@@ -91,17 +91,16 @@ const PostDetail = () => {
 
   const onReply = (comment: PostDetailInterface, isReplyToReply = false) => {
     if (isReplyToReply) {
-      setReplyToReply(comment); 
+      setReplyToReply(comment);
       setReplyToComment(null);
     } else {
-      setReplyToComment(comment); 
+      setReplyToComment(comment);
       setReplyToReply(null);
     }
   };
-  
 
   const cancelReply = () => {
-    setReplyToComment(null); 
+    setReplyToComment(null);
     setReplyToReply(null);
   };
 
@@ -109,31 +108,31 @@ const PostDetail = () => {
     if (comment.trim().length === 0) {
       return;
     }
-  
+
     let commentData;
-  
+
     // Determine if this is a new comment, a reply to a comment, or a reply to a reply
     if (replyToReply) {
       commentData = {
         content: comment,
-        reply_id: replyToComment?.id || 0,
-        parent_comment_id: replyToReply.id,
+        reply_id: replyToReply.id, // Reply to a reply
+        parent_comment_id: replyToComment?.id || 0, // Parent comment of the reply
         post_id: parseInt(postId ?? ""),
       };
     } else if (replyToComment) {
       commentData = {
         content: comment,
-        comment_id: replyToComment.id, // Use comment ID for reply-to-comment
+        comment_id: replyToComment.id, // Reply to a comment
         user_id: loggedInUserId,
         post_id: parseInt(postId ?? ""),
       };
     } else {
       commentData = {
         content: comment,
-        post_id: parseInt(postId ?? ""), // Top-level comment
+        post_id: parseInt(postId ?? ""), // New top-level comment
       };
     }
-  
+
     try {
       if (replyToReply) {
         await CommentsService.replyToReply(commentData); // API call for reply-to-reply
@@ -142,16 +141,14 @@ const PostDetail = () => {
       } else {
         await CommentsService.commentPost(commentData); // API call for new comment
       }
-  
+
       setComment(""); // Clear the input
-      setReplyToComment(null); // Reset reply-to-comment
-      setReplyToReply(null);   // Reset reply-to-reply
+      cancelReply();   // Reset reply-to states
       await fetchComments(); // Refresh the comment list
     } catch (error) {
       Alert.alert("Error", "Failed to submit comment. Please try again.");
     }
   };
-  
 
   const deleteCommentHandler = (commentId: number) => {
     CommentsService.deleteComment(commentId, parseInt(postId ?? ""))

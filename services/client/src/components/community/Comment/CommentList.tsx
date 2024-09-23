@@ -17,21 +17,22 @@ import { useActionSheet } from '@expo/react-native-action-sheet'; // Import useA
 // Separate component for rendering each comment
 const CommentItem = ({ comment, level, isReply, onReply, handleDelete, isDark, commentTime }) => {
   const [commentHeight, setCommentHeight] = useState(0);
-  const { showActionSheetWithOptions } = useActionSheet(); // Destructure the hook
+  const { showActionSheetWithOptions } = useActionSheet(); 
+  const { t } = useTranslation();
 
   const handleLongPress = () => {
     // Action sheet options
-    const options = ["Reply", "Delete", "Report", "Cancel"];
+    const options = [t("Community.reply"), t("delete"), t("cancel")];
     const destructiveButtonIndex = 1; // Set "Delete" as the destructive button
-    const cancelButtonIndex = 3; // Set "Cancel" as the cancel button
+    const cancelButtonIndex = 2; // Set "Cancel" as the cancel button
 
     showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
         destructiveButtonIndex,
-        title: "Choose an action",
-        message: "Select an option for this comment",
+        title: t("Community.chooseAction"),
+        message: t("Community.selectAnOption"),
       },
       (buttonIndex) => {
         if (buttonIndex === 0) {
@@ -40,10 +41,7 @@ const CommentItem = ({ comment, level, isReply, onReply, handleDelete, isDark, c
         } else if (buttonIndex === 1) {
           // Delete
           handleDelete(comment, isReply);
-        } else if (buttonIndex === 2) {
-          // Report
-          Alert.alert("Reported", "You have reported this comment.");
-        }
+        } 
       }
     );
   };
