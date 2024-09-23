@@ -56,7 +56,7 @@ async def get_notifications(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
 
-@router.put("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/read/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def mark_notification_as_read(notification_id: int, db: Session = db_dependency, user: User = Depends(get_current_user)):
     try:
         notification = db.query(NotificationRead).filter(NotificationRead.id == notification_id).first()

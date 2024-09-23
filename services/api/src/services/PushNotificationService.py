@@ -20,7 +20,7 @@ class PushNotificationService:
         notification_token = self._get_post_owner_notification_token(self.db, post)
         if not notification_token:
             return
-        notification = self._create_notification(post, commenter)
+        notification = self._create_comment_notification(post, commenter)
         self._associate_notification_with_user(post.user, notification)
         self._send_notifications([notification_token], notification.title, notification.message, self._get_extra_data(post, commenter))
 
@@ -36,7 +36,7 @@ class PushNotificationService:
             "post_id": post.id,
             "user_id": post.user.id,
             "type": "post",
-            "url": f"/post/{post.id}"
+            "url": f"community/{post.id}"
         }
 
         self._send_notifications(notification_tokens, title, message, extra)
@@ -123,14 +123,14 @@ class PushNotificationService:
         )
         return query[0] if query else None
     
-    def _create_notification(self, post: Post, commenter: User) -> Notification:
+    def _create_comment_notification(self, post: Post, commenter: User) -> Notification:
         title = "New Comment Created."
         message = f"{commenter.user_profile.first_name} {commenter.user_profile.last_name} commented on your post."
 
         notification = Notification(
             title=title,
             message=message,
-            possible_url=f"/post/{post.id}",
+            possible_url=f"/community/{post.id}",
             notification_type=NotificationType.INFO.value
         )
         self.db.add(notification)

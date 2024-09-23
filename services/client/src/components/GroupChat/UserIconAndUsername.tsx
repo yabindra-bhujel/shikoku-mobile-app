@@ -60,6 +60,11 @@ const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
       fontWeight: "bold",
       color: isDark ? "white" : "black",
     },
+    lastMessage: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 5,
+    }
   });
 
   return (
@@ -92,6 +97,13 @@ const UserIconAndUsername: React.FC<UserIconAndUsernameProps> = ({
                 <Text style={styles.groupName}>
                   {group?.name?.trim()}
                 </Text>
+
+                {/* last message */}
+                <View style={styles.lastMessage}>
+                  <Text style={{ fontWeight: "bold" }}>{group.last_message?.sender} </Text>
+                  <Text>{group.last_message?.message || "メッセージはありません"}</Text>
+                  </View>
+
               </View>
             </View>
 
