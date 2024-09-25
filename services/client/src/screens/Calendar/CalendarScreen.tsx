@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { Calendar, LocaleConfig, Agenda } from 'react-native-calendars';
 import { FontAwesome } from '@expo/vector-icons';
 import EventModal from '../../components/Calendar/EventDetailUpdateModal';
 import CalenderService from '@/src/api/CalenderService';
@@ -17,6 +17,8 @@ import CreateModal from "@/src/components/Calendar/EventCreateModal";
 import { CalendarClientEvent } from "@/src/components/CalendarEventTypes";
 import { useUser } from "@/src/hooks/UserContext";
 import { useTranslation } from "react-i18next";
+import CalendarUi from "./CalenderUi";
+import { CalendarEventList } from "./CalenderEventList";
 
 const CalendarScreen = () => {
   const isDark = useColorScheme() === 'dark';
@@ -29,6 +31,11 @@ const CalendarScreen = () => {
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
   const { loggedInUserId } = useUser();
   const {t} = useTranslation();
+
+  useEffect(() => {
+    // set initial event date today 
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+  })
 
   const fetchData = async () => {
     try {
@@ -191,68 +198,25 @@ const CalendarScreen = () => {
           width: '100%',
         }}
       >
-        <Calendar
-          current={currentDateString}
-          markedDates={{ ...markedDates, [selectedDate || '']: { selected: true } }}
-          onDayPress={handleSelected}
-          renderArrow={(direction: string) => {
-            return direction === 'right' ? (
-              <FontAwesome
-                name="chevron-right"
-                size={18}
-                color={isDark ? 'white' : 'black'}
-              />
-            ) : (
-              <FontAwesome
-                name="chevron-left"
-                size={18}
-                color={isDark ? 'white' : 'black'}
-              />
-            );
-          }}
-          enableSwipeMonths={true}
-          markingType="multi-dot"
-          theme={{
-            dayTextColor: isDark ? 'white' : 'black',
-            textDayHeaderFontWeight: '900',
-            textMonthFontWeight: '900',
-            textMonthFontSize: 20,
-            textDayFontSize: 16,
-            calendarBackground: isDark ? '#111' : 'white',
-            monthTextColor: isDark ? 'white' : 'black',
-            textMonth: t('calendar.monthNames'),
-            textDayNames: t('calendar.dayNames'),
-          }}
-          style={{
-            marginHorizontal: 10,
-          }}
+        <CalendarUi
+          currentDateString={currentDateString}
+          markedDates={markedDates}
+          selectedDate={selectedDate}
+          handleSelected={handleSelected}
+          isDark={isDark}
+          t={t}
         />
+
+<Agenda />
+
+
       </View>
       <ScrollView style={styles.dateContainer}>
-        <View style={styles.eventList}>
-          {filteredEvents.length > 0 ? (
-            filteredEvents.map((event, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleEventClick(event)}
-              >
-                <View style={styles.eventItem}>
-                  <Text style={styles.eventTitle}>{event.title}</Text>
-                  <View>
-                    <Text style={styles.eventTime}>
-                    {event.startTime.split("Z")[0]}
-                    </Text>
-                    <Text style={styles.eventTime}>
-                   {event.endTime.split("Z")[0]}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.noEventsText}>{t("calendar.noEvent")}</Text>
-          )}
-        </View>
+        <CalendarEventList
+          filteredEvents={filteredEvents}
+          handleEventClick={handleEventClick}
+          t={t}
+        />
       </ScrollView>
       <FontAwesome
         name="plus-circle"
