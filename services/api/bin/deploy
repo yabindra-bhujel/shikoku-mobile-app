@@ -4,8 +4,29 @@ set -e
 # Set the working directory
 cd /app
 
+MIGRATION_FLAGE="false"
+
+# option で -m が指定された場合はマイグレーションを実行する
+
+
+while getopts "-m" opt; do
+  case ${opt} in
+    m )
+      MIGRATION_FLAGE="true"
+      ;;
+    \? )
+      echo "Usage: cmd [-m]"
+      ;;
+  esac
+done
+
+
 # apply migrations
-alembic upgrade head
+
+if [ $MIGRATION_FLAGE = "true" ]; then
+  echo "Apply migrations"
+  alembic upgrade head
+fi
 
 # Start the application server
 exec gunicorn -k uvicorn.workers.UvicornWorker -c config/gunicorn_conf.py main:app
