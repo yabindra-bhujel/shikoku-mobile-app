@@ -1,19 +1,6 @@
 #!/bin/bash
 set -e
 
-ADD_MIGRATION_FLAG="false"
-
-# オプションで -m が指定された場合はマイグレーションを実行する
-while getopts ":m" opt; do
-  case ${opt} in
-    m )
-      ADD_MIGRATION_FLAG="true"
-      ;;
-    \? )
-      echo "Usage: cmd [-m]"
-      ;;
-  esac
-done
 
 # 環境設定ファイルのコピー
 cp services/api/env.template services/api/.env
@@ -37,9 +24,4 @@ fi
 # メインのDocker Composeファイルを使ってサービスを起動
 docker-compose up -d
 
-# api のコンテナに入って、deploy スクリプトを実行
-if [ $ADD_MIGRATION_FLAG = "true" ]; then
-    docker-compose exec api bin/deploy -m
-else
-    docker-compose exec api bin/deploy
-fi
+docker-compose exec api bin/deploy

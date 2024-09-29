@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+# カラー定義
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# PostgreSQLデータベースのステータスをチェック
+if docker ps --format '{{.Names}}' | grep -qw postgres_db; then
+  if [ "$(docker inspect -f '{{.State.Running}}' postgres_db)" = "true" ]; then
+    echo -e "${GREEN}PostgreSQL database container is running.${NC}"
+  else
+    echo -e "${RED}PostgreSQL database container is stopped.${NC}"
+  fi
+else
+  echo -e "${YELLOW}PostgreSQL database container does not exist.${NC}"
+fi
+
+# APIサーバのステータスをチェック
+if docker-compose ps | grep -qw api; then
+  if [ "$(docker-compose ps -q api | xargs docker inspect -f '{{.State.Running}}')" = "true" ]; then
+    echo -e "${GREEN}API server is running.${NC}"
+  else
+    echo -e "${RED}API server is stopped.${NC}"
+  fi
+else
+  echo -e "${YELLOW}API server does not exist.${NC}"
+fi

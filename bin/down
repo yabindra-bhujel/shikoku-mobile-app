@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+# Dockerネットワークを削除
+if docker network ls | grep -wq school_app; then
+  echo "Removing Docker network 'school_app'..."
+  docker network rm school_app
+fi
+
+# アプリケーションサーバを停止
+echo "Stopping application server..."
+docker-compose down
+
+# PostgreSQLデータベースコンテナを停止
+if docker ps -a --format '{{.Names}}' | grep -wq postgres_db; then
+  echo "Stopping PostgreSQL database container..."
+  docker stop postgres_db
+else
+  echo "No PostgreSQL database container found."
+fi
+
+# 必要に応じて、データベースコンテナを削除
+if docker ps -a --format '{{.Names}}' | grep -wq postgres_db; then
+  echo "Removing PostgreSQL database container..."
+  docker rm postgres_db
+fi
+
+echo "All servers have been stopped and cleaned up."
