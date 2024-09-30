@@ -29,7 +29,11 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 log_path = "var/log/dev.log" if DEBUG else "var/log/prod.log"
 logger = setup_logging(log_path)
 
-app = FastAPI(debug=DEBUG)
+app = FastAPI(
+    title="API",
+    description="API for the school mobile application",
+    version="0.1.0",
+    debug=DEBUG)
 
 # 開発環境でのみ使用するため
 if DEBUG:
@@ -59,14 +63,14 @@ app.add_exception_handler(Exception, ExceptionHandlerMiddleware)
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 # apiのrouterを登録
-app.include_router(auth_router.router)
-app.include_router(calender_router)
-app.include_router(user_profile_router)
-app.include_router(post_router)
-app.include_router(comment_router)
-app.include_router(like_router)
-app.include_router(group_router)
-app.include_router(group_message_router)
+app.include_router(auth_router.router, prefix="/api")
+app.include_router(calender_router, prefix="/api")
+app.include_router(user_profile_router, prefix="/api")
+app.include_router(post_router, prefix="/api")
+app.include_router(comment_router, prefix="/api")
+app.include_router(like_router, prefix="/api")
+app.include_router(group_router, prefix="/api")
+app.include_router(group_message_router, prefix="/api")
 
 
 #  これは テスト用の HTML です

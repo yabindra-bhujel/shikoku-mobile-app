@@ -10,7 +10,6 @@ services:
     ports:
     - target: 5432
       published: 5432
-      # protocol: tcp
 
     volumes:
       - db_data:/var/lib/postgresql/data

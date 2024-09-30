@@ -1,0 +1,24 @@
+
+services:
+  nginx:
+    build:
+      continer_name: nginx
+      context: ./services/nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - static_volume:/srv/app/static
+      - ./var/log/webserver:/var/log/webserver
+      - ./services/nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - school_app
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -7,7 +7,6 @@ VENV_DIR="services/api/.venv"
 CONTAINER_NAME="postgres_db"
 DATABASE_NAME="school_db"
 NETWORK_NAME="school_app"
-CONTAINER_PORT=5432
 
 START_IOS_APP=false
 START_ANDROID=false

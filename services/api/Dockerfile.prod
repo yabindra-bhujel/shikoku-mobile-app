@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Set work directory
-WORKDIR /app
+WORKDIR /srv/app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends gcc
@@ -16,7 +16,7 @@ RUN chmod 755 temp/workers
 
 
 # copy dependencies
-COPY poetry.lock pyproject.toml /app/
+COPY poetry.lock pyproject.toml /srv/app/
 # Install dependencies
 RUN pip install poetry
 RUN poetry config virtualenvs.create false
@@ -24,16 +24,14 @@ RUN poetry install --no-dev
 
 # Copy project
 
-COPY ./bin /app/bin
+COPY ./bin /srv/app/bin
 
-RUN chmod 755 /app/bin/*
+RUN chmod 755 /srv/app/bin/*
 
-COPY . /app/
+COPY . /srv/app
 
 ENV PORT 8000
 EXPOSE 8000
 
 
 ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "config/gunicorn_conf.py", "main:app"]
-
-

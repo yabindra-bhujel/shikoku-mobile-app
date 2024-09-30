@@ -25,4 +25,12 @@ if docker ps -a --format '{{.Names}}' | grep -wq postgres_db; then
   docker rm postgres_db
 fi
 
+# nginxコンテナを停止
+if docker ps -a --format '{{.Names}}' | grep -wq nginx; then
+  echo "Stopping nginx container..."
+  docker stop nginx
+else
+  echo "No nginx container found."
+fi
+
 echo "All servers have been stopped and cleaned up."
