@@ -4,11 +4,12 @@ import Entypo from '@expo/vector-icons/Entypo';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import * as SecureStore from 'expo-secure-store'; 
-import { router } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import AuthServices from './../src/api/AuthServices';
 
 export default function App() {
-  const [appIsReady, setAppIsReady] = useState<boolean>(false);
+  const [appIsReady, setAppIsReady] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     async function prepare() {
@@ -29,45 +30,34 @@ export default function App() {
   useEffect(() => {
     const fetchRefreshToken = async () => {
       try {
-        // 保存されたrefresh tokneを取得
         const storedToken = await SecureStore.getItemAsync('refreshToken');
         if (storedToken) {
-          // refresh tokenを使って新しいaccess tokenを取得
           const response = await AuthServices.refreshToken(storedToken);
           if (response.status === 200) {
-            // 新しいaccess tokenが発行することができれば、homeに遷移
             router.push("/home");
           } else {
-            // それ以外の場合は、loginに遷移
-            router.push("/login"); 
+            router.push("/login");
           }
         } else {
           router.push("/login");
         }
       } catch (error) {
-        router.push("/login"); 
+        router.push("/login");
+      } finally {
+        await SplashScreen.hideAsync();
       }
     };
 
-    fetchRefreshToken();
-  }, []);
-
-  const onLayoutRootView = useCallback(async () => {
     if (appIsReady) {
-      await SplashScreen.hideAsync();
+      fetchRefreshToken();
     }
-  }, [appIsReady]);
+  }, [appIsReady, router]);
 
   if (!appIsReady) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#007BFF" />
-      </View>
-    );
+    return null; 
   }
-
   return (
-    <View style={styles.container} onLayout={onLayoutRootView}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Welcome Back!</Text>
         <Entypo name="rocket" size={50} style={styles.icon} />
