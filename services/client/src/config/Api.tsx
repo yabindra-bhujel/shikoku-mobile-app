@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 export const SERVER_HOST = '127.0.0.1'
+// export const SERVER_HOST = '192.168.1.1'
 
 const BASE_URL = `http://${SERVER_HOST}:8000`;
 const axiosInstance = axios.create({

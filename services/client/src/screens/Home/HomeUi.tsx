@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { ScaledSheet } from 'react-native-size-matters';
 import { useTranslation } from 'react-i18next';
 import { useNotification } from '@/src/hooks/notificationProvider';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 interface ButtonData {
   route: string;
@@ -22,13 +23,14 @@ const Home = () => {
   const buttonData: ButtonData[] = [
     { route: '/community', icon: <Ionicons name="people-outline" size={45} color="#ff6666" />, title: t('commuIcons') },
     { route: '/calendar', icon: <Ionicons name="calendar-outline" size={45} color="blue" />, title: t('CalendarIcons') },
+    { route: '/chatbot', icon: <FontAwesome5 name="robot" size={24} color="#42f575" />, title: t('ChatBot') },
     { route: '/event', icon: <Ionicons name="school-outline" size={45} color="purple" />, title: t('SchoolEvt') },
     { route: '/chat', icon: <Ionicons name="chatbubble-ellipses-outline" size={45} color="#00A5CF" />, title: t('Chat') },
     
     {
       route: '/notification',
       icon: <Ionicons name="notifications-outline" size={45} color="#CA3C25" />,
-      title: t('notification'),
+      title: t('settings.notifications'),
       showBadge: unreadNotificationCount > 0,
       badgeCount: unreadNotificationCount,
     },

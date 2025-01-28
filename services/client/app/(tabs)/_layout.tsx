@@ -77,17 +77,6 @@ const TabLayout = () => {
             headerStyle: {
               backgroundColor: isDark ? "#333" : "#fff",
             },
-            // headerRight: () => (
-            //   <View style={{ marginRight: 10 }}>
-            //     <TouchableOpacity onPress={handleMoreOptionsPress}>
-            //       <Ionicons
-            //         name="ellipsis-horizontal-outline"
-            //         size={24}
-            //         color={isDark ? "#fff" : "#000"}
-            //       />
-            //     </TouchableOpacity>
-            //   </View>
-            // ),
           }}
         />
       </Stack>
