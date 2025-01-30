@@ -16,7 +16,7 @@ import UserAvatar from "@/src/components/UserAvatar";
 import PostFooter from "@/src/components/community/PostFooter";
 import TextPost from "@/src/components/community/PostText";
 import CommentsService from "@/src/api/CommentServices";
-import CommentBox from "@/src/components/community/Comment/CommentBox";
+import CommentBox from "@/src/components/community/Comment/CommentInput";
 import CommentList from "@/src/components/community/Comment/CommentList";
 import ImagePost from "@/src/components/community/ImagePost";
 import { useTranslation } from "react-i18next";

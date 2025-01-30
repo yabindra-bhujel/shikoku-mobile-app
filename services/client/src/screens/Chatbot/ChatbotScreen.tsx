@@ -7,8 +7,9 @@ import {
   Platform,
   TouchableOpacity,
   View,
+  Keyboard,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { SafeAreaView } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -24,6 +25,7 @@ interface dtypes {
 const ChatbotScreen = () => {
   const [dataChat, setDataChat] = useState<dtypes[]>([]);
   const [message, setMessage] = useState("");
+  const flatListRef = useRef<FlatList>(null);
 
   const submitMessage = async () => {
     if (!message.trim()) return;
@@ -38,6 +40,7 @@ const ChatbotScreen = () => {
     setDataChat([...dataChat, userMessage]);
 
     setMessage("");
+    Keyboard.dismiss();
 
     try {
       // Get the chatbot's response
@@ -57,17 +60,16 @@ const ChatbotScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 95 : 0}
+        style={styles.keyboardAvoidingView}
       >
         <View style={styles.chatBodyContainer}>
           <FlatList
-            contentContainerStyle={{
-              paddingHorizontal: 15,
-              gap: 10,
-            }}
+            ref={flatListRef}
+            contentContainerStyle={styles.flatListContent}
             inverted={true}
             data={[...dataChat].reverse()}
             keyExtractor={(item) => item.id.toString()}
@@ -84,11 +86,7 @@ const ChatbotScreen = () => {
                   </View>
                   {item.type === "USER" && (
                     <View style={styles.chatUserIcon}>
-                      <FontAwesome5
-                        name="user-circle"
-                        size={30}
-                        color="black"
-                      />
+                      <FontAwesome5 name="user-circle" size={30} color="black" />
                     </View>
                   )}
                 </View>
@@ -104,6 +102,9 @@ const ChatbotScreen = () => {
               value={message}
               onChangeText={(text) => setMessage(text)}
               placeholder="Type your message..."
+              multiline={false}
+              returnKeyType="send"
+              onSubmitEditing={submitMessage}
             />
           </View>
 
@@ -117,14 +118,34 @@ const ChatbotScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  chatBodyContainer: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  chatBodyContainer: { 
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  flatListContent: {
+    paddingHorizontal: 15,
+    gap: 10,
+    paddingBottom: 20,
+  },
   chatBody: {
     backgroundColor: "lightblue",
     borderRadius: 10,
     padding: 15,
     flex: 1,
+    maxWidth: '80%',
   },
-  chatUserIcon: { marginTop: 5 },
+  chatUserIcon: { 
+    marginTop: 5,
+    width: 30,
+    alignItems: 'center',
+  },
   chatTextContainer: {
     justifyContent: "center",
     marginBottom: 10,
@@ -132,25 +153,36 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   chatInputContainer: {
-    flex: 0,
     padding: 10,
-    borderTopWidth: 2,
-    borderTopColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
     flexDirection: "row",
-    justifyContent: "center",
+    backgroundColor: '#fff',
     alignItems: "center",
   },
   inputForm: {
     flex: 1,
-    padding: 10,
-    borderWidth: 1,
     marginRight: 10,
-    borderRadius: 10,
-    borderColor: "#f0e9e7",
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 15,
   },
-  inputField: { backgroundColor: "#fff", height: 45 },
-  sendBtn: { padding: 15, backgroundColor: "blue", borderRadius: 10 },
-  sendBtnTitle: { color: "white" },
+  inputField: { 
+    paddingVertical: 10,
+    fontSize: 16,
+    maxHeight: 100,
+  },
+  sendBtn: { 
+    padding: 12,
+    backgroundColor: "blue",
+    borderRadius: 20,
+    width: 70,
+    alignItems: 'center',
+  },
+  sendBtnTitle: { 
+    color: "white",
+    fontWeight: '600',
+  },
 });
 
 export default ChatbotScreen;

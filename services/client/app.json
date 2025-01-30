@@ -16,7 +16,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.shukoku-u-mobile.client"
+      "bundleIdentifier": "com.shukoku-u-mobile.client",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "We need access to your photo library to select photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +28,8 @@
       },
       "permissions": [
         "android.permission.INTERNET",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"
       ],
       "useNextNotificationsApi": true,
       "config": {

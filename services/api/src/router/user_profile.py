@@ -41,11 +41,11 @@ async def upload_profile_picture(
 ):
     try:
         UserProfileLogic.profile(db, user, file, request)
-
         return {"message": "Profile picture uploaded successfully"}
-
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        print(f"Error during image upload: {str(e)}")  # Log the error
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: {str(e)}")
+
 
 # ユーザ プロファイルの取得
 @router.get("", status_code=status.HTTP_200_OK)

@@ -1,5 +1,5 @@
 from urllib.request import Request
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 import os
 import shutil
 from sqlalchemy.orm import Session
@@ -36,32 +36,35 @@ class UserProfileLogic:
         
 
     @staticmethod
-    def profile(db, user: User, file: bytes, request: Request) -> UserProfile:
+    def profile(db, user: User, file: UploadFile, request: Request) -> dict:
         try:
             user_profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
             if not user_profile:
                 user_profile = UserProfile(user_id=user.id)
                 db.add(user_profile)
-            
-            # 写真を 保存される path
-            file_path = os.path.join("static", "user_profile", f"{user.id}.png")
 
-            # ユーザの 写真変更は Transaction で やる もし 写真が　消されて 新しい 写真が追加 できなった場合は自動で 返してくれる
+            # Create the 'user_profile' directory if it doesn't exist
+            user_profile_dir = os.path.join("static", "user_profile")
+            os.makedirs(user_profile_dir, exist_ok=True)
+
+            # Define the file path
+            file_path = os.path.join(user_profile_dir, f"{user.id}.png")
+
+            # Handle file saving in a transaction
             with db.begin_nested():
-                # 古い 写真を消す
+                # Remove the old photo if it exists
                 if user_profile.profile_picture:
                     old_file_path = os.path.join("static", user_profile.profile_picture)
                     if os.path.exists(old_file_path):
                         os.remove(old_file_path)
 
-                #新しい写真の追加
+                # Save the new photo
                 with open(file_path, "wb") as buffer:
                     shutil.copyfileobj(file.file, buffer)
 
             user_profile.profile_picture = f"user_profile/{user.id}.png"
 
             db.add(user_profile)
-
             db.commit()
             db.refresh(user_profile)
 
@@ -70,7 +73,7 @@ class UserProfileLogic:
             return {"message": "Profile picture uploaded successfully", "profile_picture_url": profile_picture_url}
         
         except Exception as e:
-            # エラーが 発生したら 元のデータに戻す
+            # Rollback if any error occurs
             db.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
