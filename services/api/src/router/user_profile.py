@@ -43,7 +43,6 @@ async def upload_profile_picture(
         UserProfileLogic.profile(db, user, file, request)
         return {"message": "Profile picture uploaded successfully"}
     except Exception as e:
-        print(f"Error during image upload: {str(e)}")  # Log the error
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: {str(e)}")
 
 
