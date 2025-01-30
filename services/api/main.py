@@ -22,6 +22,7 @@ from src.router.user_details import router as user_details_router
 from src.router.notification_token import router as notification_token_router
 from src.router.notifications import router as notification_router
 from src.router.admin import router as admin_router
+from src.router.chatbot import router as chatbot_router
 # 開発環境でのみ使用するため
 from debug_toolbar.middleware import DebugToolbarMiddleware
 
@@ -77,6 +78,7 @@ app.include_router(user_details_router)
 app.include_router(notification_token_router)
 app.include_router(notification_router)
 app.include_router(admin_router)
+app.include_router(chatbot_router)
 
 
 #  これは テスト用の HTML です

@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { Component, useState } from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
+import ChatBotService from "@/src/api/ChatBotService";
 
 interface dtypes {
   id: number;
@@ -22,21 +23,39 @@ interface dtypes {
 
 const ChatbotScreen = () => {
   const [dataChat, setDataChat] = useState<dtypes[]>([]);
-
   const [message, setMessage] = useState("");
 
-  const submitMessage = () => {
-    setDataChat([
-      ...dataChat,
-      {
-        id: Math.random(),
-        type: "USER",
-        content: message,
-        date: new Date().toISOString(),
-      },
-    ]);
+  const submitMessage = async () => {
+    if (!message.trim()) return;
+
+    // Append user message to the chat
+    const userMessage = {
+      id: Math.random(),
+      type: "USER",
+      content: message,
+      date: new Date().toISOString(),
+    };
+    setDataChat([...dataChat, userMessage]);
+
     setMessage("");
+
+    try {
+      // Get the chatbot's response
+      const botResponse = await ChatBotService.getResponse(message);
+
+      // Append chatbot message to the chat
+      const botMessage = {
+        id: Math.random(),
+        type: "chatBot",
+        content: botResponse,
+        date: new Date().toISOString(),
+      };
+      setDataChat((prevChat) => [...prevChat, botMessage]);
+    } catch (error) {
+      console.error("Error fetching chatbot response:", error);
+    }
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
@@ -49,36 +68,29 @@ const ChatbotScreen = () => {
               paddingHorizontal: 15,
               gap: 10,
             }}
-            
             inverted={true}
             data={[...dataChat].reverse()}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item, index }) => {
+            renderItem={({ item }) => {
               return (
                 <View style={styles.chatTextContainer}>
                   {item.type === "chatBot" ? (
                     <View style={styles.chatUserIcon}>
                       <FontAwesome6 name="robot" size={24} color="black" />
                     </View>
-                  ) : (
-                    <></>
-                  )}
+                  ) : null}
                   <View style={styles.chatBody}>
                     <Text>{item.content}</Text>
                   </View>
-                  <View>
-                    {item.type === "USER" ? (
-                      <View style={styles.chatUserIcon}>
-                        <FontAwesome5
-                          name="user-circle"
-                          size={30}
-                          color="black"
-                        />
-                      </View>
-                    ) : (
-                      <></>
-                    )}
-                  </View>
+                  {item.type === "USER" && (
+                    <View style={styles.chatUserIcon}>
+                      <FontAwesome5
+                        name="user-circle"
+                        size={30}
+                        color="black"
+                      />
+                    </View>
+                  )}
                 </View>
               );
             }}
@@ -90,35 +102,29 @@ const ChatbotScreen = () => {
             <TextInput
               style={styles.inputField}
               value={message}
-              onChangeText={(e) => {
-                setMessage(e);
-              }}
+              onChangeText={(text) => setMessage(text)}
+              placeholder="Type your message..."
             />
           </View>
 
-          <View>
-            <TouchableOpacity style={styles.sendBtn} onPress={submitMessage}>
-              <Text style={styles.sendBtnTitle}>Send</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.sendBtn} onPress={submitMessage}>
+            <Text style={styles.sendBtnTitle}>Send</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
-  chatBodyContainer: {
-    flex: 1,
-  },
+  chatBodyContainer: { flex: 1 },
   chatBody: {
     backgroundColor: "lightblue",
     borderRadius: 10,
     padding: 15,
     flex: 1,
   },
-  chatUserIcon: {
-    marginTop: 5,
-  },
+  chatUserIcon: { marginTop: 5 },
   chatTextContainer: {
     justifyContent: "center",
     marginBottom: 10,
@@ -142,18 +148,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: "#f0e9e7",
   },
-  inputField: {
-    backgroundColor: "#fff",
-    height: 45,
-  },
-  sendBtn: {
-    padding: 15,
-    backgroundColor: "blue",
-    borderRadius: 10,
-  },
-  sendBtnTitle: {
-    color: "white",
-  },
+  inputField: { backgroundColor: "#fff", height: 45 },
+  sendBtn: { padding: 15, backgroundColor: "blue", borderRadius: 10 },
+  sendBtnTitle: { color: "white" },
 });
 
 export default ChatbotScreen;
