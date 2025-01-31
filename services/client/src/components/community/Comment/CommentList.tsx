@@ -115,6 +115,7 @@ const CommentList: React.FC<CommentListProps> = ({
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: '#fcfcfd',
   },
   commentItem: {
     flexDirection: "row",
